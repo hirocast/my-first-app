@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中1数学 1学期・最速先取りナビ</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #0f172a; }
+        body { font-family: -apple-system, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #0f172a; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         h1 { color: #1e3a8a; text-align: center; font-size: 1.4rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 20px; letter-spacing: 0.05em; }
+        .subtitle { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 20px; }
         .date-badge { text-align: center; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 12px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; }
-        .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; position: relative; }
+        .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; }
         .unit-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
-        .task-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; line-height: 1.5; color: #1e293b; }
-        .try-it-link { display: flex; align-items: center; justify-content: center; background: #ff0000; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4); }
-        .try-it-link::before { content: '▶'; margin-right: 8px; font-size: 0.8rem; }
-        footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; line-height: 1.6; }
+        .task-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #1e293b; }
+        .try-it-link { display: flex; align-items: center; justify-content: center; background: #ff0000; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; }
+        footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -25,52 +24,27 @@
     <div class="subtitle">中学1年生 / 1学期 数学 (算数)</div>
     <div id="today-date" class="date-badge">読み込み中...</div>
     <div id="schedule-content"></div>
-    <footer>
-        大手塾スケジュール準拠<br>
-        1学期の目標：一次方程式の計算までを完璧にする
-    </footer>
+    <footer>大手塾スケジュール準拠 / 1学期目標：一次方程式まで完璧にする</footer>
 </div>
 
 <script>
-    // --- 1学期・数学スケジュールデータ（主要日程） ---
+    // リンク切れ対策：単元トップページへのリンクに統一しました
     const scheduleData = {
-        // --- 3月：春期講習・先取り ---
-        "2026-03-26": { label: "3月26日", unit: "正負の数", title: "【導入】プラスとマイナスの世界", url: "https://www.try-it.jp/chapters-2117/sections-2118/lessons-2119/" },
-        "2026-03-27": { label: "3月27日", unit: "正負の数", title: "【絶対値】数直線と絶対値のルール", url: "https://www.try-it.jp/chapters-2117/sections-2118/lessons-2122/" },
-        "2026-03-30": { label: "3月30日", unit: "正負の数", title: "【加法】正負の足し算（同符号・異符号）", url: "https://www.try-it.jp/chapters-2117/sections-2124/lessons-2125/" },
-        "2026-03-31": { label: "3月31日", unit: "正負の数", title: "【減法】正負の引き算（マイナスを引く意味）", url: "https://www.try-it.jp/chapters-2117/sections-2124/lessons-2128/" },
-
-        // --- 4月：正負の数の計算完成 ---
-        "2026-04-06": { label: "4月6日", unit: "正負の数", title: "【乗法・除法】掛け算・割り算の符号ルール", url: "https://www.try-it.jp/chapters-2117/sections-2131/lessons-2132/" },
-        "2026-04-13": { label: "4月13日", unit: "正負の数", title: "【四則混合】＋ー×÷の混じった計算", url: "https://www.try-it.jp/chapters-2117/sections-2131/lessons-2137/" },
-        "2026-04-20": { label: "4月20日", unit: "正負の数", title: "【利用】平均や基準からの差を解く", url: "https://www.try-it.jp/chapters-2117/sections-2139/lessons-2140/" },
-
-        // --- 5月：文字の式 ---
-        "2026-05-11": { label: "5月11日", unit: "文字の式", title: "【文字式の表し方】×と÷の省略ルール", url: "https://www.try-it.jp/chapters-2144/sections-2145/lessons-2146/" },
-        "2026-05-18": { label: "5月18日", unit: "文字の式", title: "【代入と式の値】文字に数字を当てはめる", url: "https://www.try-it.jp/chapters-2144/sections-2145/lessons-2150/" },
-        "2026-05-25": { label: "5月25日", unit: "文字の式", title: "【式の計算】項と係数を理解してまとめる", url: "https://www.try-it.jp/chapters-2144/sections-2152/lessons-2153/" },
-
-        // --- 6月：一次方程式 ---
-        "2026-06-08": { label: "6月8日", unit: "一次方程式", title: "【等式の性質】天秤のルールで解く", url: "https://www.try-it.jp/chapters-2165/sections-2166/lessons-2167/" },
-        "2026-06-15": { label: "6月15日", unit: "一次方程式", title: "【移項】パーツを移動させて解くテクニック", url: "https://www.try-it.jp/chapters-2165/sections-2166/lessons-2170/" },
-        "2026-06-22": { label: "6月22日", unit: "一次方程式", title: "【小数・分数】カッコや分数の計算攻略", url: "https://www.try-it.jp/chapters-2165/sections-2166/lessons-2173/" },
-
-        // --- 7月：方程式の利用・復習 ---
-        "2026-07-06": { label: "7月6日", unit: "一次方程式", title: "【方程式の利用】文章題から式を作る", url: "https://www.try-it.jp/chapters-2165/sections-2177/lessons-2178/" },
-        "2026-07-13": { label: "7月13日", unit: "1学期総復習", title: "【まとめ】期末テスト・実力テスト対策", url: "https://www.try-it.jp/chapters-2165/" }
+        "2026-03-26": { label: "3月26日", unit: "正負の数", title: "【導入】プラスとマイナスの世界・絶対値", url: "https://www.try-it.jp/chapters-2117/sections-2118/" },
+        "2026-03-27": { label: "3月27日", unit: "正負の数", title: "【加法・減法】正負の足し算と引き算", url: "https://www.try-it.jp/chapters-2117/sections-2124/" },
+        "2026-03-30": { label: "3月30日", unit: "正負の数", title: "【乗法・除法】掛け算と割り算のルール", url: "https://www.try-it.jp/chapters-2117/sections-2131/" },
+        "2026-04-06": { label: "4月6日", unit: "正負の数", title: "【四則混合】計算の優先順位を極める", url: "https://www.try-it.jp/chapters-2117/sections-2131/" },
+        "2026-05-11": { label: "5月11日", unit: "文字の式", title: "【文字式の表し方】×と÷の省略ルール", url: "https://www.try-it.jp/chapters-2144/sections-2145/" },
+        "2026-06-08": { label: "6月8日", unit: "一次方程式", title: "【方程式】等式の性質と解き方の基本", url: "https://www.try-it.jp/chapters-2165/sections-2166/" },
+        "2026-07-06": { label: "7月6日", unit: "一次方程式", title: "【方程式の利用】文章題の攻略", url: "https://www.try-it.jp/chapters-2165/sections-2177/" }
     };
 
-    // 今日を判定
     const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const todayKey = `${y}-${m}-${d}`;
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     const dateElement = document.getElementById('today-date');
     const contentElement = document.getElementById('schedule-content');
 
-    // 表示処理
     if (scheduleData[todayKey]) {
         const data = scheduleData[todayKey];
         dateElement.textContent = data.label;
@@ -78,19 +52,12 @@
             <div class="task-card">
                 <span class="unit-tag">${data.unit}</span>
                 <div class="task-title">${data.title}</div>
-                <a href="${data.url}" class="try-it-link" target="_blank">Try it で動画授業を開始</a>
+                <a href="${data.url}" class="try-it-link" target="_blank">▶ Try it で授業動画一覧を見る</a>
             </div>
         `;
     } else {
-        // 週末や未登録の日
-        const day = now.getDay(); // 0:日, 6:土
-        dateElement.textContent = (day === 0 || day === 6) ? "週末リセット" : "復習・自習タイム";
-        contentElement.innerHTML = `
-            <div style="text-align:center;color:#64748b;padding:30px;">
-                <p>本日の新規タスクはありません。</p>
-                <p style="font-size:0.9rem;">今週学んだ Try it の動画をもう一度見直して、ワークで定着させよう！</p>
-            </div>
-        `;
+        dateElement.textContent = "復習・自習タイム";
+        contentElement.innerHTML = `<div style="text-align:center;color:#64748b;padding:30px;">本日の新規タスクはありません。<br>これまでの復習を進めましょう。</div>`;
     }
 </script>
 
