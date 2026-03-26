@@ -96,76 +96,170 @@
 <div class="reset-wrap"><button class="reset-btn" onclick="resetAll()">🔄 進捗をリセット</button></div>
 
 <script>
-// ===== Try IT 公式ページ各レッスンから直接取得した YouTube ID =====
 const C = [
+  // ===== ① 正負の数 (chapters-323) 17本 =====
   { chapter:"正負の数", sections:[
     { section:"正負の数とは", videos:[
-      {id:"v01", title:"マイナスとは？",        yt:"JC0Cdwm_1mE"},
-      {id:"v02", title:"数直線",                yt:"mMm1YNifnNc"},
-      {id:"v03", title:"数の大小関係",           yt:"a7V0L0Fka8Y"},
-      {id:"v04", title:"絶対値とは？",           yt:"vo_1hF9l-C8"},
+      {id:"v01", title:"正負の数・自然数とは？",  yt:"bDfrobfQ6-I"},
+      {id:"v02", title:"「増える・減る」の表し方", yt:"2GaX4q6XSpg"},
+      {id:"v03", title:"マイナスとは？",           yt:"JC0Cdwm_1mE"},
+      {id:"v04", title:"数直線",                   yt:"mMm1YNifnNc"},
+      {id:"v05", title:"数の大小関係",              yt:"a7V0L0Fka8Y"},
+      {id:"v06", title:"絶対値とは？",              yt:"vo_1hF9l-C8"},
     ]},
     { section:"加法と減法", videos:[
-      {id:"v05", title:"加法（たし算）",         yt:"4wLZRtM07sU"},
-      {id:"v06", title:"減法（ひき算）",         yt:"x7zBjB-m4CY"},
-      {id:"v07", title:"項とは？",               yt:"fw_eMP14KTk"},
-      {id:"v08", title:"加法・減法の計算",        yt:"YWWeiuBQa_A"},
+      {id:"v07", title:"加法（たし算）",            yt:"4wLZRtM07sU"},
+      {id:"v08", title:"減法（ひき算）",            yt:"x7zBjB-m4CY"},
+      {id:"v09", title:"項とは？",                  yt:"fw_eMP14KTk"},
+      {id:"v10", title:"加法・減法の計算",           yt:"YWWeiuBQa_A"},
     ]},
     { section:"乗法と除法", videos:[
-      {id:"v09", title:"乗法（かけ算）",         yt:"gfGy0racLYI"},
-      {id:"v10", title:"累乗（指数）について",   yt:"kzH-aOuMVco"},
-      {id:"v11", title:"除法（わり算）",         yt:"IC8QoE8maSM"},
-      {id:"v12", title:"乗法・除法の計算",       yt:"RDO8m3GnwT4"},
-      {id:"v13", title:"四則の計算",             yt:"aVDqAXSqAkw"},
-      {id:"v14", title:"分配法則",               yt:"P-LkfGr5128"},
-      {id:"v15", title:"分配法則の逆",           yt:"uvYr1_AjtfQ"},
+      {id:"v11", title:"乗法（かけ算）",            yt:"gfGy0racLYI"},
+      {id:"v12", title:"累乗（指数）について",      yt:"kzH-aOuMVco"},
+      {id:"v13", title:"除法（わり算）",            yt:"IC8QoE8maSM"},
+      {id:"v14", title:"乗法・除法の計算",          yt:"RDO8m3GnwT4"},
+      {id:"v15", title:"四則の計算",                yt:"aVDqAXSqAkw"},
+      {id:"v16", title:"分配法則",                  yt:"P-LkfGr5128"},
+      {id:"v17", title:"分配法則の逆",              yt:"uvYr1_AjtfQ"},
     ]},
   ]},
+
+  // ===== ② 文字と式 (chapters-395) 16本 =====
   { chapter:"文字と式", sections:[
     { section:"文字を使った式", videos:[
-      {id:"v16", title:'文字「x」について',      yt:"cPyNz345ooc"},
-      {id:"v17", title:"積の表し方（ルール１）", yt:"uZPEyBpijbM"},
-      {id:"v18", title:"商の表し方（ルール２）", yt:"BY4d4pJk5vs"},
-      {id:"v19", title:'円周率「π」について',   yt:"rwQ-G69or4M"},
-      {id:"v20", title:"文字で表すコツ１（買い物）",  yt:"cb5uWuHjmhg"},
-      {id:"v21", title:"文字で表すコツ２（図形）",    yt:"zylZIf6tRR8"},
-      {id:"v22", title:"文字で表すコツ３（割合）",    yt:"rBTRvc6kXyI"},
-      {id:"v23", title:"文字で表すコツ４（速さ）",    yt:"qEf3uJfeIQ4"},
-      {id:"v24", title:"単位の計算",             yt:"xvIyYWFmV8U"},
-      {id:"v25", title:"代入とは？",             yt:"XGbF4qJZIPA"},
+      {id:"v18", title:'文字「x」について',         yt:"cPyNz345ooc"},
+      {id:"v19", title:"積の表し方（ルール１）",    yt:"uZPEyBpijbM"},
+      {id:"v20", title:"商の表し方（ルール２）",    yt:"BY4d4pJk5vs"},
+      {id:"v21", title:'円周率「π」について',      yt:"rwQ-G69or4M"},
+      {id:"v22", title:"文字で表すコツ１（買い物）",yt:"cb5uWuHjmhg"},
+      {id:"v23", title:"文字で表すコツ２（図形）",  yt:"zylZIf6tRR8"},
+      {id:"v24", title:"文字で表すコツ３（割合）",  yt:"rBTRvc6kXyI"},
+      {id:"v25", title:"文字で表すコツ４（速さ）",  yt:"qEf3uJfeIQ4"},
+      {id:"v26", title:"単位の計算",                yt:"xvIyYWFmV8U"},
+      {id:"v27", title:"代入とは？",                yt:"XGbF4qJZIPA"},
     ]},
     { section:"文字式の計算", videos:[
-      {id:"v26", title:"項と係数",               yt:"JASkJce1STg"},
-      {id:"v27", title:"文字のたし算・ひき算",   yt:"-W3RE3XTTIk"},
-      {id:"v28", title:"文字のかけ算・わり算",   yt:"QTBvOyL99_Y"},
+      {id:"v28", title:"項と係数",                  yt:"JASkJce1STg"},
+      {id:"v29", title:"文字のたし算・ひき算",      yt:"-W3RE3XTTIk"},
+      {id:"v30", title:"文字のかけ算・わり算",      yt:"QTBvOyL99_Y"},
     ]},
     { section:"文字式の利用", videos:[
-      {id:"v29", title:"偶数・奇数の表し方",     yt:"JPDxyN2r5Ss"},
-      {id:"v30", title:"等式とは？",             yt:"neQsx2elTbo"},
-      {id:"v31", title:"不等式とは？",           yt:"QkuNoBAfwtM"},
+      {id:"v31", title:"偶数・奇数の表し方",        yt:"JPDxyN2r5Ss"},
+      {id:"v32", title:"等式とは？",                yt:"neQsx2elTbo"},
+      {id:"v33", title:"不等式とは？",              yt:"QkuNoBAfwtM"},
     ]},
   ]},
+
+  // ===== ③ 方程式 (chapters-463) 10本 =====
   { chapter:"方程式", sections:[
     { section:"方程式の解き方", videos:[
-      {id:"v32", title:"方程式とは？",                           yt:"JD0G9ZGqKT0"},
-      {id:"v33", title:"等式の性質",                             yt:"m4AOfYF_mN8"},
-      {id:"v34", title:"方程式の解き方１（移項）",               yt:"q7N6UByB_W0"},
-      {id:"v35", title:"方程式の解き方２（両辺をかける・わる）", yt:"MfKR-bigLzw"},
-      {id:"v36", title:"方程式の解き方３（コツ）",               yt:"XnMqgL5StDw"},
-      {id:"v37", title:"方程式の解き方４（カッコ・分数・小数）", yt:"V-osCIuwUME"},
+      {id:"v34", title:"方程式とは？",                           yt:"JD0G9ZGqKT0"},
+      {id:"v35", title:"等式の性質",                             yt:"m4AOfYF_mN8"},
+      {id:"v36", title:"方程式の解き方１（移項）",               yt:"q7N6UByB_W0"},
+      {id:"v37", title:"方程式の解き方２（両辺をかける・わる）", yt:"MfKR-bigLzw"},
+      {id:"v38", title:"方程式の解き方３（コツ）",               yt:"XnMqgL5StDw"},
+      {id:"v39", title:"方程式の解き方４（カッコ・分数・小数）", yt:"V-osCIuwUME"},
     ]},
     { section:"方程式の文章題", videos:[
-      {id:"v38", title:"方程式の文章題（買い物）",    yt:"6MZD672_8Y4"},
-      {id:"v39", title:"方程式の文章題（余り・不足）",yt:"GJxbw-48cp4"},
-      {id:"v40", title:"方程式の文章題（速さ）",      yt:"t1h9z3-Y00Y"},
+      {id:"v40", title:"方程式の文章題（買い物）",     yt:"6MZD672_8Y4"},
+      {id:"v41", title:"方程式の文章題（余り・不足）", yt:"GJxbw-48cp4"},
+      {id:"v42", title:"方程式の文章題（速さ）",       yt:"t1h9z3-Y00Y"},
     ]},
     { section:"比例式", videos:[
-      {id:"v41", title:"比例式の解き方", yt:"1YfL70POfU0"},
+      {id:"v43", title:"比例式の解き方",               yt:"1YfL70POfU0"},
+    ]},
+  ]},
+
+  // ===== ④ 比例と反比例 (chapters-508) 15本 =====
+  { chapter:"比例・反比例", sections:[
+    { section:"関数", videos:[
+      {id:"v44", title:"関数とは？",                   yt:"SUzlnAiLTW0"},
+    ]},
+    { section:"比例", videos:[
+      {id:"v45", title:"比例とは？",                   yt:"2Xu0KvKMSb8"},
+      {id:"v46", title:"変域とは？",                   yt:"QOjEgAtTNOk"},
+      {id:"v47", title:"座標の書き方",                 yt:"Cyttk10XmnI"},
+      {id:"v48", title:"比例のグラフ１（y=2x）",       yt:"-ULjfPao3JY"},
+      {id:"v49", title:"比例のグラフ２（y=−2x）",     yt:"MmiHtlhkB3I"},
+      {id:"v50", title:"比例のグラフ３（y=2/3x）",     yt:"jtvtB2WVIHc"},
+      {id:"v51", title:"直線の式の求め方",             yt:"krp4DTDvX0Y"},
+      {id:"v52", title:"比例の式の求め方",             yt:"P5yKUOivmis"},
+    ]},
+    { section:"反比例", videos:[
+      {id:"v53", title:"反比例とは？",                 yt:"3Ing9bxBCvg"},
+      {id:"v54", title:"反比例のグラフ",               yt:"bGqTkmLwJdQ"},
+      {id:"v55", title:"双曲線の式の求め方",           yt:"LChmQpKm93U"},
+      {id:"v56", title:"反比例の式の求め方",           yt:"Y8PU7bQt4NU"},
+    ]},
+    { section:"比例・反比例の利用", videos:[
+      {id:"v57", title:"比例の文章題",                 yt:"2uz7tBD8LOU"},
+      {id:"v58", title:"反比例の文章題",               yt:"v-MNBoY_onM"},
+    ]},
+  ]},
+
+  // ===== ⑤ 平面図形 (chapters-574) 11本 =====
+  { chapter:"平面図形", sections:[
+    { section:"図形の呼び方と移動", videos:[
+      {id:"v59", title:"図形の用語と記号",             yt:"5KzoQKrDdvc"},
+      {id:"v60", title:"平行移動の作図",               yt:"e2zwfYfvcI8"},
+      {id:"v61", title:"対称移動の作図",               yt:"2Vkrox38_qU"},
+      {id:"v62", title:"回転移動の作図",               yt:"YYiIB6tU8EM"},
+      {id:"v63", title:"円の用語と記号",               yt:"liwIQrx8Qqg"},
+    ]},
+    { section:"基本の作図", videos:[
+      {id:"v64", title:"コンパスの使い方",             yt:"uc5ufX_F7gg"},
+      {id:"v65", title:"垂直二等分線の作図",           yt:"QcP5MosQrTs"},
+      {id:"v66", title:"垂線の作図",                   yt:"oVJvbCTZA5k"},
+      {id:"v67", title:"角の二等分線の作図",           yt:"r-mrGyqOocc"},
+      {id:"v68", title:"45°と60°の作図",              yt:"Kj7vxEyAbD4"},
+      {id:"v69", title:"接線の作図",                   yt:"NCGBZeMwAYM"},
+    ]},
+  ]},
+
+  // ===== ⑥ 空間図形 (chapters-621) 14本 =====
+  { chapter:"空間図形", sections:[
+    { section:"立体の呼び方", videos:[
+      {id:"v70", title:"立体の名称",                   yt:"yrOS0cDIDB4"},
+      {id:"v71", title:"正多面体",                     yt:"aFo0KXPLdRo"},
+    ]},
+    { section:"立体の見方と調べ方", videos:[
+      {id:"v72", title:"面と面の位置関係",             yt:"o0Cvgm7vOgs"},
+      {id:"v73", title:"面と線の位置関係",             yt:"_m8UlHUen1I"},
+      {id:"v74", title:"ねじれの位置とは？",           yt:"n39MjxwXjfk"},
+      {id:"v75", title:"回転体",                       yt:"Ey1bOVULeu8"},
+      {id:"v76", title:"投影図",                       yt:"coYGrg8UGv4"},
+      {id:"v77", title:"展開図",                       yt:"PQX1j4KMJig"},
+    ]},
+    { section:"おうぎ形の演習", videos:[
+      {id:"v78", title:"おうぎ形の公式",               yt:"dMUdkQ4QDwQ"},
+      {id:"v79", title:"おうぎ形の応用問題",           yt:"9it1FIuYwpY"},
+      {id:"v80", title:"円すいの問題",                 yt:"Pe8su6_II1Q"},
+    ]},
+    { section:"立体の表面積と体積", videos:[
+      {id:"v81", title:"立体の表面積",                 yt:"LeR9qtR_3dA"},
+      {id:"v82", title:"立体の体積",                   yt:"QznKn6ffib8"},
+      {id:"v83", title:"球",                           yt:"FaQn-Do8vco"},
+    ]},
+  ]},
+
+  // ===== ⑦ 資料の整理 (chapters-683) 8本 =====
+  { chapter:"資料の整理", sections:[
+    { section:"資料の散らばりと代表値", videos:[
+      {id:"v84", title:"度数分布表",                   yt:"DBeg1mrlPh4"},
+      {id:"v85", title:"ヒストグラム",                 yt:"1qbrWVkWVhI"},
+      {id:"v86", title:"相対度数の求め方",             yt:"FWYc_oqHoZ0"},
+      {id:"v87", title:"平均値と中央値",               yt:"PRXzrAnX-ms"},
+      {id:"v88", title:"最頻値と階級値",               yt:"WDUhMCPQGyE"},
+      {id:"v89", title:"資料整理の総合問題",           yt:"INDKrK2ZYS4"},
+    ]},
+    { section:"近似値と有効数字", videos:[
+      {id:"v90", title:"近似値",                       yt:"5tk8mmDlmzc"},
+      {id:"v91", title:"有効数字",                     yt:"0wKqQUKqOW8"},
     ]},
   ]},
 ];
 
-const SK="tryit_g1_v4", SK2="tryit_g1_streak", SK3="tryit_g1_last";
+const SK="tryit_g1_v5", SK2="tryit_g1_streak", SK3="tryit_g1_last";
 const getW=()=>{try{return JSON.parse(localStorage.getItem(SK))||{};}catch{return{};}};
 const saveW=o=>localStorage.setItem(SK,JSON.stringify(o));
 
@@ -222,16 +316,25 @@ function build(){
   const w=getW(); let n=0, html="";
   C.forEach(ch=>{
     let tot=0; ch.sections.forEach(s=>tot+=s.videos.length);
-    html+=`<div class="chapter" data-chapter="${ch.chapter}"><div class="chapter-header"><span class="chapter-badge">${ch.chapter}</span><span class="chapter-progress">0/${tot}</span></div>`;
+    html+=`<div class="chapter" data-chapter="${ch.chapter}">`;
+    html+=`<div class="chapter-header"><span class="chapter-badge">${ch.chapter}</span><span class="chapter-progress">0/${tot}</span></div>`;
     ch.sections.forEach(sec=>{
       html+=`<div class="section-group"><div class="section-label">${sec.section}</div>`;
       sec.videos.forEach(v=>{
-        n++; const isW=!!w[v.id];
+        n++;
+        const isW=!!w[v.id];
         const cc=isW?"video-card watched":"video-card";
         const bc=isW?"done-btn is-watched":"done-btn unwatched";
         const bl=isW?"✓ 済み":"未視聴";
         const bt=isW?"クリックで未視聴に戻す":"クリックで視聴済みにする";
-        html+=`<div class="${cc}"><div class="video-num">${n}</div><div class="video-info"><a class="video-title" href="https://youtu.be/${v.yt}" target="_blank" rel="noopener">${v.title}</a><div class="video-meta">▶ YouTubeで開く</div></div><button class="${bc}" title="${bt}" onclick="toggleWatched('${v.id}',this)">${bl}</button></div>`;
+        html+=`<div class="${cc}">`;
+        html+=`<div class="video-num">${n}</div>`;
+        html+=`<div class="video-info">`;
+        html+=`<a class="video-title" href="https://youtu.be/${v.yt}" target="_blank" rel="noopener">${v.title}</a>`;
+        html+=`<div class="video-meta">▶ YouTubeで開く</div>`;
+        html+=`</div>`;
+        html+=`<button class="${bc}" title="${bt}" onclick="toggleWatched('${v.id}',this)">${bl}</button>`;
+        html+=`</div>`;
       });
       html+=`</div>`;
     });
@@ -244,11 +347,13 @@ function build(){
 document.querySelectorAll(".tab-btn").forEach(b=>{
   b.addEventListener("click",()=>{
     document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active"); applyFilter(b.dataset.filter);
+    b.classList.add("active");
+    applyFilter(b.dataset.filter);
   });
 });
 
-build(); updateStreak();
+build();
+updateStreak();
 </script>
 </body>
 </html>
