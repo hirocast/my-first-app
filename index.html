@@ -5,63 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中1数学 最速先取りナビ</title>
     <style>
-        body { font-family: sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #0f172a; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         h1 { color: #1e3a8a; text-align: center; font-size: 1.4rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #64748b; font-size: 0.9rem; margin-bottom: 20px; }
-        .date-badge { text-align: center; background: #3b82f6; color: white; padding: 10px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.1rem; }
-        .task-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-        .unit-name { font-size: 0.8rem; color: #3b82f6; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .task-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; line-height: 1.4; }
-        .try-it-link { display: block; text-align: center; background: #ff0000; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; transition: background 0.2s; }
-        .try-it-link:hover { background: #cc0000; }
-        .no-task { text-align: center; color: #94a3b8; padding: 40px 0; }
-        footer { text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 30px; }
+        .subtitle { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 20px; letter-spacing: 0.05em; }
+        .date-badge { text-align: center; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 12px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; }
+        .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; }
+        .unit-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
+        .task-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 20px; line-height: 1.5; color: #1e293b; }
+        .try-it-link { display: flex; align-items: center; justify-content: center; background: #ff0000; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
+        .try-it-link::before { content: '▶'; margin-right: 8px; font-size: 0.8rem; }
+        footer { text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 30px; line-height: 1.6; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>最難関突破スケジュール</h1>
-    <div class="subtitle">中学1年生 / 1学期 数学</div>
+    <div class="subtitle">中学1年生 / 1学期 数学 (算数)</div>
     
-    <div id="today-date" class="date-badge">読み込み中...</div>
+    <div id="today-date" class="date-badge">---</div>
 
     <div id="schedule-content">
         </div>
 
     <footer>
-        大手塾カリキュラム準拠<br>
-        自学自習でトップレベルを目指す
+        大手塾スケジュール準拠<br>
+        駿台・早稲アカ等の進度を参考に構築
     </footer>
 </div>
 
 <script>
-    // --- 1. 中1数学 1学期スケジュールデータ ---
-    // Try itのURLは、各単元のリストページや代表的な動画URLを指定しています。
+    // --- 中1数学 1学期・算数（数学）スケジュール ---
     const scheduleData = {
-        "2026-03-26": {
-            dateLabel: "3月26日",
-            unit: "正の数・負の数",
-            title: "反対の性質を持つ量（＋とー）の概念を理解する",
-            videoUrl: "https://www.try-it.jp/chapters-2117/"
-        },
-        "2026-03-27": {
-            dateLabel: "3月27日",
-            unit: "正の数・負の数",
-            title: "絶対値の考え方と、数直線上の位置をマスターする",
-            videoUrl: "https://www.try-it.jp/lessons-2122/"
-        },
-        "2026-03-28": {
-            dateLabel: "3月28日",
-            unit: "正の数・負の数",
-            title: "正負の数の加法（足し算）を完璧にする",
-            videoUrl: "https://www.try-it.jp/lessons-2125/"
-        }
-        // ここにどんどん日付を追加していけます
+        // 春休み期間
+        "2026-03-26": { label: "3月26日", unit: "正負の数", title: "【導入】プラスとマイナスの世界を理解する", url: "https://www.try-it.jp/chapters-2117/sections-2118/lessons-2119/" },
+        "2026-03-27": { label: "3月27日", unit: "正負の数", title: "【絶対値】数の大きさと距離の考え方", url: "https://www.try-it.jp/chapters-2117/sections-2118/lessons-2122/" },
+        "2026-03-28": { label: "3月28日", unit: "正負の数", title: "【加法】正負の足し算をマスターする", url: "https://www.try-it.jp/chapters-2117/sections-2124/lessons-2125/" },
+        
+        // 4月以降の例
+        "2026-04-06": { label: "4月6日 (入学式期)", unit: "正負の数", title: "【乗法・除法】掛け算と割り算のルール", url: "https://www.try-it.jp/chapters-2117/sections-2131/lessons-2132/" },
+        "2026-05-11": { label: "5月11日", unit: "文字の式", title: "【文字式のルール】×や÷の省略を学ぶ", url: "https://www.try-it.jp/chapters-2144/sections-2145/lessons-2146/" },
+        "2026-06-08": { label: "6月8日", unit: "一次方程式", title: "【等式の性質】方程式を解く基本原理", url: "https://www.try-it.jp/chapters-2165/sections-2166/lessons-2167/" }
     };
 
-    // --- 2. 日付判定処理 ---
+    // 今日を判定
     const now = new Date();
     const y = now.getFullYear();
     const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -71,25 +59,19 @@
     const dateElement = document.getElementById('today-date');
     const contentElement = document.getElementById('schedule-content');
 
-    // --- 3. 表示反映 ---
     if (scheduleData[todayKey]) {
         const data = scheduleData[todayKey];
-        dateElement.textContent = data.dateLabel;
-
+        dateElement.textContent = data.label;
         contentElement.innerHTML = `
             <div class="task-card">
-                <div class="unit-name">${data.unit}</div>
+                <span class="unit-tag">${data.unit}</span>
                 <div class="task-title">${data.title}</div>
-                <a href="${data.videoUrl}" class="try-it-link" target="_blank">▶ Try it で授業を受ける</a>
+                <a href="${data.url}" class="try-it-link" target="_blank">Try it で授業動画を見る</a>
             </div>
         `;
     } else {
-        dateElement.textContent = "本日の予定";
-        contentElement.innerHTML = `
-            <div class="no-task">
-                <p>本日のスケジュールは未登録です。<br>前日の復習を進めましょう！</p>
-            </div>
-        `;
+        dateElement.textContent = "休日の予定";
+        contentElement.innerHTML = `<div style="text-align:center;color:#64748b;padding:30px;">本日のタスクはありません。<br>これまでの復習をしておこう！</div>`;
     }
 </script>
 
