@@ -5,63 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中1数学 1学期・最速先取りナビ</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #0f172a; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        h1 { color: #1e3a8a; text-align: center; font-size: 1.4rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 20px; }
-        .date-badge { text-align: center; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 12px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; }
-        .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center; }
-        .unit-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
-        .task-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #1e293b; line-height: 1.5; }
-        .play-button { display: flex; align-items: center; justify-content: center; background: #ff0000; color: white; text-decoration: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; transition: transform 0.2s; box-shadow: 0 4px 12px rgba(255,0,0,0.3); }
-        .play-button:active { transform: scale(0.98); }
-        footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; }
+        body { font-family: -apple-system, sans-serif; background-color: #f1f5f9; margin: 0; padding: 10px; color: #0f172a; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        h1 { color: #1e3a8a; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
+        
+        /* 今日の目標エリア */
+        .today-section { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #3b82f6; border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .date-badge { display: inline-block; background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
+        .task-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
+        
+        /* ボタン共通 */
+        .btn { display: flex; align-items: center; justify-content: center; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; width: 100%; box-sizing: border-box; }
+        .btn-red { background: #ff0000; color: white; box-shadow: 0 4px 10px rgba(255,0,0,0.2); }
+        .btn-outline { background: white; color: #1e3a8a; border: 2px solid #1e3a8a; margin-top: 10px; }
+
+        /* 全リストエリア */
+        #all-list { display: none; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; text-decoration: none; color: #334155; }
+        .list-item:active { background: #f8fafc; }
+        .unit-num { font-weight: bold; color: #3b82f6; margin-right: 10px; }
+
+        footer { text-align: center; font-size: 0.7rem; color: #94a3b8; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>最難関突破スケジュール</h1>
-    <div class="subtitle">中学1年生 / 1学期 数学 (算数)</div>
-    <div id="today-date" class="date-badge">読み込み中...</div>
-    <div id="schedule-content"></div>
-    <footer>大手塾スケジュール準拠 / 1学期目標：一次方程式まで完璧にする</footer>
+    <h1>最速先取りナビ</h1>
+    
+    <div class="today-section">
+        <div id="today-date" class="date-badge">Loading...</div>
+        <div id="today-task-content">
+            </div>
+    </div>
+
+    <button class="btn btn-outline" onclick="toggleList()">▼ 1学期の全授業リストを見る</button>
+
+    <div id="all-list">
+        <h2 style="font-size: 1rem; color: #1e3a8a;">1学期・数学全カリキュラム</h2>
+        <div id="list-container">
+            </div>
+    </div>
+
+    <footer>努力は裏切らない。1日1歩ずつ進もう！</footer>
 </div>
 
 <script>
-// ご提示いただいた最新のURLを反映
-    const scheduleData = {
-        "2026-03-26": { 
-            label: "3月26日", 
-            unit: "正負の数", 
-            title: "正負の数1：マイナス（0より小さい数）", 
-            videoUrl: "https://www.youtube.com/watch?v=JC0Cdwm_1mE" 
-        },
-        // ...以下、他の日程も同様に設定可能です
+    // 全データ（1学期分）
+    const allVideos = [
+        { id: 1, unit: "正負", title: "マイナス（0より小さい数）", url: "https://youtu.be/JC0Cdwm_1mE" },
+        { id: 2, unit: "正負", title: "正の数・負の数・自然数", url: "https://youtu.be/0pT2DHeXmZg" },
+        { id: 3, unit: "正負", title: "絶対値と不等号", url: "https://youtu.be/qQYFv_3F28w" },
+        { id: 4, unit: "正負", title: "正負の数の加法（足し算）", url: "https://youtu.be/v0-vIInyvY4" },
+        { id: 5, unit: "正負", title: "正負の数の減法（引き算）", url: "https://youtu.be/I9j4e4yU3X8" },
+        { id: 6, unit: "正負", title: "加減の混じった計算", url: "https://youtu.be/nF6u9W8M7Ew" },
+        { id: 7, unit: "正負", title: "正負の数の乗法（掛け算）", url: "https://youtu.be/vV93Z-kZ9oE" },
+        { id: 8, unit: "正負", title: "累乗（同じ数の掛け算）", url: "https://youtu.be/q091tV5p3rU" },
+        { id: 9, unit: "正負", title: "正負の数の除法（割り算）", url: "https://youtu.be/t1h9z3-Y00Y" },
+        { id: 10, unit: "正負", title: "四則の混じった計算", url: "https://youtu.be/1YfL70POfU0" },
+        { id: 11, unit: "文字", title: "文字を使った式の表し方", url: "https://youtu.be/XyS0ZfW15hM" },
+        { id: 12, unit: "文字", title: "×や÷の省き方のルール", url: "https://youtu.be/VvA_q0MAsq4" },
+        { id: 13, unit: "文字", title: "代入と式の値", url: "https://youtu.be/jC0yFwZ3pI4" },
+        { id: 14, unit: "文字", title: "項と係数・1次式の計算", url: "https://youtu.be/QWlY_t8X_2g" },
+        { id: 15, unit: "文字", title: "1次式の加法・減法", url: "https://youtu.be/hE5yP7t3v94" },
+        { id: 16, unit: "方程式", title: "方程式とその解", url: "https://youtu.be/K-8kS2Ww8cI" },
+        { id: 17, unit: "方程式", title: "等式の性質", url: "https://youtu.be/m4AOfYF_mN8" },
+        { id: 18, unit: "方程式", title: "移項（いこう）の解き方", url: "https://youtu.be/q7N6UByB_W0" }
+    ];
+
+    // 日付と動画IDの紐付け（塾のスケジュールをイメージ）
+    const scheduleByDate = {
+        "2026-03-26": 1,
+        "2026-03-27": 2,
+        "2026-03-30": 3,
+        "2026-03-31": 4,
+        "2026-04-01": 5
     };
 
+    // 初期表示設定
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
+    document.getElementById('today-date').textContent = todayKey.replace(/-/g, '/');
 
-    const dateElement = document.getElementById('today-date');
-    const contentElement = document.getElementById('schedule-content');
+    const videoId = scheduleByDate[todayKey];
+    const todayTask = allVideos.find(v => v.id === videoId);
 
-    if (scheduleData[todayKey]) {
-        const data = scheduleData[todayKey];
-        dateElement.textContent = data.label;
-        contentElement.innerHTML = `
-            <div class="task-card">
-                <span class="unit-tag">${data.unit}</span>
-                <div class="task-title">${data.title}</div>
-                <a href="${data.videoUrl}" class="play-button" target="_blank">
-                    ▶ YouTubeで授業を受ける
-                </a>
-                <p style="font-size:0.8rem; color:#64748b; margin-top:15px;">※別タブで動画が開きます</p>
-            </div>
+    const taskContent = document.getElementById('today-task-content');
+    if (todayTask) {
+        taskContent.innerHTML = `
+            <div class="task-title">${todayTask.title}</div>
+            <a href="${todayTask.url}" class="btn btn-red" target="_blank">▶ 今日の授業を受ける</a>
         `;
     } else {
-        dateElement.textContent = "復習・自習タイム";
-        contentElement.innerHTML = `<div style="text-align:center;color:#64748b;padding:30px;">本日の新規タスクはありません。</div>`;
+        taskContent.innerHTML = `<p style="color:#64748b;">今日の指定タスクはありません。<br>全リストから先取りを進めましょう！</p>`;
+    }
+
+    // 全リストの生成
+    const listContainer = document.getElementById('list-container');
+    allVideos.forEach(v => {
+        const item = document.createElement('a');
+        item.className = 'list-item';
+        item.href = v.url;
+        item.target = '_blank';
+        item.innerHTML = `<span><span class="unit-num">${v.id}</span> ${v.title}</span> <span>▶</span>`;
+        listContainer.appendChild(item);
+    });
+
+    // リストの開閉
+    function toggleList() {
+        const list = document.getElementById('all-list');
+        list.style.display = (list.style.display === 'block') ? 'none' : 'block';
     }
 </script>
 
