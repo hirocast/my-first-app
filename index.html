@@ -6,277 +6,65 @@
 <title>Try IT 中学1年数学 学習ナビ</title>
 <style>
   :root {
-    --primary: #2563eb;
-    --primary-light: #dbeafe;
-    --success: #16a34a;
-    --success-light: #dcfce7;
-    --gray: #6b7280;
-    --gray-light: #f3f4f6;
-    --border: #e5e7eb;
-    --text: #111827;
-    --text-sub: #6b7280;
-    --card-bg: #ffffff;
+    --primary: #2563eb; --primary-light: #dbeafe;
+    --success: #16a34a; --success-light: #dcfce7;
+    --gray: #6b7280; --gray-light: #f3f4f6;
+    --border: #e5e7eb; --text: #111827; --text-sub: #6b7280;
     --shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:#f0f4f8; color:var(--text); }
 
-  body {
-    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
-    background: #f0f4f8;
-    color: var(--text);
-    min-height: 100vh;
-  }
+  header { background:linear-gradient(135deg,#1e40af,#3b82f6); color:white; padding:20px 16px 16px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  header h1 { font-size:18px; font-weight:700; margin-bottom:12px; }
+  .progress-wrap { background:rgba(255,255,255,.2); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+  .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .progress-label { font-size:13px; opacity:.9; }
+  .progress-count { font-size:16px; font-weight:700; }
+  .progress-bar-bg { background:rgba(255,255,255,.3); border-radius:99px; height:8px; overflow:hidden; }
+  .progress-bar-fill { background:#86efac; height:100%; border-radius:99px; transition:width .4s; }
+  .streak-wrap { display:flex; align-items:center; gap:6px; font-size:13px; opacity:.9; }
+  .streak-num { font-weight:700; font-size:15px; }
 
-  /* ===== HEADER ===== */
-  header {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    color: white;
-    padding: 20px 16px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  header h1 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
+  .tabs { display:flex; gap:6px; padding:12px 16px; overflow-x:auto; background:white; border-bottom:1px solid var(--border); -webkit-overflow-scrolling:touch; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex-shrink:0; padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:white; color:var(--text-sub); font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .tab-btn:hover { border-color:var(--primary); color:var(--primary); }
+  .tab-btn.active { background:var(--primary); border-color:var(--primary); color:white; }
 
-  /* ===== PROGRESS BAR ===== */
-  .progress-wrap {
-    background: rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-  }
-  .progress-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .progress-label { font-size: 13px; opacity: 0.9; }
-  .progress-count { font-size: 16px; font-weight: 700; }
-  .progress-bar-bg {
-    background: rgba(255,255,255,0.3);
-    border-radius: 99px;
-    height: 8px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    background: #86efac;
-    height: 100%;
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
+  main { padding:16px; max-width:680px; margin:0 auto; }
 
-  /* ===== STREAK ===== */
-  .streak-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    opacity: 0.9;
-  }
-  .streak-fire { font-size: 16px; }
-  .streak-num { font-weight: 700; font-size: 15px; }
+  .chapter { margin-bottom:24px; }
+  .chapter-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .chapter-badge { background:var(--primary); color:white; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .chapter-progress { margin-left:auto; font-size:12px; color:var(--text-sub); font-weight:600; }
 
-  /* ===== UNIT TABS ===== */
-  .tabs {
-    display: flex;
-    gap: 6px;
-    padding: 12px 16px;
-    overflow-x: auto;
-    background: white;
-    border-bottom: 1px solid var(--border);
-    -webkit-overflow-scrolling: touch;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1.5px solid var(--border);
-    background: white;
-    color: var(--text-sub);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .tab-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-  }
+  .section-group { margin-bottom:12px; }
+  .section-label { font-size:12px; font-weight:600; color:var(--text-sub); padding:4px 8px; background:var(--gray-light); border-left:3px solid var(--primary); border-radius:0 4px 4px 0; margin-bottom:6px; }
 
-  /* ===== MAIN ===== */
-  main { padding: 16px; max-width: 680px; margin: 0 auto; }
+  .video-card { background:white; border-radius:10px; border:1.5px solid var(--border); padding:12px 14px; display:flex; align-items:center; gap:12px; margin-bottom:6px; transition:all .2s; box-shadow:var(--shadow); }
+  .video-card:hover { border-color:var(--primary); box-shadow:0 2px 8px rgba(37,99,235,.15); transform:translateY(-1px); }
+  .video-card.watched { background:#f0fdf4; border-color:#86efac; }
 
-  /* ===== CHAPTER SECTION ===== */
-  .chapter {
-    margin-bottom: 24px;
-  }
-  .chapter-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    padding: 0 2px;
-  }
-  .chapter-badge {
-    background: var(--primary);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-  .chapter-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .chapter-progress {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--text-sub);
-    font-weight: 600;
-  }
+  .video-num { width:28px; height:28px; border-radius:50%; background:var(--gray-light); color:var(--text-sub); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .video-card.watched .video-num { background:var(--success-light); color:var(--success); }
 
-  /* ===== SECTION GROUP ===== */
-  .section-group {
-    margin-bottom: 12px;
-  }
-  .section-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-sub);
-    padding: 4px 8px;
-    background: var(--gray-light);
-    border-left: 3px solid var(--primary);
-    border-radius: 0 4px 4px 0;
-    margin-bottom: 6px;
-  }
+  .video-info { flex:1; min-width:0; }
+  .video-title { font-size:14px; font-weight:600; color:var(--text); text-decoration:none; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .video-title:hover { color:var(--primary); }
+  .video-card.watched .video-title { color:var(--success); }
+  .video-meta { font-size:11px; color:var(--text-sub); margin-top:2px; }
 
-  /* ===== VIDEO CARD ===== */
-  .video-card {
-    background: var(--card-bg);
-    border-radius: 10px;
-    border: 1.5px solid var(--border);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-    transition: all 0.2s;
-    box-shadow: var(--shadow);
-  }
-  .video-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(37,99,235,0.15);
-    transform: translateY(-1px);
-  }
-  .video-card.watched {
-    background: #f0fdf4;
-    border-color: #86efac;
-  }
+  .done-btn { flex-shrink:0; padding:6px 12px; border-radius:20px; border:2px solid; font-size:12px; font-weight:700; cursor:pointer; transition:all .2s; white-space:nowrap; min-width:76px; text-align:center; }
+  .done-btn.unwatched { background:white; color:#9ca3af; border-color:#d1d5db; }
+  .done-btn.unwatched:hover { background:var(--success-light); border-color:var(--success); color:var(--success); }
+  .done-btn.is-watched { background:var(--success); color:white; border-color:var(--success); box-shadow:0 1px 4px rgba(22,163,74,.4); }
+  .done-btn.is-watched:hover { background:#dc2626; border-color:#dc2626; box-shadow:none; }
 
-  .video-num {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--gray-light);
-    color: var(--text-sub);
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .video-card.watched .video-num {
-    background: var(--success-light);
-    color: var(--success);
-  }
-
-  .video-info { flex: 1; min-width: 0; }
-  .video-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: none;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .video-title:hover { color: var(--primary); }
-  .video-card.watched .video-title { color: var(--success); }
-
-  .video-meta {
-    font-size: 11px;
-    color: var(--text-sub);
-    margin-top: 2px;
-  }
-
-  /* ===== DONE BUTTON ===== */
-  .done-btn {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1.5px solid var(--border);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    min-width: 72px;
-    text-align: center;
-  }
-  /* 未視聴状態 */
-  .done-btn.unwatched {
-    background: white;
-    color: var(--gray);
-    border-color: var(--border);
-  }
-  .done-btn.unwatched:hover {
-    background: var(--success-light);
-    border-color: var(--success);
-    color: var(--success);
-  }
-  /* 視聴済み状態 */
-  .done-btn.is-watched {
-    background: var(--success);
-    color: white;
-    border-color: var(--success);
-  }
-  .done-btn.is-watched:hover {
-    background: #dc2626;
-    border-color: #dc2626;
-  }
-
-  /* ===== RESET BUTTON ===== */
-  .reset-wrap {
-    text-align: center;
-    padding: 16px 0 32px;
-  }
-  .reset-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-sub);
-    font-size: 12px;
-    padding: 6px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-  }
-  .reset-btn:hover { border-color: #dc2626; color: #dc2626; }
-
-  /* ===== HIDDEN ===== */
-  .hidden { display: none !important; }
+  .reset-wrap { text-align:center; padding:16px 0 32px; }
+  .reset-btn { background:none; border:1px solid var(--border); color:var(--text-sub); font-size:12px; padding:6px 16px; border-radius:20px; cursor:pointer; }
+  .reset-btn:hover { border-color:#dc2626; color:#dc2626; }
+  .hidden { display:none !important; }
 </style>
 </head>
 <body>
@@ -286,18 +74,11 @@
   <div class="progress-wrap">
     <div class="progress-top">
       <span class="progress-label">学習進捗</span>
-      <span class="progress-count"><span id="watched-count">0</span> / <span id="total-count">0</span> 本 (<span id="pct">0</span>%)</span>
+      <span class="progress-count"><span id="wc">0</span>/<span id="tc">0</span>本 (<span id="pct">0</span>%)</span>
     </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pfill" style="width:0%"></div></div>
   </div>
-  <div class="streak-wrap">
-    <span class="streak-fire">🔥</span>
-    <span>連続学習</span>
-    <span class="streak-num" id="streak-num">0</span>
-    <span>日</span>
-  </div>
+  <div class="streak-wrap">🔥 連続学習 <span class="streak-num" id="snum">0</span> 日</div>
 </header>
 
 <div class="tabs">
@@ -311,284 +92,163 @@
   <button class="tab-btn" data-filter="資料の整理">資料の整理</button>
 </div>
 
-<main id="main-content"></main>
-
-<div class="reset-wrap">
-  <button class="reset-btn" onclick="resetAll()">🔄 進捗をリセット</button>
-</div>
+<main id="main"></main>
+<div class="reset-wrap"><button class="reset-btn" onclick="resetAll()">🔄 進捗をリセット</button></div>
 
 <script>
-// ========== カリキュラムデータ（トライイット準拠） ==========
-const CURRICULUM = [
-  {
-    chapter: "正負の数",
-    sections: [
-      {
-        section: "正負の数とは",
-        videos: [
-          { id: "v01", title: "マイナスとは？", ytId: "JC0Cdwm_1mE" },
-          { id: "v02", title: "数直線", ytId: "mMm1YNifnNc" },
-          { id: "v03", title: "数の大小関係", ytId: "a7V0L0Fka8Y" },
-          { id: "v04", title: "絶対値とは？", ytId: "qQYFv_3F28w" },
-        ]
-      },
-      {
-        section: "加法と減法",
-        videos: [
-          { id: "v05", title: "正負の数の加法（足し算）", ytId: "v0-vIInyvY4" },
-          { id: "v06", title: "正負の数の減法（引き算）", ytId: "I9j4e4yU3X8" },
-          { id: "v07", title: "項とは？", ytId: "fw_eMP14KTk" },
-          { id: "v08", title: "加減の混じった計算", ytId: "YWWeiuBQa_A" },
-        ]
-      },
-      {
-        section: "乗法と除法",
-        videos: [
-          { id: "v09", title: "正負の数の乗法（掛け算）", ytId: "gfGy0racLYI" },
-          { id: "v10", title: "累乗（同じ数の掛け算）", ytId: "q091tV5p3rU" },
-          { id: "v11", title: "正負の数の除法（割り算）", ytId: "IC8QoE8maSM" },
-          { id: "v12", title: "乗法・除法の混じった計算", ytId: "RDO8m3GnwT4" },
-          { id: "v13", title: "四則の混じった計算", ytId: "aVDqAXSqAkw" },
-          { id: "v14", title: "分配法則", ytId: "vV93Z-kZ9oE" },
-          { id: "v15", title: "分配法則の逆", ytId: "uvYr1_AjtfQ" },
-        ]
-      }
-    ]
-  },
-  {
-    chapter: "文字と式",
-    sections: [
-      {
-        section: "文字を使った式",
-        videos: [
-          { id: "v16", title: "文字を使った式の表し方", ytId: "XyS0ZfW15hM" },
-          { id: "v17", title: "×や÷の省き方のルール", ytId: "VvA_q0MAsq4" },
-          { id: "v18", title: "代入と式の値", ytId: "jC0yFwZ3pI4" },
-        ]
-      },
-      {
-        section: "文字式の計算",
-        videos: [
-          { id: "v19", title: "項と係数", ytId: "JASkJce1STg" },
-          { id: "v20", title: "文字のたし算・ひき算", ytId: "-W3RE3XTTIk" },
-          { id: "v21", title: "文字のかけ算・わり算", ytId: "QTBvOyL99_Y" },
-        ]
-      },
-      {
-        section: "文字式の利用",
-        videos: [
-          { id: "v22", title: "偶数・奇数の表し方", ytId: "JPDxyN2r5Ss" },
-          { id: "v23", title: "等式とは？", ytId: "neQsx2elTbo" },
-          { id: "v24", title: "不等号と不等式", ytId: "QkuNoBAfwtM" },
-        ]
-      }
-    ]
-  },
-  {
-    chapter: "方程式",
-    sections: [
-      {
-        section: "方程式の解き方",
-        videos: [
-          { id: "v25", title: "方程式とは？", ytId: "JD0G9ZGqKT0" },
-          { id: "v26", title: "等式の性質", ytId: "m4AOfYF_mN8" },
-          { id: "v27", title: "方程式の解き方１（移項）", ytId: "q7N6UByB_W0" },
-          { id: "v28", title: "方程式の解き方２（両辺をかける・わる）", ytId: "MfKR-bigLzw" },
-          { id: "v29", title: "方程式の解き方３（コツ）", ytId: "K-8kS2Ww8cI" },
-          { id: "v30", title: "方程式の解き方４（カッコ・分数・小数）", ytId: "nF6u9W8M7Ew" },
-        ]
-      },
-      {
-        section: "方程式の文章題",
-        videos: [
-          { id: "v31", title: "方程式の文章題（買い物）", ytId: "t1h9z3-Y00Y" },
-          { id: "v32", title: "方程式の文章題（余り・不足）", ytId: "GJxbw-48cp4" },
-          { id: "v33", title: "方程式の文章題（速さ）", ytId: "1YfL70POfU0" },
-        ]
-      },
-      {
-        section: "比例式",
-        videos: [
-          { id: "v34", title: "比例式の解き方", ytId: "QWlY_t8X_2g" },
-        ]
-      }
-    ]
-  },
-  {
-    chapter: "比例・反比例",
-    sections: [
-      {
-        section: "比例",
-        videos: [
-          { id: "v35", title: "比例とは？", ytId: "hE5yP7t3v94" },
-        ]
-      }
-    ]
-  }
+// ===== Try IT 公式ページ各レッスンから直接取得した YouTube ID =====
+const C = [
+  { chapter:"正負の数", sections:[
+    { section:"正負の数とは", videos:[
+      {id:"v01", title:"マイナスとは？",        yt:"JC0Cdwm_1mE"},
+      {id:"v02", title:"数直線",                yt:"mMm1YNifnNc"},
+      {id:"v03", title:"数の大小関係",           yt:"a7V0L0Fka8Y"},
+      {id:"v04", title:"絶対値とは？",           yt:"vo_1hF9l-C8"},
+    ]},
+    { section:"加法と減法", videos:[
+      {id:"v05", title:"加法（たし算）",         yt:"4wLZRtM07sU"},
+      {id:"v06", title:"減法（ひき算）",         yt:"x7zBjB-m4CY"},
+      {id:"v07", title:"項とは？",               yt:"fw_eMP14KTk"},
+      {id:"v08", title:"加法・減法の計算",        yt:"YWWeiuBQa_A"},
+    ]},
+    { section:"乗法と除法", videos:[
+      {id:"v09", title:"乗法（かけ算）",         yt:"gfGy0racLYI"},
+      {id:"v10", title:"累乗（指数）について",   yt:"kzH-aOuMVco"},
+      {id:"v11", title:"除法（わり算）",         yt:"IC8QoE8maSM"},
+      {id:"v12", title:"乗法・除法の計算",       yt:"RDO8m3GnwT4"},
+      {id:"v13", title:"四則の計算",             yt:"aVDqAXSqAkw"},
+      {id:"v14", title:"分配法則",               yt:"P-LkfGr5128"},
+      {id:"v15", title:"分配法則の逆",           yt:"uvYr1_AjtfQ"},
+    ]},
+  ]},
+  { chapter:"文字と式", sections:[
+    { section:"文字を使った式", videos:[
+      {id:"v16", title:'文字「x」について',      yt:"cPyNz345ooc"},
+      {id:"v17", title:"積の表し方（ルール１）", yt:"uZPEyBpijbM"},
+      {id:"v18", title:"商の表し方（ルール２）", yt:"BY4d4pJk5vs"},
+      {id:"v19", title:'円周率「π」について',   yt:"rwQ-G69or4M"},
+      {id:"v20", title:"文字で表すコツ１（買い物）",  yt:"cb5uWuHjmhg"},
+      {id:"v21", title:"文字で表すコツ２（図形）",    yt:"zylZIf6tRR8"},
+      {id:"v22", title:"文字で表すコツ３（割合）",    yt:"rBTRvc6kXyI"},
+      {id:"v23", title:"文字で表すコツ４（速さ）",    yt:"qEf3uJfeIQ4"},
+      {id:"v24", title:"単位の計算",             yt:"xvIyYWFmV8U"},
+      {id:"v25", title:"代入とは？",             yt:"XGbF4qJZIPA"},
+    ]},
+    { section:"文字式の計算", videos:[
+      {id:"v26", title:"項と係数",               yt:"JASkJce1STg"},
+      {id:"v27", title:"文字のたし算・ひき算",   yt:"-W3RE3XTTIk"},
+      {id:"v28", title:"文字のかけ算・わり算",   yt:"QTBvOyL99_Y"},
+    ]},
+    { section:"文字式の利用", videos:[
+      {id:"v29", title:"偶数・奇数の表し方",     yt:"JPDxyN2r5Ss"},
+      {id:"v30", title:"等式とは？",             yt:"neQsx2elTbo"},
+      {id:"v31", title:"不等式とは？",           yt:"QkuNoBAfwtM"},
+    ]},
+  ]},
+  { chapter:"方程式", sections:[
+    { section:"方程式の解き方", videos:[
+      {id:"v32", title:"方程式とは？",                           yt:"JD0G9ZGqKT0"},
+      {id:"v33", title:"等式の性質",                             yt:"m4AOfYF_mN8"},
+      {id:"v34", title:"方程式の解き方１（移項）",               yt:"q7N6UByB_W0"},
+      {id:"v35", title:"方程式の解き方２（両辺をかける・わる）", yt:"MfKR-bigLzw"},
+      {id:"v36", title:"方程式の解き方３（コツ）",               yt:"XnMqgL5StDw"},
+      {id:"v37", title:"方程式の解き方４（カッコ・分数・小数）", yt:"V-osCIuwUME"},
+    ]},
+    { section:"方程式の文章題", videos:[
+      {id:"v38", title:"方程式の文章題（買い物）",    yt:"6MZD672_8Y4"},
+      {id:"v39", title:"方程式の文章題（余り・不足）",yt:"GJxbw-48cp4"},
+      {id:"v40", title:"方程式の文章題（速さ）",      yt:"t1h9z3-Y00Y"},
+    ]},
+    { section:"比例式", videos:[
+      {id:"v41", title:"比例式の解き方", yt:"1YfL70POfU0"},
+    ]},
+  ]},
 ];
 
-// ========== ストレージ管理 ==========
-const STORAGE_KEY = "tryit_math_g1_watched";
-const STREAK_KEY  = "tryit_math_g1_streak";
-const LAST_KEY    = "tryit_math_g1_lastdate";
+const SK="tryit_g1_v4", SK2="tryit_g1_streak", SK3="tryit_g1_last";
+const getW=()=>{try{return JSON.parse(localStorage.getItem(SK))||{};}catch{return{};}};
+const saveW=o=>localStorage.setItem(SK,JSON.stringify(o));
 
-function getWatched() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveWatched(obj) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-}
-
-// ===== 連続学習日数 =====
-function updateStreak() {
-  const today = new Date().toISOString().slice(0,10);
-  const last  = localStorage.getItem(LAST_KEY);
-  let streak  = parseInt(localStorage.getItem(STREAK_KEY) || "0", 10);
-
-  if (!last) {
-    streak = 1;
-  } else {
-    const diff = (new Date(today) - new Date(last)) / 86400000;
-    if (diff === 1) {
-      streak += 1;
-    } else if (diff > 1) {
-      streak = 1;
-    }
-    // diff === 0: 当日アクセス済み → 変化なし
-  }
-  localStorage.setItem(STREAK_KEY, streak);
-  localStorage.setItem(LAST_KEY, today);
-  document.getElementById("streak-num").textContent = streak;
+function updateStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const last=localStorage.getItem(SK3);
+  let s=parseInt(localStorage.getItem(SK2)||"0",10);
+  if(!last){s=1;}else{const d=(new Date(today)-new Date(last))/86400000;if(d===1)s++;else if(d>1)s=1;}
+  localStorage.setItem(SK2,s);localStorage.setItem(SK3,today);
+  document.getElementById("snum").textContent=s;
 }
 
-// ========== 進捗バー更新 ==========
-function updateProgress() {
-  const watched = getWatched();
-  const total   = document.querySelectorAll(".done-btn").length;
-  const count   = Object.values(watched).filter(Boolean).length;
-  const pct     = total > 0 ? Math.round(count / total * 100) : 0;
-
-  document.getElementById("watched-count").textContent = count;
-  document.getElementById("total-count").textContent   = total;
-  document.getElementById("pct").textContent           = pct;
-  document.getElementById("progress-fill").style.width = pct + "%";
-}
-
-// ========== 済みボタン切り替え ==========
-function toggleWatched(videoId, btn) {
-  const watched = getWatched();
-  const isNowWatched = !watched[videoId];
-  watched[videoId] = isNowWatched;
-  saveWatched(watched);
-  applyWatchedState(videoId, btn, isNowWatched);
-  updateProgress();
-}
-
-function applyWatchedState(videoId, btn, isWatched) {
-  const card = btn.closest(".video-card");
-  if (isWatched) {
-    btn.textContent   = "✓ 済み";
-    btn.className     = "done-btn is-watched";
-    btn.title         = "クリックで未視聴に戻す";
-    card.classList.add("watched");
-  } else {
-    btn.textContent   = "未視聴";
-    btn.className     = "done-btn unwatched";
-    btn.title         = "クリックで済みにする";
-    card.classList.remove("watched");
-  }
-}
-
-// ========== リセット ==========
-function resetAll() {
-  if (!confirm("すべての進捗をリセットしますか？")) return;
-  localStorage.removeItem(STORAGE_KEY);
-  document.querySelectorAll(".done-btn").forEach(btn => {
-    const card = btn.closest(".video-card");
-    btn.textContent = "未視聴";
-    btn.className   = "done-btn unwatched";
-    btn.title       = "クリックで済みにする";
-    card.classList.remove("watched");
-  });
-  updateProgress();
-}
-
-// ========== フィルタ ==========
-function applyFilter(filter) {
-  document.querySelectorAll(".chapter").forEach(ch => {
-    const chapterName = ch.dataset.chapter;
-    ch.classList.toggle("hidden", filter !== "all" && chapterName !== filter);
+function updateProgress(){
+  const w=getW();
+  const total=document.querySelectorAll(".done-btn").length;
+  const count=Object.values(w).filter(Boolean).length;
+  const pct=total?Math.round(count/total*100):0;
+  document.getElementById("wc").textContent=count;
+  document.getElementById("tc").textContent=total;
+  document.getElementById("pct").textContent=pct;
+  document.getElementById("pfill").style.width=pct+"%";
+  document.querySelectorAll(".chapter").forEach(ch=>{
+    const done=ch.querySelectorAll(".done-btn.is-watched").length;
+    const all=ch.querySelectorAll(".done-btn").length;
+    const p=ch.querySelector(".chapter-progress");
+    if(p)p.textContent=done+"/"+all;
   });
 }
 
-// ========== HTML構築 ==========
-function buildHTML() {
-  const main    = document.getElementById("main-content");
-  const watched = getWatched();
-  let globalNum = 0;
-  let html = "";
+function applyState(btn,isW){
+  const card=btn.closest(".video-card");
+  if(isW){btn.textContent="✓ 済み";btn.className="done-btn is-watched";btn.title="クリックで未視聴に戻す";card.classList.add("watched");}
+  else{btn.textContent="未視聴";btn.className="done-btn unwatched";btn.title="クリックで視聴済みにする";card.classList.remove("watched");}
+}
 
-  CURRICULUM.forEach(chObj => {
-    let chWatched = 0;
-    let chTotal   = 0;
-    chObj.sections.forEach(sec => {
-      chTotal += sec.videos.length;
-      sec.videos.forEach(v => { if (watched[v.id]) chWatched++; });
-    });
+function toggleWatched(id,btn){
+  const w=getW();w[id]=!w[id];saveW(w);applyState(btn,w[id]);updateProgress();
+}
 
-    html += `<div class="chapter" data-chapter="${chObj.chapter}">`;
-    html += `<div class="chapter-header">
-      <span class="chapter-badge">${chObj.chapter}</span>
-      <span class="chapter-progress">${chWatched}/${chTotal}</span>
-    </div>`;
+function resetAll(){
+  if(!confirm("すべての進捗をリセットしますか？"))return;
+  localStorage.removeItem(SK);
+  document.querySelectorAll(".done-btn").forEach(b=>applyState(b,false));
+  updateProgress();
+}
 
-    chObj.sections.forEach(sec => {
-      html += `<div class="section-group">`;
-      html += `<div class="section-label">${sec.section}</div>`;
+function applyFilter(f){
+  document.querySelectorAll(".chapter").forEach(ch=>{
+    ch.classList.toggle("hidden",f!=="all"&&ch.dataset.chapter!==f);
+  });
+}
 
-      sec.videos.forEach(v => {
-        globalNum++;
-        const isWatched    = !!watched[v.id];
-        const cardClass    = isWatched ? "video-card watched" : "video-card";
-        const btnClass     = isWatched ? "done-btn is-watched" : "done-btn unwatched";
-        const btnLabel     = isWatched ? "✓ 済み" : "未視聴";
-        const btnTitle     = isWatched ? "クリックで未視聴に戻す" : "クリックで済みにする";
-
-        html += `
-        <div class="${cardClass}" id="card-${v.id}">
-          <div class="video-num">${globalNum}</div>
-          <div class="video-info">
-            <a class="video-title" href="https://youtu.be/${v.ytId}" target="_blank" rel="noopener">${v.title}</a>
-            <div class="video-meta">▶ YouTube で開く</div>
-          </div>
-          <button class="${btnClass}" title="${btnTitle}"
-            onclick="toggleWatched('${v.id}', this)">${btnLabel}</button>
-        </div>`;
+function build(){
+  const w=getW(); let n=0, html="";
+  C.forEach(ch=>{
+    let tot=0; ch.sections.forEach(s=>tot+=s.videos.length);
+    html+=`<div class="chapter" data-chapter="${ch.chapter}"><div class="chapter-header"><span class="chapter-badge">${ch.chapter}</span><span class="chapter-progress">0/${tot}</span></div>`;
+    ch.sections.forEach(sec=>{
+      html+=`<div class="section-group"><div class="section-label">${sec.section}</div>`;
+      sec.videos.forEach(v=>{
+        n++; const isW=!!w[v.id];
+        const cc=isW?"video-card watched":"video-card";
+        const bc=isW?"done-btn is-watched":"done-btn unwatched";
+        const bl=isW?"✓ 済み":"未視聴";
+        const bt=isW?"クリックで未視聴に戻す":"クリックで視聴済みにする";
+        html+=`<div class="${cc}"><div class="video-num">${n}</div><div class="video-info"><a class="video-title" href="https://youtu.be/${v.yt}" target="_blank" rel="noopener">${v.title}</a><div class="video-meta">▶ YouTubeで開く</div></div><button class="${bc}" title="${bt}" onclick="toggleWatched('${v.id}',this)">${bl}</button></div>`;
       });
-
-      html += `</div>`;
+      html+=`</div>`;
     });
-
-    html += `</div>`;
+    html+=`</div>`;
   });
-
-  main.innerHTML = html;
+  document.getElementById("main").innerHTML=html;
   updateProgress();
 }
 
-// ========== タブイベント ==========
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    applyFilter(btn.dataset.filter);
+document.querySelectorAll(".tab-btn").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); applyFilter(b.dataset.filter);
   });
 });
 
-// ========== 初期化 ==========
-buildHTML();
-updateStreak();
+build(); updateStreak();
 </script>
 </body>
 </html>
