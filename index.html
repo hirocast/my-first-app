@@ -12,7 +12,7 @@
         .date-badge { text-align: center; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 12px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; }
         .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; }
         .unit-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
-        .task-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #1e293b; line-height: 1.4; }
+        .task-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; color: #1e293b; line-height: 1.5; }
         .try-it-link { display: flex; align-items: center; justify-content: center; background: #ff0000; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; box-shadow: 0 4px 10px rgba(255,0,0,0.2); }
         footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; }
     </style>
@@ -28,31 +28,19 @@
 </div>
 
 <script>
-    // 確実にアクセス可能な公式URLへ更新
+    // リンク切れ対策：YouTubeの検索結果へ飛ばす方式に変更
     const scheduleData = {
-        // --- 3月：春休み先取り ---
-        "2026-03-26": { label: "3月26日", unit: "正負の数", title: "【導入】プラスとマイナスの世界・絶対値", url: "https://www.youtube.com/watch?v=Fj-P6S01hZ0" },
-        "2026-03-27": { label: "3月27日", unit: "正負の数", title: "【加法・減法】正負の足し算と引き算", url: "https://www.youtube.com/watch?v=v0-vIInyvY4" },
-        "2026-03-30": { label: "3月30日", unit: "正負の数", title: "【乗法・除法】掛け算と割り算のルール", url: "https://www.youtube.com/watch?v=vV93Z-kZ9oE" },
-        
-        // --- 4月：正負の数 完成 ---
-        "2026-04-06": { label: "4月6日", unit: "正負の数", title: "【四則混合】＋ー×÷の混じった計算を攻略", url: "https://www.try-it.jp/chapters-2117/" },
-
-        // --- 5月：文字の式 ---
-        "2026-05-11": { label: "5月11日", unit: "文字の式", title: "【ルール】×と÷の省略と文字式のきまり", url: "https://www.try-it.jp/chapters-2144/" },
-
-        // --- 6月：一次方程式 ---
-        "2026-06-08": { label: "6月8日", unit: "一次方程式", title: "【方程式】天秤のルールと移項の基本", url: "https://www.try-it.jp/chapters-2165/" },
-
-        // --- 7月：方程式の利用 ---
-        "2026-07-06": { label: "7月6日", unit: "一次方程式", title: "【利用】文章題から式を立てるコツ", url: "https://www.try-it.jp/chapters-2165/" }
+        "2026-03-26": { label: "3月26日", unit: "正負の数", title: "【導入】プラスとマイナスの世界・絶対値", query: "Try+it+中1+数学+正負の数+導入" },
+        "2026-03-27": { label: "3月27日", unit: "正負の数", title: "【加法・減法】正負の足し算と引き算", query: "Try+it+中1+数学+正負の数+加法+減法" },
+        "2026-03-30": { label: "3月30日", unit: "正負の数", title: "【乗法・除法】掛け算と割り算のルール", query: "Try+it+中1+数学+正負の数+乗法+除法" },
+        "2026-04-06": { label: "4月6日", unit: "正負の数", title: "【四則混合】＋ー×÷の混じった計算", query: "Try+it+中1+数学+正負の数+四則混合" },
+        "2026-05-11": { label: "5月11日", unit: "文字の式", title: "【ルール】×と÷の省略と文字式のきまり", query: "Try+it+中1+数学+文字の式+きまり" },
+        "2026-06-08": { label: "6月8日", unit: "一次方程式", title: "【方程式】天秤のルールと移項の基本", query: "Try+it+中1+数学+一次方程式+解き方" },
+        "2026-07-06": { label: "7月6日", unit: "一次方程式", title: "【利用】文章題から式を立てるコツ", query: "Try+it+中1+数学+一次方程式+利用" }
     };
 
     const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const todayKey = `${y}-${m}-${d}`;
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     const dateElement = document.getElementById('today-date');
     const contentElement = document.getElementById('schedule-content');
@@ -60,20 +48,18 @@
     if (scheduleData[todayKey]) {
         const data = scheduleData[todayKey];
         dateElement.textContent = data.label;
+        // YouTube検索URLを生成
+        const searchUrl = `https://www.youtube.com/results?search_query=${data.query}`;
         contentElement.innerHTML = `
             <div class="task-card">
                 <span class="unit-tag">${data.unit}</span>
                 <div class="task-title">${data.title}</div>
-                <a href="${data.url}" class="try-it-link" target="_blank">▶ 動画授業を再生する</a>
+                <a href="${searchUrl}" class="try-it-link" target="_blank">▶ YouTubeで授業を検索</a>
             </div>
         `;
     } else {
         dateElement.textContent = "復習・自習タイム";
-        contentElement.innerHTML = `
-            <div style="text-align:center;color:#64748b;padding:30px;">
-                本日の新規タスクはありません。<br>これまでの復習を進めましょう！
-            </div>
-        `;
+        contentElement.innerHTML = `<div style="text-align:center;color:#64748b;padding:30px;">本日の新規タスクはありません。<br>これまでの復習を進めましょう！</div>`;
     }
 </script>
 
