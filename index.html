@@ -3,84 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>塾レベル学習ナビゲート</title>
+    <title>中1数学 最速先取りナビ</title>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #004080; text-align: center; font-size: 1.5rem; }
-        .date-badge { text-align: center; background: #d9534f; color: white; padding: 8px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
-        .grade-section { border-left: 5px solid #004080; padding-left: 15px; margin-bottom: 25px; }
-        .grade-title { font-weight: bold; font-size: 1.1rem; color: #004080; margin-bottom: 10px; }
-        .task-list { list-style: none; padding: 0; }
-        .task-item { background: #f9f9f9; margin-bottom: 8px; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
-        .subject { font-weight: bold; color: #d9534f; margin-right: 10px; }
-        footer { text-align: center; font-size: 0.8rem; color: #888; margin-top: 20px; }
+        body { font-family: sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        h1 { color: #1e3a8a; text-align: center; font-size: 1.4rem; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #64748b; font-size: 0.9rem; margin-bottom: 20px; }
+        .date-badge { text-align: center; background: #3b82f6; color: white; padding: 10px; border-radius: 12px; margin-bottom: 25px; font-weight: bold; font-size: 1.1rem; }
+        .task-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .unit-name { font-size: 0.8rem; color: #3b82f6; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .task-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; line-height: 1.4; }
+        .try-it-link { display: block; text-align: center; background: #ff0000; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; transition: background 0.2s; }
+        .try-it-link:hover { background: #cc0000; }
+        .no-task { text-align: center; color: #94a3b8; padding: 40px 0; }
+        footer { text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 30px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>最難関突破スケジュール</h1>
-    <div id="today-date" class="date-badge">日付を取得中...</div>
+    <div class="subtitle">中学1年生 / 1学期 数学</div>
+    
+    <div id="today-date" class="date-badge">読み込み中...</div>
 
     <div id="schedule-content">
         </div>
 
-    <footer>※参考書とTry itを併用し、自学自習の習慣を確立しましょう。</footer>
+    <footer>
+        大手塾カリキュラム準拠<br>
+        自学自習でトップレベルを目指す
+    </footer>
 </div>
 
 <script>
-    // --- 1. スケジュールデータ（ここを増やすだけで毎日分作れます） ---
-    const dailyData = {
+    // --- 1. 中1数学 1学期スケジュールデータ ---
+    // Try itのURLは、各単元のリストページや代表的な動画URLを指定しています。
+    const scheduleData = {
         "2026-03-26": {
-            label: "3月26日（春期講習 第1期）",
-            tasks: [
-                { grade: "新中1", sub: "算数", detail: "小学校の「割合・比」の総復習（try it）" },
-                { grade: "新中2", sub: "数学", detail: "中1幾何（図形）の難問復習 10問" },
-                { grade: "新中3", sub: "英語", detail: "中1・中2の全単語総点検（英検準2級レベル）" }
-            ]
+            dateLabel: "3月26日",
+            unit: "正の数・負の数",
+            title: "反対の性質を持つ量（＋とー）の概念を理解する",
+            videoUrl: "https://www.try-it.jp/chapters-2117/"
         },
         "2026-03-27": {
-            label: "3月27日（春期講習 第2期）",
-            tasks: [
-                { grade: "新中1", sub: "英語", detail: "アルファベットと挨拶の予習（try it）" },
-                { grade: "新中2", sub: "英語", detail: "過去進行形の文法確認" },
-                { grade: "新中3", sub: "数学", detail: "因数分解の公式暗記と練習" }
-            ]
+            dateLabel: "3月27日",
+            unit: "正の数・負の数",
+            title: "絶対値の考え方と、数直線上の位置をマスターする",
+            videoUrl: "https://www.try-it.jp/lessons-2122/"
+        },
+        "2026-03-28": {
+            dateLabel: "3月28日",
+            unit: "正の数・負の数",
+            title: "正負の数の加法（足し算）を完璧にする",
+            videoUrl: "https://www.try-it.jp/lessons-2125/"
         }
-        // ここに3月28日以降も同じ形式で追加できます
+        // ここにどんどん日付を追加していけます
     };
 
-    // --- 2. 今日の日付を取得する処理 ---
+    // --- 2. 日付判定処理 ---
     const now = new Date();
     const y = now.getFullYear();
     const m = String(now.getMonth() + 1).padStart(2, '0');
     const d = String(now.getDate()).padStart(2, '0');
-    const todayKey = `${y}-${m}-${d}`; // "2026-03-26" という形式にする
+    const todayKey = `${y}-${m}-${d}`;
 
-    // --- 3. 画面に反映させる処理 ---
     const dateElement = document.getElementById('today-date');
     const contentElement = document.getElementById('schedule-content');
 
-    if (dailyData[todayKey]) {
-        const data = dailyData[todayKey];
-        dateElement.textContent = data.label;
+    // --- 3. 表示反映 ---
+    if (scheduleData[todayKey]) {
+        const data = scheduleData[todayKey];
+        dateElement.textContent = data.dateLabel;
 
-        let html = "";
-        data.tasks.forEach(task => {
-            html += `
-                <div class="grade-section">
-                    <div class="grade-title">${task.grade}</div>
-                    <ul class="task-list">
-                        <li class="task-item"><span class="subject">${task.sub}</span>${task.detail}</li>
-                    </ul>
-                </div>
-            `;
-        });
-        contentElement.innerHTML = html;
+        contentElement.innerHTML = `
+            <div class="task-card">
+                <div class="unit-name">${data.unit}</div>
+                <div class="task-title">${data.title}</div>
+                <a href="${data.videoUrl}" class="try-it-link" target="_blank">▶ Try it で授業を受ける</a>
+            </div>
+        `;
     } else {
         dateElement.textContent = "本日の予定";
-        contentElement.innerHTML = "<p style='text-align:center;'>本日のスケジュールは登録されていません。予習を進めましょう！</p>";
+        contentElement.innerHTML = `
+            <div class="no-task">
+                <p>本日のスケジュールは未登録です。<br>前日の復習を進めましょう！</p>
+            </div>
+        `;
     }
 </script>
 
