@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>塾レベル学習ナビゲート</title>
     <style>
-        /* 見た目を整えるCSS（内装） */
         body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { color: #004080; text-align: center; font-size: 1.5rem; }
-        .date-badge { text-align: center; background: #004080; color: white; padding: 5px; border-radius: 5px; margin-bottom: 20px; }
+        .date-badge { text-align: center; background: #d9534f; color: white; padding: 8px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
         .grade-section { border-left: 5px solid #004080; padding-left: 15px; margin-bottom: 25px; }
         .grade-title { font-weight: bold; font-size: 1.1rem; color: #004080; margin-bottom: 10px; }
         .task-list { list-style: none; padding: 0; }
@@ -22,37 +21,68 @@
 
 <div class="container">
     <h1>最難関突破スケジュール</h1>
-    <div class="date-badge">2026年3月26日（春期講習期間）</div>
+    <div id="today-date" class="date-badge">日付を取得中...</div>
 
-    <div class="grade-section">
-        <div class="grade-title">新中学1年生：中学準備・最速先取り</div>
-        <ul class="task-list">
-            <li class="task-item"><span class="subject">算数</span>小学校の「割合・比」の総復習（try it）</li>
-            <li class="task-item"><span class="subject">英語</span>アルファベット完全マスターとbe動詞の予習</li>
-            <li class="task-item"><span class="subject">目標</span>中学最初の定期テストで学年10位以内を目指す基礎固め</li>
-        </ul>
-    </div>
-
-    <div class="grade-section">
-        <div class="grade-title">新中学2年生：中1復習と連立方程式</div>
-        <ul class="task-list">
-            <li class="task-item"><span class="subject">数学</span>中1幾何（図形）の難問復習 10問</li>
-            <li class="task-item"><span class="subject">英語</span>過去進行形・未来形の先取り学習</li>
-            <li class="task-item"><span class="subject">目標</span>駿台模試 偏差値60突破に向けた思考力強化</li>
-        </ul>
-    </div>
-
-    <div class="grade-section">
-        <div class="grade-title">新中学3年生：受験生モード始動</div>
-        <ul class="task-list">
-            <li class="task-item"><span class="subject">英語</span>中1・中2の全単語総点検（英検準2級レベル）</li>
-            <li class="task-item"><span class="subject">数学</span>展開・因数分解の応用問題を30分集中</li>
-            <li class="task-item"><span class="subject">目標</span>早慶・国立附属高合格への土台完成</li>
-        </ul>
-    </div>
+    <div id="schedule-content">
+        </div>
 
     <footer>※参考書とTry itを併用し、自学自習の習慣を確立しましょう。</footer>
 </div>
+
+<script>
+    // --- 1. スケジュールデータ（ここを増やすだけで毎日分作れます） ---
+    const dailyData = {
+        "2026-03-26": {
+            label: "3月26日（春期講習 第1期）",
+            tasks: [
+                { grade: "新中1", sub: "算数", detail: "小学校の「割合・比」の総復習（try it）" },
+                { grade: "新中2", sub: "数学", detail: "中1幾何（図形）の難問復習 10問" },
+                { grade: "新中3", sub: "英語", detail: "中1・中2の全単語総点検（英検準2級レベル）" }
+            ]
+        },
+        "2026-03-27": {
+            label: "3月27日（春期講習 第2期）",
+            tasks: [
+                { grade: "新中1", sub: "英語", detail: "アルファベットと挨拶の予習（try it）" },
+                { grade: "新中2", sub: "英語", detail: "過去進行形の文法確認" },
+                { grade: "新中3", sub: "数学", detail: "因数分解の公式暗記と練習" }
+            ]
+        }
+        // ここに3月28日以降も同じ形式で追加できます
+    };
+
+    // --- 2. 今日の日付を取得する処理 ---
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const todayKey = `${y}-${m}-${d}`; // "2026-03-26" という形式にする
+
+    // --- 3. 画面に反映させる処理 ---
+    const dateElement = document.getElementById('today-date');
+    const contentElement = document.getElementById('schedule-content');
+
+    if (dailyData[todayKey]) {
+        const data = dailyData[todayKey];
+        dateElement.textContent = data.label;
+
+        let html = "";
+        data.tasks.forEach(task => {
+            html += `
+                <div class="grade-section">
+                    <div class="grade-title">${task.grade}</div>
+                    <ul class="task-list">
+                        <li class="task-item"><span class="subject">${task.sub}</span>${task.detail}</li>
+                    </ul>
+                </div>
+            `;
+        });
+        contentElement.innerHTML = html;
+    } else {
+        dateElement.textContent = "本日の予定";
+        contentElement.innerHTML = "<p style='text-align:center;'>本日のスケジュールは登録されていません。予習を進めましょう！</p>";
+    }
+</script>
 
 </body>
 </html>
