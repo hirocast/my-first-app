@@ -35,8 +35,16 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
+  .progress-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    width: 36px;
+    flex-shrink: 0;
+  }
+  .progress-label.grad { color: #f5d78e; }
   .progress-bar-outer {
     flex: 1;
     background: rgba(255,255,255,0.15);
@@ -49,6 +57,9 @@
     background: linear-gradient(90deg, #e94560, #f5a623);
     border-radius: 999px;
     transition: width 0.4s ease;
+  }
+  .progress-bar-inner.grad {
+    background: linear-gradient(90deg, #f5a623, #e8900a);
   }
   .progress-text {
     font-size: 0.78rem;
@@ -123,6 +134,30 @@
     border-radius: 999px;
     transition: width 0.4s ease;
   }
+  .chapter-grad-bar-outer {
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    height: 4px;
+    margin-top: 3px;
+    overflow: hidden;
+  }
+  .chapter-grad-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #f5a623, #e8900a);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .chapter-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .chapter-grad-text {
+    font-size: 0.68rem;
+    color: #f5d78e;
+    white-space: nowrap;
+  }
   .chapter-body {
     background: #fff;
     border-radius: 0 0 12px 12px;
@@ -170,7 +205,7 @@
   }
   .sec-progress-bar-outer {
     width: 56px;
-    height: 5px;
+    height: 4px;
     background: rgba(15,52,96,0.15);
     border-radius: 999px;
     overflow: hidden;
@@ -181,15 +216,36 @@
     border-radius: 999px;
     transition: width 0.4s ease;
   }
+  .sec-grad-bar-outer {
+    width: 56px;
+    height: 4px;
+    background: rgba(200,119,0,0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .sec-grad-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #f5a623, #e8900a);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .sec-progress-texts {
+    display: flex;
+    justify-content: space-between;
+    width: 56px;
+  }
   .sec-progress-text {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     color: #0f3460;
     white-space: nowrap;
   }
-  .sec-grad-count {
-    font-size: 0.62rem;
+  .sec-grad-text {
+    font-size: 0.58rem;
     color: #c87700;
     white-space: nowrap;
+  }
+  .sec-grad-count {
+    display: none; /* grad bar で置き換えたので非表示 */
   }
   /* 100%達成スタイル */
   .section-label.completed {
@@ -597,10 +653,18 @@
 <header>
   <h1>Try IT <span>中学1年数学</span></h1>
   <div class="progress-wrap">
+    <span class="progress-label">視聴</span>
     <div class="progress-bar-outer">
       <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
     </div>
     <div class="progress-text" id="globalText">0 / 0</div>
+  </div>
+  <div class="progress-wrap">
+    <span class="progress-label grad">🎓習得</span>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner grad" id="globalGradBar" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="globalGradText">0 / 0</div>
   </div>
   <div class="header-meta">
     <div class="streak" id="streakLabel">🔥 連続学習: 0日</div>
@@ -960,6 +1024,7 @@ function refreshQuiz(vid) {
   tmp.innerHTML = renderQuizArea(vid);
   quizEl.replaceWith(tmp.firstElementChild);
   updateCardGradBadge(vid);
+  updateGradProgress();
 }
 
 function updateCardGradBadge(vid) {
@@ -1020,6 +1085,29 @@ function updateProgress() {
     if (barEl) barEl.style.width = cpct + '%';
     if (txtEl) txtEl.textContent = `${cd} / ${ct}`;
   });
+
+  updateGradProgress();
+}
+
+function updateGradProgress() {
+  let total = 0, gradTotal = 0;
+  C.forEach(ch => {
+    let ct = 0, cg = 0;
+    ch.sections.forEach(sec => sec.videos.forEach(v => {
+      ct++; total++;
+      if (isVideoGraduated(v.id)) { cg++; gradTotal++; }
+    }));
+    const cgpct = ct ? Math.round(cg / ct * 100) : 0;
+    const gradBarEl = document.getElementById('chgradbar_' + ch.id);
+    const gradTxtEl = document.getElementById('chgradtxt_' + ch.id);
+    if (gradBarEl) gradBarEl.style.width = cgpct + '%';
+    if (gradTxtEl) gradTxtEl.textContent = `🎓 ${cg} / ${ct}`;
+  });
+  const gpct = total ? Math.round(gradTotal / total * 100) : 0;
+  const gBar = document.getElementById('globalGradBar');
+  const gTxt = document.getElementById('globalGradText');
+  if (gBar) gBar.style.width = gpct + '%';
+  if (gTxt) gTxt.textContent = `${gradTotal} / ${total}`;
 }
 
 // ─────────────────────────────────────────
@@ -1245,12 +1333,17 @@ function refreshSectionLabel(chId, secNum) {
   const pct = total ? Math.round(watchedCount / total * 100) : 0;
   const gradCount = visibleVideos.filter(v => isVideoGraduated(v.id)).length;
 
-  const bar   = document.getElementById('secbar_'  + secId);
-  const txt   = document.getElementById('sectext_' + secId);
-  const gradEl= document.getElementById('secgrad_' + secId);
-  if (bar)    bar.style.width = pct + '%';
-  if (txt)    txt.textContent = `${watchedCount}/${total}`;
-  if (gradEl) gradEl.textContent = gradCount > 0 ? '🎓' + gradCount : '';
+  const bar        = document.getElementById('secbar_'      + secId);
+  const gradBar    = document.getElementById('secgradbar_'  + secId);
+  const txt        = document.getElementById('sectext_'     + secId);
+  const gradTxt    = document.getElementById('secgradtxt_'  + secId);
+  const gradCount2 = document.getElementById('secgrad_'     + secId);
+  const gradPct = total ? Math.round(gradCount / total * 100) : 0;
+  if (bar)        bar.style.width = pct + '%';
+  if (gradBar)    gradBar.style.width = gradPct + '%';
+  if (txt)        txt.textContent = `${watchedCount}/${total}`;
+  if (gradTxt)    gradTxt.textContent = `🎓${gradCount}`;
+  if (gradCount2) gradCount2.textContent = '';
 
   label.classList.toggle('completed', pct === 100);
 
@@ -1323,9 +1416,12 @@ function build(filter) {
     // 復習モード：選択外の章をスキップ
     if (reviewActive && !reviewChapters.includes(ch.id)) return;
 
-    let ct = 0, cd = 0;
-    ch.sections.forEach(sec => sec.videos.forEach(v => { ct++; if (w[v.id]) cd++; }));
+    let ct = 0, cd = 0, cg = 0;
+    ch.sections.forEach(sec => sec.videos.forEach(v => {
+      ct++; if (w[v.id]) cd++; if (isVideoGraduated(v.id)) cg++;
+    }));
     const cpct = ct ? Math.round(cd / ct * 100) : 0;
+    const cgpct = ct ? Math.round(cg / ct * 100) : 0;
 
     const block = document.createElement('div');
     block.className = 'chapter-block';
@@ -1334,13 +1430,19 @@ function build(filter) {
 
     block.innerHTML = `
       <div class="chapter-header">
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="chapter-title">${ch.title}</div>
           <div class="chapter-bar-outer">
             <div class="chapter-bar-inner" id="chbar_${ch.id}" style="width:${cpct}%"></div>
           </div>
+          <div class="chapter-grad-bar-outer">
+            <div class="chapter-grad-bar-inner" id="chgradbar_${ch.id}" style="width:${cgpct}%"></div>
+          </div>
         </div>
-        <div class="chapter-progress" id="chtxt_${ch.id}">${cd} / ${ct}</div>
+        <div class="chapter-progress-wrap">
+          <div class="chapter-progress" id="chtxt_${ch.id}">${cd} / ${ct}</div>
+          <div class="chapter-grad-text" id="chgradtxt_${ch.id}">🎓 ${cg} / ${ct}</div>
+        </div>
       </div>
       <div class="chapter-body" id="chbody_${ch.id}"></div>
     `;
@@ -1366,12 +1468,18 @@ function build(filter) {
         <span>${sec.title}</span>
         <div class="sec-meta">
           ${pctSec === 100 ? '<span class="sec-complete-badge">✨ 完了！</span>' : ''}
-          <span class="sec-grad-count" id="secgrad_${secId}">${gradSec > 0 ? '🎓' + gradSec : ''}</span>
+          <span class="sec-grad-count" id="secgrad_${secId}"></span>
           <div class="sec-progress-wrap">
             <div class="sec-progress-bar-outer">
               <div class="sec-progress-bar-inner" id="secbar_${secId}" style="width:${pctSec}%"></div>
             </div>
-            <span class="sec-progress-text" id="sectext_${secId}">${watchedSec}/${totalSec}</span>
+            <div class="sec-grad-bar-outer">
+              <div class="sec-grad-bar-inner" id="secgradbar_${secId}" style="width:${totalSec ? Math.round(gradSec/totalSec*100) : 0}%"></div>
+            </div>
+            <div class="sec-progress-texts">
+              <span class="sec-progress-text" id="sectext_${secId}">${watchedSec}/${totalSec}</span>
+              <span class="sec-grad-text" id="secgradtxt_${secId}">🎓${gradSec}</span>
+            </div>
           </div>
           <span class="sec-arrow">▶</span>
         </div>`;
