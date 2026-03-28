@@ -316,6 +316,17 @@ body {
 <script src="data.js"></script>
 <script>
 // ─────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────
+function parseTimeToSeconds(str) {
+  if (!str) return 0;
+  const parts = str.trim().split(':').map(Number);
+  if (parts.length === 2) return (parts[0] * 60 + parts[1]) || 0;
+  if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || 0;
+  return 0;
+}
+
+// ─────────────────────────────────────
 // DB（多機能モードと共有キー）
 // ─────────────────────────────────────
 const WATCHED_KEY = 'tryit_math1_v6';
@@ -676,8 +687,12 @@ function onWatched() {
 function showVideoContainer(item) {
   const container = document.getElementById('videoContainer');
   const frame = document.getElementById('videoFrame');
-  const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1`;
-  if (frame.src !== newSrc) frame.src = newSrc; // 同じ動画なら再ロードしない
+  const q = loadQuiz();
+  const savedTime = q[item.id + '_startTime'] || '';
+  const startSec = item.type === 'review' ? parseTimeToSeconds(savedTime) : 0;
+  const startParam = startSec > 0 ? `&start=${startSec}` : '';
+  const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
+  if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
 }
 

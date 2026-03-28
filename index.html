@@ -947,6 +947,17 @@ PROBLEMS['v001'] = function() {
 
 <script>
 // ─────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────
+function parseTimeToSeconds(str) {
+  if (!str) return 0;
+  const parts = str.trim().split(':').map(Number);
+  if (parts.length === 2) return (parts[0] * 60 + parts[1]) || 0;
+  if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || 0;
+  return 0;
+}
+
+// ─────────────────────────────────────────
 // STORAGE KEYS
 // ─────────────────────────────────────────
 const STORAGE_KEY = 'tryit_math1_v6';
@@ -1240,11 +1251,19 @@ function renderQuizArea(vid) {
     }
   }
 
+  const savedStartTime = q[vid + '_startTime'] || '';
   return `
     <div class="quiz-area" id="quiz_${vid}">
       <div class="quiz-header">
         <span class="quiz-title">📝 練習問題</span>
         <a class="quiz-link" href="${tryItUrl}" target="_blank">公式サイトで解く →</a>
+      </div>
+      <div class="qcount-wrap" style="margin-bottom:6px;">
+        <span class="qcount-label">解説開始時間:</span>
+        <input type="text" id="startTime_${vid}" value="${savedStartTime}"
+               placeholder="例: 3:45"
+               style="width:70px;font-size:0.78rem;padding:3px 6px;border:1px solid #ccc;border-radius:6px;margin-left:4px;"
+               onchange="onSaveStartTime('${vid}', this.value)">
       </div>
       <div class="qcount-wrap">
         <span class="qcount-label">問題数:</span>
@@ -1257,6 +1276,12 @@ function renderQuizArea(vid) {
 // ─────────────────────────────────────────
 // QUIZ EVENT HANDLERS
 // ─────────────────────────────────────────
+function onSaveStartTime(vid, val) {
+  const q = loadQuiz();
+  q[vid + '_startTime'] = val.trim();
+  saveQuiz(q);
+}
+
 function onSetQcount(vid, n) {
   if (!setQcount(vid, n)) return;
   refreshQuiz(vid);
@@ -1480,9 +1505,14 @@ function toggleCard(vid) {
     C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
       if (v.id === vid) ytId = v.yt;
     })));
+    const w = loadWatched();
+    const qd = loadQuiz();
+    const savedTime = qd[vid + '_startTime'] || '';
+    const startSec = (w[vid] && savedTime) ? parseTimeToSeconds(savedTime) : 0;
+    const startParam = startSec > 0 ? `&start=${startSec}` : '';
     body.innerHTML = `
       <div class="video-wrapper">
-        <iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&playsinline=1"
+        <iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&playsinline=1${startParam}"
                 allowfullscreen allow="accelerometer; autoplay; clipboard-write;
                 encrypted-media; gyroscope; picture-in-picture">
         </iframe>
