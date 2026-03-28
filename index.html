@@ -378,6 +378,16 @@
     text-align: center;
   }
 
+  /* 習得バッジ */
+  .grad-badge {
+    font-size: 0.65rem;
+    background: linear-gradient(135deg, #f5a623, #e8900a);
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+
   .bottom-pad { height: 40px; }
 </style>
 </head>
@@ -491,6 +501,36 @@ function isRoundAllClear(vid, round, qcount) {
   return true;
 }
 
+// 2回連続○で「習得済み」判定
+function isGraduated(vid, round, qi) {
+  if (round < 2) return false;
+  const q = loadQuiz();
+  return q[`${vid}_r${round}_q${qi}`] === '○' &&
+         q[`${vid}_r${round-1}_q${qi}`] === '○';
+}
+
+// 賢く始める：○→ー、△×ー→再挑戦（空白）
+function startSmartRound(vid, nextRound) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const prevRound = nextRound - 1;
+
+  for (let qi = 1; qi <= qcount; qi++) {
+    const prevMark = q[`${vid}_r${prevRound}_q${qi}`] || '';
+    if (prevMark === '○') {
+      // ○ → 次の回はスキップ（ー）
+      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
+    }
+    // ー（前回スキップ）→ 空白で再挑戦
+    // △ → 空白で再挑戦
+    // × → 空白で再挑戦
+  }
+
+  saveQuiz(q);
+  setStartedRounds(vid, nextRound);
+  refreshQuiz(vid);
+}
+
 // 前の回で○だった問題番号のリストを返す
 function getPrevCircleQuestions(vid, prevRound, qcount) {
   const q = loadQuiz();
@@ -560,10 +600,12 @@ function renderQuizArea(vid) {
           `<button class="mark-btn${mark === m ? ' selected-' + m : ''}"
             onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
         ).join('');
+        const graduated = isGraduated(vid, r, qi);
         qRowsHtml += `
           <div class="question-row">
             <div class="q-label">問${qi}</div>
             <div class="mark-btns">${btnsHtml}</div>
+            ${graduated ? '<span class="grad-badge">🎓 習得</span>' : ''}
           </div>`;
       }
 
@@ -581,23 +623,20 @@ function renderQuizArea(vid) {
     const latestComplete = isRoundComplete(vid, startedRounds, qcount);
     if (latestComplete && startedRounds < MAX_R) {
       const nextRound = startedRounds + 1;
-      const prevCircleCount = getPrevCircleQuestions(vid, startedRounds, qcount).length;
-      const hasCircles = prevCircleCount > 0;
 
       roundsHtml += `
         <div class="next-round-wrap">
-          <div class="next-round-label">第${nextRound}回の開始方法を選んでください</div>
+          <div class="next-round-label">第${nextRound}回の開始方法</div>
           <div class="next-round-btns">
             <button class="btn-next-round primary"
+              onclick="startSmartRound('${vid}', ${nextRound})">
+              賢く始める（推奨）<br>
+              <span style="font-size:0.65rem;font-weight:400;">○→スキップ／△×ー→再挑戦</span>
+            </button>
+            <button class="btn-next-round"
               onclick="startNextRound('${vid}', ${nextRound}, false)">
               空白で始める
             </button>
-            ${hasCircles ? `
-            <button class="btn-next-round"
-              onclick="startNextRound('${vid}', ${nextRound}, true)">
-              前回の○を<br>ーにして始める
-              <br><span style="font-size:0.65rem;font-weight:400;">(${prevCircleCount}問スキップ)</span>
-            </button>` : ''}
           </div>
         </div>`;
     }
