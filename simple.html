@@ -750,13 +750,20 @@ function updateLayout() {
     app.style.height = (vvH - headerH) + 'px';
   } else {
     const naturalH = window.innerWidth * 0.5625; // 16:9
-    const maxH     = Math.floor(vvH * 0.45);     // キーボードあり時に入力欄を確保
+    const maxH     = Math.floor(vvH * 0.38);     // キーボードあり時に入力欄を確保
     const videoH   = Math.min(naturalH, maxH);
     vc.style.top    = (offsetTop + headerH) + 'px';
     vc.style.height = videoH + 'px';
     const appTop = offsetTop + headerH + videoH;
     app.style.top    = appTop + 'px';
     app.style.height = Math.max(60, vvH - headerH - videoH) + 'px';
+  }
+  // フォーカス中の入力欄を #app 内でスクロールして見えるようにする
+  const active = document.activeElement;
+  if (active && active.matches && active.matches('.answer-input')) {
+    requestAnimationFrame(() => {
+      active.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    });
   }
 }
 
@@ -1009,6 +1016,14 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', updateLayout);
   window.visualViewport.addEventListener('scroll', updateLayout);
 }
+// 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches && e.target.matches('.answer-input')) {
+    setTimeout(() => {
+      e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 400);
+  }
+});
 </script>
 </body>
 </html>
