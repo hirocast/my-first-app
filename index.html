@@ -1207,7 +1207,7 @@ function renderQuizArea(vid) {
           <div class="next-round-wrap">
             <div class="all-grad-banner" onclick="closeAndCelebrate('${vid}')" style="cursor:pointer;">
               🎓 全問習得済み！
-              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じる</span>
+              <span class="all-grad-sub">この動画の練習問題はすべて習得しました　▲ 閉じる</span>
             </div>
             <div class="next-round-btns">
               <button class="btn-next-round btn-recheck"
@@ -1243,7 +1243,7 @@ function renderQuizArea(vid) {
   return `
     <div class="quiz-area" id="quiz_${vid}">
       <div class="quiz-header">
-        <span class="quiz-title">📝 確認問題</span>
+        <span class="quiz-title">📝 練習問題</span>
         <a class="quiz-link" href="${tryItUrl}" target="_blank">公式サイトで解く →</a>
       </div>
       <div class="qcount-wrap">
@@ -1523,7 +1523,7 @@ function showCelebrationToast() {
 // RESET
 // ─────────────────────────────────────────
 function resetAll() {
-  if (!confirm('視聴履歴・確認問題の記録をすべてリセットしますか？')) return;
+  if (!confirm('視聴履歴・練習問題の記録をすべてリセットしますか？')) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(STREAK_KEY);
   localStorage.removeItem(QUIZ_KEY);
@@ -1563,7 +1563,7 @@ function updateGuidanceToast() {
         toast.innerHTML = html('✅', '「未視聴」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
       }
     } else if (qcount === 0) {
-      toast.innerHTML = html('📝', '確認問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
+      toast.innerHTML = html('📝', '練習問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
     } else {
       const r = getStartedRounds(vid);
       const complete = isRoundComplete(vid, r, qcount);
@@ -1587,7 +1587,7 @@ function updateGuidanceToast() {
   // カードが閉じている場合：全体の状態から案内
   const hasAnyWatched = Object.values(w).some(Boolean);
   if (!hasAnyWatched) {
-    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '▼ を押すと動画と確認問題が開きます');
+    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '▼ を押すと動画と練習問題が開きます');
     toast.classList.add('visible');
     return;
   }
@@ -1597,7 +1597,7 @@ function updateGuidanceToast() {
     if (w[vid] && getQcount(vid) === 0) { watchedNoQuiz = true; break; }
   }
   if (watchedNoQuiz) {
-    toast.innerHTML = html('📝', '確認問題の数を設定しよう', '動画を開いて公式サイトの問題数をタップしよう');
+    toast.innerHTML = html('📝', '練習問題の数を設定しよう', '動画を開いて公式サイトの問題数をタップしよう');
     toast.classList.add('visible');
     return;
   }
@@ -1612,7 +1612,7 @@ function updateGuidanceToast() {
     if (marked > 0 && !isRoundComplete(vid, r, qcount)) { hasPartialRound = true; break; }
   }
   if (hasPartialRound) {
-    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて残りの○△×を記録しよう');
+    toast.innerHTML = html('✏️', '練習問題の続きをやろう', '動画を開いて残りの○△×を記録しよう');
     toast.classList.add('visible');
     return;
   }
