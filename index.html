@@ -156,6 +156,61 @@
   }
   .sec-arrow.open { transform: rotate(90deg); }
 
+  .sec-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .sec-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .sec-progress-bar-outer {
+    width: 56px;
+    height: 5px;
+    background: rgba(15,52,96,0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .sec-progress-bar-inner {
+    height: 100%;
+    background: #0f3460;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .sec-progress-text {
+    font-size: 0.6rem;
+    color: #0f3460;
+    white-space: nowrap;
+  }
+  .sec-grad-count {
+    font-size: 0.62rem;
+    color: #c87700;
+    white-space: nowrap;
+  }
+  /* 100%達成スタイル */
+  .section-label.completed {
+    background: linear-gradient(135deg, #fff8e0, #ffedb0);
+    border-bottom-color: #f5a623;
+  }
+  .section-label.completed:hover { background: linear-gradient(135deg, #fff3cc, #ffe89a); }
+  .section-label.completed .sec-progress-bar-inner {
+    background: linear-gradient(90deg, #f5a623, #e8900a);
+  }
+  .section-label.completed .sec-progress-text { color: #b36d00; font-weight: 700; }
+  .sec-complete-badge {
+    font-size: 0.65rem;
+    background: linear-gradient(135deg, #f5a623, #e8900a);
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 7px;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+
   /* ── Video card ── */
   .video-card { border-bottom: 1px solid #eef2f7; }
   .video-card:last-child { border-bottom: none; }
@@ -872,6 +927,8 @@ function updateCardGradBadge(vid) {
   } else if (!isVGrad && badge) {
     badge.remove();
   }
+  const secInfo = findVideoSection(vid);
+  if (secInfo) refreshSectionLabel(secInfo.chId, secInfo.secNum);
 }
 
 // ─────────────────────────────────────────
@@ -946,6 +1003,8 @@ function toggleWatched(vid, e) {
     btn.textContent = '済み';
   }
   updateProgress();
+  const secInfo = findVideoSection(vid);
+  if (secInfo) refreshSectionLabel(secInfo.chId, secInfo.secNum);
 }
 
 // ─────────────────────────────────────────
@@ -1106,6 +1165,58 @@ function updateReviewUI() {
 }
 
 // ─────────────────────────────────────────
+// SECTION PROGRESS
+// ─────────────────────────────────────────
+function findVideoSection(vid) {
+  for (const ch of C) {
+    for (const sec of ch.sections) {
+      if (sec.videos.some(v => v.id === vid)) return { chId: ch.id, secNum: sec.secNum };
+    }
+  }
+  return null;
+}
+
+function refreshSectionLabel(chId, secNum) {
+  const secId = `sec_${chId}_${secNum}`;
+  const secBody = document.getElementById(secId);
+  if (!secBody) return;
+  const label = secBody.previousElementSibling;
+  if (!label || !label.classList.contains('section-label')) return;
+
+  let sec = null;
+  C.forEach(c => { if (c.id === chId) c.sections.forEach(s => { if (s.secNum === secNum) sec = s; }); });
+  if (!sec) return;
+
+  const w = loadWatched();
+  const visibleVideos = reviewActive
+    ? sec.videos.filter(v => videoMatchesCondition(v.id, reviewCondition))
+    : sec.videos;
+  const total = visibleVideos.length;
+  const watchedCount = visibleVideos.filter(v => w[v.id]).length;
+  const pct = total ? Math.round(watchedCount / total * 100) : 0;
+  const gradCount = visibleVideos.filter(v => isVideoGraduated(v.id)).length;
+
+  const bar   = document.getElementById('secbar_'  + secId);
+  const txt   = document.getElementById('sectext_' + secId);
+  const gradEl= document.getElementById('secgrad_' + secId);
+  if (bar)    bar.style.width = pct + '%';
+  if (txt)    txt.textContent = `${watchedCount}/${total}`;
+  if (gradEl) gradEl.textContent = gradCount > 0 ? '🎓' + gradCount : '';
+
+  label.classList.toggle('completed', pct === 100);
+
+  let badge = label.querySelector('.sec-complete-badge');
+  if (pct === 100 && !badge) {
+    badge = document.createElement('span');
+    badge.className = 'sec-complete-badge';
+    badge.textContent = '✨ 完了！';
+    label.querySelector('.sec-meta').prepend(badge);
+  } else if (pct < 100 && badge) {
+    badge.remove();
+  }
+}
+
+// ─────────────────────────────────────────
 // SECTION TOGGLE
 // ─────────────────────────────────────────
 function toggleSection(secId) {
@@ -1196,9 +1307,25 @@ function build(filter) {
       if (visibleVideos.length === 0) return;
 
       const secId = `sec_${ch.id}_${sec.secNum}`;
+      const totalSec = visibleVideos.length;
+      const watchedSec = visibleVideos.filter(v => w[v.id]).length;
+      const pctSec = totalSec ? Math.round(watchedSec / totalSec * 100) : 0;
+      const gradSec = visibleVideos.filter(v => isVideoGraduated(v.id)).length;
       const secLabel = document.createElement('div');
-      secLabel.className = 'section-label';
-      secLabel.innerHTML = `<span>${sec.title}</span><span class="sec-arrow">▶</span>`;
+      secLabel.className = 'section-label' + (pctSec === 100 ? ' completed' : '');
+      secLabel.innerHTML = `
+        <span>${sec.title}</span>
+        <div class="sec-meta">
+          ${pctSec === 100 ? '<span class="sec-complete-badge">✨ 完了！</span>' : ''}
+          <span class="sec-grad-count" id="secgrad_${secId}">${gradSec > 0 ? '🎓' + gradSec : ''}</span>
+          <div class="sec-progress-wrap">
+            <div class="sec-progress-bar-outer">
+              <div class="sec-progress-bar-inner" id="secbar_${secId}" style="width:${pctSec}%"></div>
+            </div>
+            <span class="sec-progress-text" id="sectext_${secId}">${watchedSec}/${totalSec}</span>
+          </div>
+          <span class="sec-arrow">▶</span>
+        </div>`;
       secLabel.onclick = () => toggleSection(secId);
       chBody.appendChild(secLabel);
 
