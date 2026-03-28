@@ -12,20 +12,6 @@ body {
   color: #1a1a2e;
   max-width: 480px;
   margin: 0 auto;
-  overflow: hidden;
-  height: 100dvh;
-}
-#app {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 52px; /* updated by JS when video shown/hidden */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  max-width: 480px;
-  margin: 0 auto;
-  background: #f8fafc;
 }
 
 /* ── Header ── */
@@ -36,10 +22,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
@@ -141,17 +125,13 @@ body {
 .start-ch-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
 
 /* ── Video ── */
-/* videoContainer に fixed height が設定されたとき wrapper もそれに従う */
-#videoContainer[style*="height"] .video-wrapper {
-  padding-bottom: 0;
-  height: 100%;
-}
 .video-wrapper {
   position: relative;
   padding-bottom: 56.25%;
   background: #000;
+  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 0;
+  margin-bottom: 14px;
 }
 .video-wrapper iframe {
   position: absolute;
@@ -323,7 +303,7 @@ body {
   </div>
 </div>
 
-<div id="videoContainer" style="display:none; position:fixed; top:52px; left:0; right:0; z-index:50; background:#000;">
+<div id="videoContainer" style="display:none; position:sticky; top:52px; z-index:50; background:#000;">
   <div class="video-wrapper">
     <iframe id="videoFrame" src="" allowfullscreen
             allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
@@ -660,7 +640,13 @@ function startSession() {
 
 function nextItem() {
   if (qIdx >= queue.length) { renderDone(); return; }
-  renderVideo(queue[qIdx]);
+  const item = queue[qIdx];
+  // 復習かつ問題数設定済み → 動画スキップして直接問題へ
+  if (item.type === 'review' && item.qcount > 0) {
+    renderProblems(item);
+  } else {
+    renderVideo(item);
+  }
 }
 
 // ─────────────────────────────────────
@@ -703,32 +689,6 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
-function updateLayout() {
-  const vc  = document.getElementById('videoContainer');
-  const app = document.getElementById('app');
-  const headerH = document.querySelector('.app-header').offsetHeight;
-  const vvH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  const vvOffset = window.visualViewport ? window.visualViewport.offsetTop : 0;
-
-  if (vc.style.display === 'none') {
-    vc.style.height = '';
-    vc.style.overflow = '';
-    app.style.top    = headerH + 'px';
-    app.style.height = (vvH - headerH) + 'px';
-  } else {
-    // キーボード考慮: 動画は視覚領域の最大 45% まで
-    const naturalH = window.innerWidth * 0.5625;
-    const maxH     = Math.floor(vvH * 0.45);
-    const videoH   = Math.min(naturalH, maxH);
-    vc.style.height   = videoH + 'px';
-    vc.style.overflow = 'hidden';
-    const top = headerH + videoH;
-    app.style.top    = top + 'px';
-    app.style.height = Math.max(0, vvH - top) + 'px';
-  }
-  app.style.bottom = 'auto';
-}
-
 function showVideoContainer(item) {
   const container = document.getElementById('videoContainer');
   const frame = document.getElementById('videoFrame');
@@ -739,15 +699,11 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
-  // video の高さが確定してから #app の top を更新
-  requestAnimationFrame(() => updateLayout());
 }
 
 function hideVideoContainer() {
-  const container = document.getElementById('videoContainer');
-  container.style.display = 'none';
+  document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
-  updateLayout();
 }
 
 function renderQcount(item) {
@@ -796,7 +752,11 @@ function onSetQcount(n) {
 // PROBLEMS
 // ─────────────────────────────────────
 function renderProblems(item) {
+  hideVideoContainer(); // 問題入力中は動画を非表示（キーボードと干渉しない）
   currentMarks = new Array(item.qcount).fill('');
+
+  const q = loadQuiz();
+  const savedTime = item.startTime || q[item.id + '_startTime'] || '';
 
   let rows = '';
   for (let i = 0; i < item.qcount; i++) {
@@ -812,11 +772,17 @@ function renderProblems(item) {
       </div>`;
   }
 
+  const watchBtn = savedTime
+    ? `<button class="btn-ghost" onclick="renderVideo(queue[qIdx])">📺 動画を見る（${savedTime}〜）</button>`
+    : `<button class="btn-ghost" onclick="renderVideo(queue[qIdx])">📺 動画を見る</button>`;
+
   setScreen(`
     <div class="study-top">
       <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
+
+    ${watchBtn}
 
     <div class="card">
       <div class="problems-lead">結果を記録しよう</div>
@@ -971,13 +937,6 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-updateLayout();
-// キーボード出現・画面回転時に再計算
-window.addEventListener('resize', updateLayout);
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateLayout);
-  window.visualViewport.addEventListener('scroll', updateLayout);
-}
 </script>
 </body>
 </html>
