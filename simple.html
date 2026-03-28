@@ -11,26 +11,37 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   background: #f8fafc;
   color: #1a1a2e;
-  max-width: 480px;
-  margin: 0 auto;
-}
-#app {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  /* height は JS で動的設定 */
 }
 
-/* ── Header ── */
+/* ── Layout: header / video / app すべて fixed で管理 ── */
 .app-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  max-width: 480px; margin: 0 auto;
   background: linear-gradient(135deg, #1a1a2e, #0f3460);
   color: #fff;
   padding: 13px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+}
+#videoContainer {
+  position: fixed !important;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  z-index: 50;
+  background: #000;
+  /* top / height は JS で設定 */
+}
+#app {
+  position: fixed;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #f8fafc;
+  /* top / height は JS で設定 */
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
 .app-title span { color: #e94560; }
@@ -131,15 +142,17 @@ body {
 .start-ch-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
 
 /* ── Video ── */
-.video-wrapper {
+/* #videoContainer は JS で固定高さを持つため、wrapper はそれを 100% 埋める */
+#videoContainer .video-wrapper {
   position: relative;
-  padding-bottom: 56.25%;
+  width: 100%;
+  height: 100%;     /* JS で設定した container 高さを埋める */
+  padding-bottom: 0; /* 56.25% ハックを無効化 */
   background: #000;
-  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
-.video-wrapper iframe {
+#videoContainer .video-wrapper iframe {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
@@ -695,13 +708,29 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
-function updateAppHeight() {
+function updateLayout() {
   const vc  = document.getElementById('videoContainer');
   const app = document.getElementById('app');
   const headerH = document.querySelector('.app-header').offsetHeight;
-  const vcH = vc.style.display === 'none' ? 0 : vc.offsetHeight;
   const vvH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  app.style.height = Math.max(80, vvH - headerH - vcH) + 'px';
+
+  if (vc.style.display === 'none') {
+    // 動画なし: app が header 直下を埋める
+    app.style.top    = headerH + 'px';
+    app.style.height = (vvH - headerH) + 'px';
+  } else {
+    // 動画あり: 16:9 自然高さ vs 視覚領域の 50% の小さい方
+    const naturalH = window.innerWidth * 0.5625;
+    const maxH     = Math.floor(vvH * 0.50);
+    const videoH   = Math.min(naturalH, maxH);
+
+    vc.style.top    = headerH + 'px';
+    vc.style.height = videoH + 'px';
+
+    const appTop = headerH + videoH;
+    app.style.top    = appTop + 'px';
+    app.style.height = Math.max(60, vvH - appTop) + 'px';
+  }
 }
 
 function showVideoContainer(item) {
@@ -714,13 +743,13 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
-  requestAnimationFrame(updateAppHeight);
+  updateLayout();
 }
 
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
-  updateAppHeight();
+  updateLayout();
 }
 
 function renderQcount(item) {
@@ -945,10 +974,10 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-updateAppHeight();
-window.addEventListener('resize', updateAppHeight);
+updateLayout();
+window.addEventListener('resize', updateLayout);
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateAppHeight);
+  window.visualViewport.addEventListener('resize', updateLayout);
 }
 </script>
 </body>
