@@ -121,6 +121,7 @@ body {
   text-align: left; transition: background 0.15s, border-color 0.15s;
 }
 .start-ch-btn:active { background: #f0f4f8; border-color: #1565c0; }
+.start-ch-btn.selected { border-color: #1565c0; background: #e8f0fe; }
 .start-ch-title { font-size: 0.95rem; font-weight: 700; color: #0f3460; }
 .start-ch-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
 
@@ -398,23 +399,36 @@ function saveStartFrom(vid) {
 function renderStartSelection() {
   hideVideoContainer();
   const all = getAllVideos();
+  const currentStart = getStartFrom();
+  const currentVideo = currentStart ? all.find(v => v.id === currentStart) : all[0];
+  const currentLabel = currentVideo ? currentVideo.title : all[0].title;
+
+  const hasProgress = Object.values(loadWatched()).some(Boolean);
+
   let chaptersHtml = '';
   C.forEach(ch => {
     const firstVid = ch.sections[0].videos[0];
+    const isSelected = currentStart === firstVid.id || (!currentStart && firstVid.id === 'v001');
     chaptersHtml += `
-      <button class="start-ch-btn" onclick="selectStartFrom('${firstVid.id}')">
-        <span class="start-ch-title">${ch.title}</span>
+      <button class="start-ch-btn${isSelected ? ' selected' : ''}" onclick="selectStartFrom('${firstVid.id}')">
+        <span class="start-ch-title">${ch.title}${isSelected ? ' ✓' : ''}</span>
         <span class="start-ch-sub">${firstVid.title} から</span>
       </button>`;
   });
+
+  const backBtn = hasProgress
+    ? `<button class="btn-ghost" style="margin-top:8px;" onclick="renderHome()">← 戻る</button>`
+    : '';
+
   document.getElementById('app').innerHTML = `<div class="screen">
     <div style="text-align:center; padding: 16px 0 8px;">
-      <div style="font-size:1.5rem;">📚</div>
-      <div style="font-size:1.1rem; font-weight:700; margin:6px 0 4px;">どこから始める？</div>
-      <div style="font-size:0.8rem; color:#666; margin-bottom:16px;">学習を始める単元を選んでください</div>
+      <div style="font-size:1.5rem;">📍</div>
+      <div style="font-size:1.1rem; font-weight:700; margin:6px 0 4px;">開始位置を選ぼう</div>
+      <div style="font-size:0.8rem; color:#666; margin-bottom:4px;">現在: <b>${currentLabel}</b> から</div>
+      <div style="font-size:0.75rem; color:#aaa; margin-bottom:16px;">新着動画をどの単元から追加するか選べます</div>
     </div>
     <div class="start-ch-list">${chaptersHtml}</div>
-    <button class="btn-ghost" style="margin-top:8px;" onclick="selectStartFrom('v001')">最初（${all[0].title}）から始める</button>
+    ${backBtn}
   </div>`;
 }
 
@@ -596,6 +610,7 @@ function renderHome() {
     </div>
 
     <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
+    <button class="btn-ghost" onclick="renderStartSelection()">📍 開始位置を変更</button>
     <button class="btn-ghost btn-danger" onclick="resetAll()">リセット</button>
   `);
 }
