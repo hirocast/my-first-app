@@ -6,12 +6,18 @@
 <title>最速先取りナビ</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   background: #f8fafc;
   color: #1a1a2e;
   max-width: 480px;
   margin: 0 auto;
+}
+#app {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* height は JS で動的設定 */
 }
 
 /* ── Header ── */
@@ -303,7 +309,7 @@ body {
   </div>
 </div>
 
-<div id="videoContainer" style="display:none; position:sticky; top:52px; z-index:50; background:#000;">
+<div id="videoContainer" style="display:none; background:#000;">
   <div class="video-wrapper">
     <iframe id="videoFrame" src="" allowfullscreen
             allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
@@ -689,6 +695,15 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
+function updateAppHeight() {
+  const vc  = document.getElementById('videoContainer');
+  const app = document.getElementById('app');
+  const headerH = document.querySelector('.app-header').offsetHeight;
+  const vcH = vc.style.display === 'none' ? 0 : vc.offsetHeight;
+  const vvH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  app.style.height = Math.max(80, vvH - headerH - vcH) + 'px';
+}
+
 function showVideoContainer(item) {
   const container = document.getElementById('videoContainer');
   const frame = document.getElementById('videoFrame');
@@ -699,11 +714,13 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
+  requestAnimationFrame(updateAppHeight);
 }
 
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
+  updateAppHeight();
 }
 
 function renderQcount(item) {
@@ -752,11 +769,8 @@ function onSetQcount(n) {
 // PROBLEMS
 // ─────────────────────────────────────
 function renderProblems(item) {
-  hideVideoContainer(); // 問題入力中は動画を非表示（キーボードと干渉しない）
+  showVideoContainer(item); // 問題中も動画を表示（問題文が動画にあるため）
   currentMarks = new Array(item.qcount).fill('');
-
-  const q = loadQuiz();
-  const savedTime = item.startTime || q[item.id + '_startTime'] || '';
 
   let rows = '';
   for (let i = 0; i < item.qcount; i++) {
@@ -772,17 +786,11 @@ function renderProblems(item) {
       </div>`;
   }
 
-  const watchBtn = savedTime
-    ? `<button class="btn-ghost" onclick="renderVideo(queue[qIdx])">📺 動画を見る（${savedTime}〜）</button>`
-    : `<button class="btn-ghost" onclick="renderVideo(queue[qIdx])">📺 動画を見る</button>`;
-
   setScreen(`
     <div class="study-top">
       <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
-
-    ${watchBtn}
 
     <div class="card">
       <div class="problems-lead">結果を記録しよう</div>
@@ -937,6 +945,11 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
+updateAppHeight();
+window.addEventListener('resize', updateAppHeight);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateAppHeight);
+}
 </script>
 </body>
 </html>
