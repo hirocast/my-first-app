@@ -320,6 +320,7 @@ body {
 }
 .browse-row:last-child { border-bottom: none; }
 .b-num { color: #bbb; font-size: 0.72rem; width: 22px; flex-shrink: 0; }
+.b-last { font-size: 0.68rem; color: #bbb; margin-top: 2px; }
 .b-status { flex-shrink: 0; font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 
 /* ── SRS Next badge ── */
@@ -643,9 +644,10 @@ function updateSRS(vid, marks) {
     }
   }
 
-  q[vid + '_interval'] = interval;
-  q[vid + '_streak']   = newStreak;
-  q[vid + '_next']     = addDays(today, interval);
+  q[vid + '_interval']    = interval;
+  q[vid + '_streak']      = newStreak;
+  q[vid + '_next']        = addDays(today, interval);
+  q[vid + '_lastStudied'] = today;
   saveQuiz(q);
 }
 
@@ -1099,10 +1101,11 @@ function renderBrowse() {
   C.forEach(ch => {
     let rows = '';
     ch.sections.forEach(sec => sec.videos.forEach(v => {
-      const watched   = bw[v.id];
-      const graduated = bq[v.id + '_graduated'];
-      const qcount    = bq[v.id + '_qcount'] || 0;
-      const next      = bq[v.id + '_next'];
+      const watched     = bw[v.id];
+      const graduated   = bq[v.id + '_graduated'];
+      const qcount      = bq[v.id + '_qcount'] || 0;
+      const next        = bq[v.id + '_next'];
+      const lastStudied = bq[v.id + '_lastStudied'];
 
       let statusEl;
       if (graduated)      statusEl = `<span class="b-status" style="background:#fef3c7;color:#b36d00;">🎓習得</span>`;
@@ -1118,9 +1121,14 @@ function renderBrowse() {
         else nextEl = `<span class="next-badge">${daysLeft}日後</span>`;
       }
 
+      const lastEl = lastStudied
+        ? `<div class="b-last">最終学習: ${relativeDate(lastStudied)}</div>` : '';
       rows += `<div class="browse-row">
         <span class="b-num">${v.num}</span>
-        <span style="flex:1;font-size:0.83rem;">${v.title}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.83rem;">${v.title}</div>
+          ${lastEl}
+        </div>
         ${nextEl}
         ${statusEl}
       </div>`;
