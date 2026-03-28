@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最速先取りナビ　学習理論</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+      padding: 40px 24px 32px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.8;
+    }
+
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-intro h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 12px;
+    }
+
+    .card-intro p {
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: #444;
+    }
+
+    /* Principle cards */
+    .principle {
+      border-left: 4px solid #ccc;
+    }
+
+    details > summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    details > summary::-webkit-details-marker { display: none; }
+
+    .summary-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .summary-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .summary-chevron {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: #999;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    details[open] .summary-chevron {
+      transform: rotate(180deg);
+    }
+
+    .detail-body {
+      margin-top: 16px;
+    }
+
+    .detail-body p {
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .app-box {
+      background: #f0f4ff;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 4px;
+    }
+
+    .app-box-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #0f3460;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .app-box p {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 0;
+    }
+
+    /* References */
+    .card-refs h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .card-refs ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .card-refs li {
+      font-size: 0.8rem;
+      color: #666;
+      line-height: 1.6;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-refs li:last-child { border-bottom: none; }
+
+    /* Back button */
+    .back-wrap {
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .btn-back {
+      display: inline-block;
+      padding: 12px 28px;
+      border: 2px solid #0f3460;
+      border-radius: 10px;
+      color: #0f3460;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-back:hover {
+      background: #0f3460;
+      color: #fff;
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.25rem; }
+      .card { padding: 18px; }
+      .summary-title { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>最速先取りナビ　学習理論</h1>
+  <p>なぜこのアプリで数学が身につくのか</p>
+</header>
+
+<main>
+
+  <!-- Intro card -->
+  <div class="card card-intro">
+    <h2>「なんとなく勉強」から「科学的な学習」へ</h2>
+    <p>このアプリは、認知科学・教育心理学の研究成果をもとに設計されています。がんばっているのに成績が上がらない原因の多くは、学習の「タイミング」と「方法」にあります。最新の学習科学が明らかにした最も効果的な手法を、中学数学の学習に組み込みました。</p>
+  </div>
+
+  <!-- Principle 1 -->
+  <div class="card principle" style="border-color: #0f3460;">
+    <details>
+      <summary>
+        <div class="summary-inner">
+          <span class="summary-icon">🧠</span>
+          <span class="summary-title">1. 忘却曲線と間隔反復（Spaced Repetition）</span>
+          <span class="summary-chevron">▼</span>
+        </div>
+      </summary>
+      <div class="detail-body">
+        <p>ドイツの心理学者ヘルマン・エビングハウスは1885年、人間の記憶が時間とともにどのように失われるかを科学的に測定しました。学習直後は急速に忘れ、24時間後には約70%を忘れてしまいます。しかし、忘れかけたタイミングで復習すると、次の忘却速度が遅くなり、少ない努力で長期記憶に定着します。</p>
+        <div class="app-box">
+          <div class="app-box-label">このアプリでは？</div>
+          <p>練習問題の結果に応じて次回の復習日を自動計算します。正解した問題は間隔を伸ばし、間違えた問題は短い間隔で再出題。「忘れる前に復習する」のではなく「ちょうど忘れかけたタイミングで復習する」ことで、脳への定着効率が最大化されます。</p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Principle 2 -->
+  <div class="card principle" style="border-color: #e94560;">
+    <details>
+      <summary>
+        <div class="summary-inner">
+          <span class="summary-icon">⚙️</span>
+          <span class="summary-title">2. SM-2アルゴリズム（個人最適化）</span>
+          <span class="summary-chevron">▼</span>
+        </div>
+      </summary>
+      <div class="detail-body">
+        <p>AnkiなどのSRS（間隔反復システム）に採用されているSM-2アルゴリズムは、各項目ごとに「覚えやすさ係数（Ease Factor）」を記録します。得意な単元は間隔が自動的に長くなり、苦手な単元には短い間隔で何度も出会えます。全員に同じペースを強いるのではなく、あなただけの最適なスケジュールを構築します。</p>
+        <div class="app-box">
+          <div class="app-box-label">このアプリでは？</div>
+          <p>動画ごとにEase Factorを記録。完全正解を続けると次の復習まで1日→6日→それ以降はEFに応じて自動延長。間違えるとEFが下がり、その単元により多く出会えるようスケジュールが組まれます。</p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Principle 3 -->
+  <div class="card principle" style="border-color: #059669;">
+    <details>
+      <summary>
+        <div class="summary-inner">
+          <span class="summary-icon">🎯</span>
+          <span class="summary-title">3. 習得基準制学習（Mastery-Based Learning）</span>
+          <span class="summary-chevron">▼</span>
+        </div>
+      </summary>
+      <div class="detail-body">
+        <p>教育心理学者ベンジャミン・ブルームが提唱した「習得基準制学習」では、次の単元に進む前に現在の単元を一定基準まで習得することが重要とされています。数学のような積み上げ型の教科では特に効果的で、基礎が曖昧なまま進むと後の単元でつまずく原因になります。</p>
+        <div class="app-box">
+          <div class="app-box-label">このアプリでは？</div>
+          <p>練習問題で×や△がある場合、次の動画に進む前に「もう一度挑戦する」か「保留して先生に聞く」かを選べます。土台を固めてから先に進む設計です。</p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Principle 4 -->
+  <div class="card principle" style="border-color: #d97706;">
+    <details>
+      <summary>
+        <div class="summary-inner">
+          <span class="summary-icon">✏️</span>
+          <span class="summary-title">4. 能動的想起（Active Recall）</span>
+          <span class="summary-chevron">▼</span>
+        </div>
+      </summary>
+      <div class="detail-body">
+        <p>「テスト効果（Testing Effect）」とも呼ばれるこの原理は、ただ内容を読んだり見たりするより、「思い出そうとする」行為そのものが記憶を強化するという研究結果に基づいています。ロディガーとカーピキー（2006）の研究では、繰り返し読んだグループより、テストを繰り返したグループの方が1週間後の記憶保持率が約50%高かったことが示されています。</p>
+        <div class="app-box">
+          <div class="app-box-label">このアプリでは？</div>
+          <p>動画を見るだけで終わらず、必ず練習問題に取り組む設計にしています。黒板を見ながら自分の手で答えを書くプロセスが、受動的な視聴を能動的な学習に変えます。</p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Principle 5 -->
+  <div class="card principle" style="border-color: #7c3aed;">
+    <details>
+      <summary>
+        <div class="summary-inner">
+          <span class="summary-icon">📌</span>
+          <span class="summary-title">5. メタ認知と保留戦略</span>
+          <span class="summary-chevron">▼</span>
+        </div>
+      </summary>
+      <div class="detail-body">
+        <p>「何がわかっていて、何がわかっていないか」を正確に把握する能力（メタ認知）は、学習効率に直結します。わからない問題をそのままにするのではなく、「わからない」を明示的に記録することで、学習の死角をなくし、先生やAIへの質問をより具体的にできます。</p>
+        <div class="app-box">
+          <div class="app-box-label">このアプリでは？</div>
+          <p>保留した問題は一覧で確認でき、「いつ・どの問題が」わからないかが見えます。漠然と「数学が苦手」ではなく「この単元の問3がわからない」と具体化することで、次のアクションにつなげます。</p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- References -->
+  <div class="card card-refs">
+    <h2>参考文献・研究</h2>
+    <ul>
+      <li>Ebbinghaus, H. (1885). <em>Über das Gedächtnis.</em> Leipzig: Duncker &amp; Humblot.</li>
+      <li>Wozniak, P. (1990). SuperMemo 2: Algorithm. SuperMemo World.</li>
+      <li>Roediger, H. L., &amp; Karpicke, J. D. (2006). The Power of Testing Memory. <em>Psychological Science, 17</em>(3), 249–255.</li>
+      <li>Bloom, B. S. (1968). Learning for Mastery. <em>Evaluation Comment, 1</em>(2).</li>
+      <li>Cepeda, N. J. et al. (2006). Distributed practice in verbal recall tasks. <em>Psychological Bulletin, 132</em>(3), 354–380.</li>
+    </ul>
+  </div>
+
+  <!-- Back button -->
+  <div class="back-wrap">
+    <a class="btn-back" href="javascript:history.back()">← アプリに戻る</a>
+  </div>
+
+</main>
+
+</body>
+</html>
