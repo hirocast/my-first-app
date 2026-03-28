@@ -65,8 +65,9 @@ body {
   flex: 1;
   min-height: 0; /* flex overflow に必須 */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   background: #f8fafc;
+  position: relative;
+  z-index: 1; /* fixed 要素(z-index:99/100)より確実に下に置く */
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
 .app-title span { color: #e94560; }
@@ -879,8 +880,8 @@ function showVideoContainer(item) {
   const startParam = startSec > 0 ? `&start=${startSec}` : '';
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
+  container.style.display = ''; // display を先に設定してから高さを計算する
   setVideoHeight();
-  container.style.display = '';
 }
 
 function hideVideoContainer() {
