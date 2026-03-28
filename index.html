@@ -519,11 +519,7 @@ function renderVideo(item) {
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
 
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1"
-              allowfullscreen allow="autoplay; encrypted-media; gyroscope; picture-in-picture">
-      </iframe>
-    </div>
+    ${videoHtml(item)}
 
     <div class="card">
       <div class="video-title">${item.title}</div>
@@ -547,6 +543,14 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
+function videoHtml(item) {
+  return `<div class="video-wrapper">
+    <iframe src="https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1"
+            allowfullscreen allow="autoplay; encrypted-media; gyroscope; picture-in-picture">
+    </iframe>
+  </div>`;
+}
+
 function renderQcount(item) {
   let btns = '';
   for (let n = 1; n <= 8; n++) {
@@ -557,6 +561,8 @@ function renderQcount(item) {
       <span class="study-badge badge-new">新着</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
+
+    ${videoHtml(item)}
 
     <div class="card">
       <div class="section-q">📝 確認問題は何問ありましたか？<br>
@@ -598,6 +604,8 @@ function renderProblems(item) {
       <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
+
+    ${videoHtml(item)}
 
     <div class="card">
       <div class="problems-lead">結果を記録しよう</div>
