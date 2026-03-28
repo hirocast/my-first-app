@@ -648,12 +648,20 @@ function isRoundAllClear(vid, round, qcount) {
   return true;
 }
 
-// 2回連続○で「習得済み」判定
+// 2回連続○で「習得済み」判定（ーは無視、一度習得したら永続）
 function isGraduated(vid, round, qi) {
-  if (round < 2) return false;
   const q = loadQuiz();
-  return q[`${vid}_r${round}_q${qi}`] === '○' &&
-         q[`${vid}_r${round-1}_q${qi}`] === '○';
+  let streak = 0;
+  for (let r = 1; r <= round; r++) {
+    const mark = q[`${vid}_r${r}_q${qi}`] || '';
+    if (mark === '○') {
+      streak++;
+      if (streak >= 2) return true;
+    } else if (mark !== 'ー') {
+      streak = 0; // △・×・空白で連続リセット（ーは無視）
+    }
+  }
+  return false;
 }
 
 // 賢く始める：習得済み（2回連続○）のみスキップ、それ以外は再挑戦
