@@ -6,52 +6,57 @@
 <title>最速先取りナビ</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html {
-  height: 100%;
-}
+html, body { height: 100%; overflow: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   background: #f8fafc;
   color: #1a1a2e;
   max-width: 480px;
   margin: 0 auto;
-  /* dvh = キーボード出現時に自動縮小する動的ビューポート高さ */
-  height: 100vh;        /* fallback */
-  height: 100dvh;       /* iOS 15.4+ / Chrome 108+ */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
-/* ── Header ── */
+/* ── Header / Video / App : すべて fixed。top は JS が visualViewport.offsetTop で補正 ── */
 .app-header {
-  flex: 0 0 auto;       /* 固定サイズ・縮まない */
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  z-index: 100;
   background: linear-gradient(135deg, #1a1a2e, #0f3460);
   color: #fff;
   padding: 13px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 100;
 }
-
-/* ── Video (黒板) ── */
-/* キーボードなし: 16:9 フルサイズ / キーボードあり: dvh が縮むので max-height で自動クリップ */
 #videoContainer {
-  flex: 0 0 auto;
-  max-height: 45vh;     /* fallback */
-  max-height: 45dvh;
-  overflow: hidden;
+  position: fixed;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  z-index: 50;
   background: #000;
+  /* top / height : JS が設定 */
 }
-
-/* ── App (ノート) ── */
+/* fixed コンテナの高さを video-wrapper が埋める */
+#videoContainer .video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+#videoContainer .video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  border: none;
+}
 #app {
-  flex: 1;              /* 残りスペースをすべて使う */
-  min-height: 0;        /* flex子要素がコンテンツより小さくなれるよう */
+  position: fixed;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: #f8fafc;
+  /* top / height : JS が設定 */
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
 .app-title span { color: #e94560; }
@@ -152,9 +157,10 @@ body {
 .start-ch-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
 
 /* ── Video ── */
+/* #videoContainer 外で使う場合の通常 wrapper */
 .video-wrapper {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 */
+  padding-bottom: 56.25%;
   background: #000;
   overflow: hidden;
   margin-bottom: 0;
@@ -725,6 +731,35 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
+function updateLayout() {
+  const vv = window.visualViewport;
+  // iOS がキーボード表示時にビジュアルビューポートをスクロールさせる分を offsetTop で補正
+  const offsetTop = vv ? vv.offsetTop : 0;
+  const vvH       = vv ? vv.height   : window.innerHeight;
+
+  const headerEl = document.querySelector('.app-header');
+  const headerH  = headerEl.offsetHeight;
+  const vc  = document.getElementById('videoContainer');
+  const app = document.getElementById('app');
+
+  // ヘッダーをビジュアルビューポートの上端に固定
+  headerEl.style.top = offsetTop + 'px';
+
+  if (vc.style.display === 'none') {
+    app.style.top    = (offsetTop + headerH) + 'px';
+    app.style.height = (vvH - headerH) + 'px';
+  } else {
+    const naturalH = window.innerWidth * 0.5625; // 16:9
+    const maxH     = Math.floor(vvH * 0.45);     // キーボードあり時に入力欄を確保
+    const videoH   = Math.min(naturalH, maxH);
+    vc.style.top    = (offsetTop + headerH) + 'px';
+    vc.style.height = videoH + 'px';
+    const appTop = offsetTop + headerH + videoH;
+    app.style.top    = appTop + 'px';
+    app.style.height = Math.max(60, vvH - headerH - videoH) + 'px';
+  }
+}
+
 function showVideoContainer(item) {
   const container = document.getElementById('videoContainer');
   const frame = document.getElementById('videoFrame');
@@ -735,11 +770,13 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
+  updateLayout();
 }
 
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
+  updateLayout();
 }
 
 function renderQcount(item) {
@@ -964,6 +1001,14 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
+updateLayout();
+window.addEventListener('resize', updateLayout);
+if (window.visualViewport) {
+  // resize: キーボード出現でビューポート高さ変化
+  // scroll: iOS がフォーカス時にビジュアルビューポートをスクロール → offsetTop で補正
+  window.visualViewport.addEventListener('resize', updateLayout);
+  window.visualViewport.addEventListener('scroll', updateLayout);
+}
 </script>
 </body>
 </html>
