@@ -17,43 +17,42 @@
   header {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     color: #fff;
-    padding: 20px 16px 16px;
+    padding: 10px 14px;
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
   }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+  }
   header h1 {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    margin-bottom: 10px;
+    letter-spacing: 0.04em;
   }
   header h1 span { color: #e94560; }
+  .header-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .streak { font-size: 0.7rem; color: #f5a623; white-space: nowrap; }
 
-  .progress-wrap {
+  /* 2本のバーを1行に */
+  .progress-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
+    gap: 5px;
+    margin-bottom: 8px;
   }
-  .progress-label {
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.7);
-    white-space: nowrap;
-    width: 36px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-  .progress-label.grad { color: #f5d78e; }
-  .pl-icon { width: 14px; text-align: center; flex-shrink: 0; line-height: 1; }
+  .pr-icon { font-size: 0.7rem; flex-shrink: 0; width: 14px; text-align: center; line-height: 1; }
+  .pr-icon.grad { color: #f5d78e; }
+  .pr-sep { color: rgba(255,255,255,0.25); font-size: 0.75rem; flex-shrink: 0; }
   .progress-bar-outer {
     flex: 1;
     background: rgba(255,255,255,0.15);
     border-radius: 999px;
-    height: 8px;
+    height: 6px;
     overflow: hidden;
   }
   .progress-bar-inner {
@@ -62,20 +61,14 @@
     border-radius: 999px;
     transition: width 0.4s ease;
   }
-  .progress-bar-inner.grad {
-    background: linear-gradient(90deg, #f5a623, #e8900a);
-  }
+  .progress-bar-inner.grad { background: linear-gradient(90deg, #f5a623, #e8900a); }
   .progress-text {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.85);
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.75);
     white-space: nowrap;
+    min-width: 28px;
+    text-align: right;
   }
-  .header-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .streak { font-size: 0.82rem; color: #f5a623; }
   .btn-reset {
     font-size: 0.72rem;
     background: rgba(233,69,96,0.25);
@@ -200,39 +193,25 @@
   .status-chip.in-progress{ background: #fde8cc; color: #c05c00; }
   .status-chip.graduated  { background: linear-gradient(135deg,#f5a623,#e8900a); color:#fff; }
 
-  /* ── ガイダンスストリップ ── */
+  /* ── ガイダンス（ヘッダー内） ── */
   #guidanceToast {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: linear-gradient(135deg, #fff8e0, #ffedb0);
-    border: 2px solid #f5a623;
-    border-radius: 16px;
-    padding: 14px 22px;
-    display: flex;
+    display: none;
     align-items: center;
-    gap: 14px;
-    box-shadow: 0 8px 32px rgba(245,166,35,0.45);
-    z-index: 150;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    white-space: nowrap;
+    gap: 8px;
+    padding: 7px 10px;
+    background: rgba(245,166,35,0.18);
+    border: 1px solid rgba(245,166,35,0.6);
+    border-radius: 10px;
     animation: guidancePulse 2s ease-in-out infinite;
   }
-  #guidanceToast.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-  }
-  .guidance-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-  .guidance-body { display: flex; flex-direction: column; gap: 2px; }
-  .guidance-msg  { font-size: 0.9rem; font-weight: 700; color: #b36d00; line-height: 1.4; }
-  .guidance-sub  { font-size: 0.72rem; font-weight: 400; color: #c87700; }
+  #guidanceToast.visible { display: flex; }
+  .guidance-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1; }
+  .guidance-body { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+  .guidance-msg  { font-size: 0.78rem; font-weight: 700; color: #f5d78e; }
+  .guidance-sub  { font-size: 0.65rem; color: rgba(255,255,255,0.6); }
   @keyframes guidancePulse {
-    0%,100% { box-shadow: 0 8px 32px rgba(245,166,35,0.45); border-color: #f5a623; }
-    50%      { box-shadow: 0 10px 40px rgba(245,166,35,0.75); border-color: #e8900a; }
+    0%,100% { border-color: rgba(245,166,35,0.6); }
+    50%      { border-color: rgba(245,166,35,1); }
   }
 
   .sec-meta {
@@ -781,28 +760,28 @@
 <body>
 
 <header>
-  <h1>Try IT <span>中学1年数学</span></h1>
-  <div class="progress-wrap">
-    <span class="progress-label"><span class="pl-icon">▶</span>視聴</span>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
-    </div>
-    <div class="progress-text" id="globalText">0 / 0</div>
-  </div>
-  <div class="progress-wrap">
-    <span class="progress-label grad"><span class="pl-icon">🎓</span>習得</span>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner grad" id="globalGradBar" style="width:0%"></div>
-    </div>
-    <div class="progress-text" id="globalGradText">0 / 0</div>
-  </div>
-  <div class="header-meta">
-    <div class="streak" id="streakLabel">🔥 連続学習: 0日</div>
-    <div style="display:flex;gap:6px;">
-      <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習設定</button>
+  <div class="header-top">
+    <h1>Try IT <span>中学1年数学</span></h1>
+    <div class="header-actions">
+      <span class="streak" id="streakLabel">🔥 0日</span>
+      <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習</button>
       <button class="btn-reset" onclick="resetAll()">リセット</button>
     </div>
   </div>
+  <div class="progress-row">
+    <span class="pr-icon">▶</span>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
+    </div>
+    <span class="progress-text" id="globalText">0/0</span>
+    <span class="pr-sep">│</span>
+    <span class="pr-icon grad">🎓</span>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner grad" id="globalGradBar" style="width:0%"></div>
+    </div>
+    <span class="progress-text" id="globalGradText">0/0</span>
+  </div>
+  <div id="guidanceToast"></div>
 </header>
 
 <div class="review-active-banner" id="reviewBanner">
@@ -814,7 +793,6 @@
 <div id="content"></div>
 <div class="bottom-pad"></div>
 
-<div id="guidanceToast"></div>
 <div class="review-overlay" id="reviewOverlay" onclick="closeReviewPanel()"></div>
 <div class="review-panel" id="reviewPanel">
   <div class="review-panel-title">📋 復習設定</div>
@@ -1170,7 +1148,7 @@ function onSetQcount(vid, n) {
   if (!setQcount(vid, n)) return;
   refreshQuiz(vid);
   updateCardStatusChip(vid);
-  updateGuidanceStrip();
+  updateGuidanceToast();
 }
 
 function onSetMark(vid, round, qi, mark) {
@@ -1265,14 +1243,14 @@ function updateStreak() {
   const today = new Date().toISOString().slice(0, 10);
   const s = loadStreak();
   if (s.lastDate === today) {
-    document.getElementById('streakLabel').textContent = `🔥 連続学習: ${s.count}日`;
+    document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
     return;
   }
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   s.count = (s.lastDate === yesterday) ? s.count + 1 : 1;
   s.lastDate = today;
   saveStreak(s);
-  document.getElementById('streakLabel').textContent = `🔥 連続学習: ${s.count}日`;
+  document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
 }
 
 // ─────────────────────────────────────────
@@ -1354,7 +1332,7 @@ function toggleWatched(vid, e) {
   }
   updateCardStatusChip(vid);
   updateProgress();
-  updateGuidanceStrip();
+  updateGuidanceToast();
   const secInfo = findVideoSection(vid);
   if (secInfo) refreshSectionLabel(secInfo.chId, secInfo.secNum);
 }
@@ -1387,7 +1365,7 @@ function toggleCard(vid) {
       </div>
       ${renderQuizArea(vid)}`;
   }
-  updateGuidanceStrip();
+  updateGuidanceToast();
 }
 
 // 現在の動画を閉じて達成トーストを表示
@@ -1433,31 +1411,10 @@ function resetAll() {
 // ─────────────────────────────────────────
 // GUIDANCE
 // ─────────────────────────────────────────
-const GUIDANCE_KEY = 'tryit_guidance_v1';
+function updateGuidanceToast() {
+  const toast = document.getElementById('guidanceToast');
+  if (!toast) return;
 
-function isNewUser() {
-  return !localStorage.getItem(STORAGE_KEY) && !localStorage.getItem(QUIZ_KEY);
-}
-
-function updateGuidanceStrip() {
-  const strip = document.getElementById('guidanceToast');
-  if (!strip) return;
-  if (localStorage.getItem(GUIDANCE_KEY) === 'done') {
-    strip.classList.remove('visible');
-    return;
-  }
-  const w = loadWatched();
-  const hasAnyWatched = Object.values(w).some(Boolean);
-  const anyCardOpen   = !!document.querySelector('.card-body.open');
-  let watchedHasQuiz  = false;
-  for (const vid of Object.keys(w)) {
-    if (w[vid] && getQcount(vid) > 0) { watchedHasQuiz = true; break; }
-  }
-  if (watchedHasQuiz) {
-    localStorage.setItem(GUIDANCE_KEY, 'done');
-    strip.classList.remove('visible');
-    return;
-  }
   const html = (icon, msg, sub) =>
     `<div class="guidance-icon">${icon}</div>
      <div class="guidance-body">
@@ -1465,14 +1422,68 @@ function updateGuidanceStrip() {
        <div class="guidance-sub">${sub}</div>
      </div>`;
 
-  if (hasAnyWatched) {
-    strip.innerHTML = html('📝', '問題数をタップしよう', '1〜8の数字で確認問題を設定できます');
-  } else if (anyCardOpen) {
-    strip.innerHTML = html('▶️', '「視聴済み」をタップしよう', '動画を見たら忘れずに記録しよう');
-  } else {
-    strip.innerHTML = html('👆', '動画タイトルをタップしよう', '動画と確認問題が開きます');
+  const w = loadWatched();
+
+  // 開いているカードを優先して案内
+  const openBody = document.querySelector('.card-body.open');
+  if (openBody) {
+    const vid = openBody.id.replace('body_', '');
+    const isWatched = !!w[vid];
+    const qcount = getQcount(vid);
+
+    if (!isWatched) {
+      toast.innerHTML = html('▶️', '「視聴済み」をタップしよう', '動画を見たら忘れずに記録しよう');
+    } else if (qcount === 0) {
+      toast.innerHTML = html('📝', '問題数をタップしよう', '1〜8の数字で確認問題を設定できます');
+    } else {
+      const r = getStartedRounds(vid);
+      const complete = isRoundComplete(vid, r, qcount);
+      if (!complete) {
+        toast.innerHTML = html('✏️', '○△×をつけよう', '各問題の理解度を記録しよう');
+      } else if (isVideoGraduated(vid)) {
+        toast.innerHTML = html('🎓', '全問習得済み！', '次の動画タイトルをタップしよう');
+      } else {
+        toast.innerHTML = html('🔄', '次の回を始めよう', '「賢く始める」で効率よく復習しよう');
+      }
+    }
+    toast.classList.add('visible');
+    return;
   }
-  strip.classList.add('visible');
+
+  // カードが閉じている場合：全体の状態から案内
+  const hasAnyWatched = Object.values(w).some(Boolean);
+  if (!hasAnyWatched) {
+    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '動画と確認問題が開きます');
+    toast.classList.add('visible');
+    return;
+  }
+
+  let watchedNoQuiz = false;
+  for (const vid of Object.keys(w)) {
+    if (w[vid] && getQcount(vid) === 0) { watchedNoQuiz = true; break; }
+  }
+  if (watchedNoQuiz) {
+    toast.innerHTML = html('📝', '問題数を設定しよう', '動画を開いて1〜8の数字をタップしよう');
+    toast.classList.add('visible');
+    return;
+  }
+
+  let hasIncomplete = false;
+  for (const vid of Object.keys(w)) {
+    if (!w[vid]) continue;
+    const qcount = getQcount(vid);
+    if (qcount === 0) continue;
+    const r = getStartedRounds(vid);
+    if (!isRoundComplete(vid, r, qcount)) { hasIncomplete = true; break; }
+  }
+  if (hasIncomplete) {
+    toast.innerHTML = html('✏️', '確認問題を続けよう', '動画を開いて○△×をつけよう');
+    toast.classList.add('visible');
+    return;
+  }
+
+  toast.innerHTML = html('👆', '次の動画を開こう', 'タイトルをタップして学習を続けよう');
+  toast.classList.add('visible');
 }
 
 // 動画の全問が習得済みかどうか判定
@@ -1690,7 +1701,7 @@ function build(filter) {
   allTab.textContent = 'すべて';
   allTab.onclick = () => applyFilter('all');
   tabBar.appendChild(allTab);
-  updateGuidanceStrip();
+  updateGuidanceToast();
 
   C.forEach(ch => {
     const t = document.createElement('button');
