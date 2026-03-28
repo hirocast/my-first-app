@@ -919,6 +919,15 @@ function isRoundComplete(vid, round, qcount) {
   return true;
 }
 
+function getRoundMarkCount(vid, round, qcount) {
+  const q = loadQuiz();
+  let count = 0;
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (q[`${vid}_r${round}_q${qi}`]) count++;
+  }
+  return count;
+}
+
 function isRoundAllClear(vid, round, qcount) {
   if (qcount === 0) return false;
   const q = loadQuiz();
@@ -1310,6 +1319,8 @@ function toggleWatched(vid, e) {
   const w = loadWatched();
   w[vid] = !w[vid];
   saveWatched(w);
+  clearTimeout(guidanceTimer);
+  guidanceTimer = null;
   updateStreak();
 
   const card    = document.getElementById('card_' + vid);
@@ -1350,9 +1361,17 @@ function toggleCard(vid) {
     body.classList.remove('open');
     arrow.classList.remove('open');
     body.innerHTML = '';
+    clearTimeout(guidanceTimer);
+    guidanceTimer = null;
+    cardOpenedAt = 0;
   } else {
     body.classList.add('open');
     arrow.classList.add('open');
+    cardOpenedAt = Date.now();
+    clearTimeout(guidanceTimer);
+    guidanceTimer = setTimeout(() => {
+      if (document.querySelector('.card-body.open')) updateGuidanceToast();
+    }, 6000);
     let ytId = '';
     C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
       if (v.id === vid) ytId = v.yt;
@@ -1423,27 +1442,36 @@ function updateGuidanceToast() {
      </div>`;
 
   const w = loadWatched();
-
-  // 開いているカードを優先して案内
   const openBody = document.querySelector('.card-body.open');
+
   if (openBody) {
     const vid = openBody.id.replace('body_', '');
     const isWatched = !!w[vid];
     const qcount = getQcount(vid);
+    const elapsed = Date.now() - cardOpenedAt;
 
     if (!isWatched) {
-      toast.innerHTML = html('▶️', '「視聴済み」をタップしよう', '動画を見たら忘れずに記録しよう');
+      if (elapsed < 6000) {
+        toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
+      } else {
+        toast.innerHTML = html('✅', '「視聴済み」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
+      }
     } else if (qcount === 0) {
-      toast.innerHTML = html('📝', '問題数をタップしよう', '1〜8の数字で確認問題を設定できます');
+      toast.innerHTML = html('📝', '問題数をタップしよう', '何問あるか確認して数字を選ぼう');
     } else {
       const r = getStartedRounds(vid);
       const complete = isRoundComplete(vid, r, qcount);
       if (!complete) {
-        toast.innerHTML = html('✏️', '○△×をつけよう', '各問題の理解度を記録しよう');
+        const marked = getRoundMarkCount(vid, r, qcount);
+        if (marked === 0) {
+          toast.innerHTML = html('✏️', '問題を解いて○△×をつけよう', '「公式サイトで解く」で問題が見られます');
+        } else {
+          toast.innerHTML = html('✏️', '残りの問題にも○△×をつけよう', `あと${qcount - marked}問。全問記録したら次へ進めます`);
+        }
       } else if (isVideoGraduated(vid)) {
-        toast.innerHTML = html('🎓', '全問習得済み！', '次の動画タイトルをタップしよう');
+        toast.innerHTML = html('🎓', '全問習得！次へ進もう', '▲ 閉じて次の動画タイトルをタップしよう');
       } else {
-        toast.innerHTML = html('🔄', '次の回を始めよう', '「賢く始める」で効率よく復習しよう');
+        toast.innerHTML = html('🔄', '次の回を始めよう', '「賢く始める」で間違えた問題だけ再挑戦しよう');
       }
     }
     toast.classList.add('visible');
@@ -1453,7 +1481,7 @@ function updateGuidanceToast() {
   // カードが閉じている場合：全体の状態から案内
   const hasAnyWatched = Object.values(w).some(Boolean);
   if (!hasAnyWatched) {
-    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '動画と確認問題が開きます');
+    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '▼ を押すと動画と確認問題が開きます');
     toast.classList.add('visible');
     return;
   }
@@ -1477,7 +1505,23 @@ function updateGuidanceToast() {
     if (!isRoundComplete(vid, r, qcount)) { hasIncomplete = true; break; }
   }
   if (hasIncomplete) {
-    toast.innerHTML = html('✏️', '確認問題を続けよう', '動画を開いて○△×をつけよう');
+    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて○△×をつけよう');
+    toast.classList.add('visible');
+    return;
+  }
+
+  let hasNextRound = false;
+  for (const vid of Object.keys(w)) {
+    if (!w[vid]) continue;
+    const qcount = getQcount(vid);
+    if (qcount === 0) continue;
+    const r = getStartedRounds(vid);
+    if (isRoundComplete(vid, r, qcount) && !isVideoGraduated(vid) && r < 10) {
+      hasNextRound = true; break;
+    }
+  }
+  if (hasNextRound) {
+    toast.innerHTML = html('🔄', '次の回を始めよう', '動画を開いて「賢く始める」をタップしよう');
     toast.classList.add('visible');
     return;
   }
@@ -1510,6 +1554,9 @@ function saveReviewSettings(r) { localStorage.setItem(REVIEW_KEY, JSON.stringify
 let reviewActive = false;
 let reviewChapters = [];
 let reviewCondition = 'needs_work';
+
+let cardOpenedAt = 0;
+let guidanceTimer = null;
 
 function videoMatchesCondition(vid, condition) {
   const q = loadQuiz();
