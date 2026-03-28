@@ -1,123 +1,867 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中1数学 1学期・最速先取りナビ</title>
-    <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f1f5f9; margin: 0; padding: 10px; color: #0f172a; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        h1 { color: #1e3a8a; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
-        
-        /* 今日の目標エリア */
-        .today-section { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #3b82f6; border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: center; }
-        .date-badge { display: inline-block; background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
-        .task-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
-        
-        /* ボタン共通 */
-        .btn { display: flex; align-items: center; justify-content: center; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; width: 100%; box-sizing: border-box; }
-        .btn-red { background: #ff0000; color: white; box-shadow: 0 4px 10px rgba(255,0,0,0.2); }
-        .btn-outline { background: white; color: #1e3a8a; border: 2px solid #1e3a8a; margin-top: 10px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Try IT 中学1年数学</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
 
-        /* 全リストエリア */
-        #all-list { display: none; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; text-decoration: none; color: #334155; }
-        .list-item:active { background: #f8fafc; }
-        .unit-num { font-weight: bold; color: #3b82f6; margin-right: 10px; }
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  header h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  header h1 span { color: #e94560; }
 
-        footer { text-align: center; font-size: 0.7rem; color: #94a3b8; margin-top: 20px; }
-    </style>
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .progress-bar-outer {
+    flex: 1;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #e94560, #f5a623);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .progress-text {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+  }
+  .header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .streak { font-size: 0.82rem; color: #f5a623; }
+  .btn-reset {
+    font-size: 0.72rem;
+    background: rgba(233,69,96,0.25);
+    color: #e94560;
+    border: 1px solid rgba(233,69,96,0.5);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-reset:hover { background: rgba(233,69,96,0.45); }
+
+  /* ── Filter Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 12px 16px 0;
+    background: #f0f4f8;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid #c0ccd8;
+    background: #fff;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #444;
+    font-weight: 600;
+  }
+  .tab.active { background: #0f3460; color: #fff; border-color: #0f3460; }
+
+  /* ── Chapter blocks ── */
+  .chapter-block { margin: 14px 12px 0; }
+  .chapter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    color: #fff;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 14px;
+  }
+  .chapter-title { font-size: 0.95rem; font-weight: 700; }
+  .chapter-progress { font-size: 0.75rem; color: rgba(255,255,255,0.75); }
+  .chapter-bar-outer {
+    background: rgba(255,255,255,0.2);
+    border-radius: 999px;
+    height: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .chapter-bar-inner {
+    height: 100%;
+    background: #e94560;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .chapter-body {
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    border: 1px solid #dde3ea;
+    border-top: none;
+    margin-bottom: 6px;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0f3460;
+    background: #eef2f7;
+    padding: 5px 14px;
+    border-bottom: 1px solid #dde3ea;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Video card ── */
+  .video-card { border-bottom: 1px solid #eef2f7; }
+  .video-card:last-child { border-bottom: none; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 10px;
+  }
+  .card-header:hover { background: #f7f9fc; }
+  .card-header.watched { background: #f0fff4; }
+
+  .num-badge {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #e8edf3;
+    color: #0f3460;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .num-badge.watched { background: #d4edda; color: #1a7a3f; }
+
+  .card-title {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    line-height: 1.3;
+  }
+  .card-title.watched { color: #888; text-decoration: line-through; }
+
+  .arrow-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: #aaa;
+    transition: transform 0.25s ease;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .arrow-icon.open { transform: rotate(180deg); }
+
+  .btn-watched {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid #0f3460;
+    background: transparent;
+    color: #0f3460;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-watched.watched { background: #0f3460; color: #fff; }
+  .btn-watched:hover { opacity: 0.75; }
+
+  /* ── Video embed ── */
+  .card-body { display: none; padding: 0 12px 12px; background: #fafbfc; }
+  .card-body.open { display: block; }
+
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+    margin-top: 8px;
+  }
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+    border-radius: 10px;
+  }
+
+  /* ── Quiz area ── */
+  .quiz-area {
+    margin-top: 12px;
+    border: 1.5px solid #dde3ea;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef2f7;
+    padding: 8px 12px;
+    border-bottom: 1px solid #dde3ea;
+  }
+  .quiz-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f3460;
+  }
+  .quiz-link {
+    font-size: 0.72rem;
+    color: #e94560;
+    text-decoration: none;
+    border: 1px solid #e94560;
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .quiz-link:hover { background: #e94560; color: #fff; }
+
+  /* 問題数設定 */
+  .qcount-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eef2f7;
+    background: #fff;
+    flex-wrap: wrap;
+  }
+  .qcount-label { font-size: 0.78rem; color: #555; white-space: nowrap; }
+  .qcount-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .qcount-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #c0ccd8;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #444;
+    transition: all 0.15s;
+  }
+  .qcount-btn.active { background: #0f3460; color: #fff; border-color: #0f3460; }
+
+  /* 回ごとの記録 */
+  .round-block {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eef2f7;
+    background: #fff;
+  }
+  .round-block:last-child { border-bottom: none; }
+  .round-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+  .round-label { font-size: 0.72rem; font-weight: 700; color: #0f3460; }
+  .all-clear-badge {
+    font-size: 0.68rem;
+    background: #28a745;
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 8px;
+  }
+
+  .round-questions { display: flex; flex-direction: column; gap: 5px; }
+  .question-row { display: flex; align-items: center; gap: 6px; }
+  .q-label { font-size: 0.72rem; color: #666; width: 32px; flex-shrink: 0; }
+  .mark-btns { display: flex; gap: 4px; }
+  .mark-btn {
+    min-width: 32px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #c0ccd8;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s;
+    padding: 0 6px;
+  }
+  .mark-btn:hover { opacity: 0.8; }
+  .mark-btn.selected-○ { background: #28a745; color: #fff; border-color: #28a745; }
+  .mark-btn.selected-△ { background: #f5a623; color: #fff; border-color: #f5a623; }
+  .mark-btn.selected-× { background: #e94560; color: #fff; border-color: #e94560; }
+  .mark-btn.selected-ー { background: #aaa; color: #fff; border-color: #aaa; }
+
+  /* 次の回を始めるボタン */
+  .next-round-wrap {
+    padding: 10px 12px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    border-top: 1px solid #eef2f7;
+  }
+  .next-round-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-next-round {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1.5px solid #0f3460;
+    background: #fff;
+    color: #0f3460;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .btn-next-round:hover { background: #0f3460; color: #fff; }
+  .btn-next-round.primary { background: #0f3460; color: #fff; }
+  .btn-next-round.primary:hover { opacity: 0.85; }
+  .next-round-label {
+    font-size: 0.72rem;
+    color: #888;
+  }
+
+  .qcount-hint {
+    font-size: 0.72rem;
+    color: #aaa;
+    padding: 8px 12px;
+    text-align: center;
+  }
+
+  .bottom-pad { height: 40px; }
+</style>
 </head>
 <body>
 
-<div class="container">
-    <h1>最速先取りナビ</h1>
-    
-    <div class="today-section">
-        <div id="today-date" class="date-badge">Loading...</div>
-        <div id="today-task-content">
-            </div>
+<header>
+  <h1>Try IT <span>中学1年数学</span></h1>
+  <div class="progress-wrap">
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
     </div>
+    <div class="progress-text" id="globalText">0 / 0</div>
+  </div>
+  <div class="header-meta">
+    <div class="streak" id="streakLabel">🔥 連続学習: 0日</div>
+    <button class="btn-reset" onclick="resetAll()">リセット</button>
+  </div>
+</header>
 
-    <button class="btn btn-outline" onclick="toggleList()">▼ 1学期の全授業リストを見る</button>
+<div class="tabs" id="tabBar"></div>
+<div id="content"></div>
+<div class="bottom-pad"></div>
 
-    <div id="all-list">
-        <h2 style="font-size: 1rem; color: #1e3a8a;">1学期・数学全カリキュラム</h2>
-        <div id="list-container">
-            </div>
-    </div>
-
-    <footer>努力は裏切らない。1日1歩ずつ進もう！</footer>
-</div>
+<script src="data.js"></script>
 
 <script>
-    // 全データ（1学期分）
-    const allVideos = [
-        { id: 1, unit: "正負", title: "マイナス（0より小さい数）", url: "https://youtu.be/JC0Cdwm_1mE" },
-        { id: 2, unit: "正負", title: "正の数・負の数・自然数", url: "https://youtu.be/0pT2DHeXmZg" },
-        { id: 3, unit: "正負", title: "絶対値と不等号", url: "https://youtu.be/qQYFv_3F28w" },
-        { id: 4, unit: "正負", title: "正負の数の加法（足し算）", url: "https://youtu.be/v0-vIInyvY4" },
-        { id: 5, unit: "正負", title: "正負の数の減法（引き算）", url: "https://youtu.be/I9j4e4yU3X8" },
-        { id: 6, unit: "正負", title: "加減の混じった計算", url: "https://youtu.be/nF6u9W8M7Ew" },
-        { id: 7, unit: "正負", title: "正負の数の乗法（掛け算）", url: "https://youtu.be/vV93Z-kZ9oE" },
-        { id: 8, unit: "正負", title: "累乗（同じ数の掛け算）", url: "https://youtu.be/q091tV5p3rU" },
-        { id: 9, unit: "正負", title: "正負の数の除法（割り算）", url: "https://youtu.be/t1h9z3-Y00Y" },
-        { id: 10, unit: "正負", title: "四則の混じった計算", url: "https://youtu.be/1YfL70POfU0" },
-        { id: 11, unit: "文字", title: "文字を使った式の表し方", url: "https://youtu.be/XyS0ZfW15hM" },
-        { id: 12, unit: "文字", title: "×や÷の省き方のルール", url: "https://youtu.be/VvA_q0MAsq4" },
-        { id: 13, unit: "文字", title: "代入と式の値", url: "https://youtu.be/jC0yFwZ3pI4" },
-        { id: 14, unit: "文字", title: "項と係数・1次式の計算", url: "https://youtu.be/QWlY_t8X_2g" },
-        { id: 15, unit: "文字", title: "1次式の加法・減法", url: "https://youtu.be/hE5yP7t3v94" },
-        { id: 16, unit: "方程式", title: "方程式とその解", url: "https://youtu.be/K-8kS2Ww8cI" },
-        { id: 17, unit: "方程式", title: "等式の性質", url: "https://youtu.be/m4AOfYF_mN8" },
-        { id: 18, unit: "方程式", title: "移項（いこう）の解き方", url: "https://youtu.be/q7N6UByB_W0" }
-    ];
+// ─────────────────────────────────────────
+// STORAGE KEYS
+// ─────────────────────────────────────────
+const STORAGE_KEY = 'tryit_math1_v6';
+const STREAK_KEY  = 'tryit_streak_v6';
+const QUIZ_KEY    = 'tryit_quiz_v1';
 
-    // 日付と動画IDの紐付け（塾のスケジュールをイメージ）
-    const scheduleByDate = {
-        "2026-03-26": 1,
-        "2026-03-27": 2,
-        "2026-03-30": 3,
-        "2026-03-31": 4,
-        "2026-04-01": 5
-    };
+function loadWatched() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveWatched(w) { localStorage.setItem(STORAGE_KEY, JSON.stringify(w)); }
+function loadStreak() {
+  try { return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count: 0, lastDate: '' }; }
+  catch { return { count: 0, lastDate: '' }; }
+}
+function saveStreak(s) { localStorage.setItem(STREAK_KEY, JSON.stringify(s)); }
+function loadQuiz() {
+  try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveQuiz(q) { localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); }
 
-    // 初期表示設定
-    const now = new Date();
-    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    
-    document.getElementById('today-date').textContent = todayKey.replace(/-/g, '/');
+// ─────────────────────────────────────────
+// QUIZ HELPERS
+// ─────────────────────────────────────────
+const MAX_Q = 8;
+const MAX_R = 10;
 
-    const videoId = scheduleByDate[todayKey];
-    const todayTask = allVideos.find(v => v.id === videoId);
+function getQcount(vid) {
+  return loadQuiz()[vid + '_qcount'] || 0;
+}
 
-    const taskContent = document.getElementById('today-task-content');
-    if (todayTask) {
-        taskContent.innerHTML = `
-            <div class="task-title">${todayTask.title}</div>
-            <a href="${todayTask.url}" class="btn btn-red" target="_blank">▶ 今日の授業を受ける</a>
-        `;
-    } else {
-        taskContent.innerHTML = `<p style="color:#64748b;">今日の指定タスクはありません。<br>全リストから先取りを進めましょう！</p>`;
+function getStartedRounds(vid) {
+  return loadQuiz()[vid + '_started'] || 1;
+}
+
+function setStartedRounds(vid, r) {
+  const q = loadQuiz();
+  q[vid + '_started'] = r;
+  saveQuiz(q);
+}
+
+function setQcount(vid, n) {
+  const q = loadQuiz();
+  const prev = q[vid + '_qcount'] || 0;
+  if (n < prev) {
+    let hasData = false;
+    for (let r = 1; r <= MAX_R; r++) {
+      for (let qi = n + 1; qi <= prev; qi++) {
+        if (q[`${vid}_r${r}_q${qi}`]) { hasData = true; break; }
+      }
+      if (hasData) break;
     }
+    if (hasData && !confirm(`問題数を${n}問に変更すると、問${n+1}以降の記録が削除されます。よろしいですか？`)) {
+      return false;
+    }
+    for (let r = 1; r <= MAX_R; r++) {
+      for (let qi = n + 1; qi <= prev; qi++) {
+        delete q[`${vid}_r${r}_q${qi}`];
+      }
+    }
+  }
+  q[vid + '_qcount'] = n;
+  saveQuiz(q);
+  return true;
+}
 
-    // 全リストの生成
-    const listContainer = document.getElementById('list-container');
-    allVideos.forEach(v => {
-        const item = document.createElement('a');
-        item.className = 'list-item';
-        item.href = v.url;
-        item.target = '_blank';
-        item.innerHTML = `<span><span class="unit-num">${v.id}</span> ${v.title}</span> <span>▶</span>`;
-        listContainer.appendChild(item);
+function isRoundComplete(vid, round, qcount) {
+  if (qcount === 0) return false;
+  const q = loadQuiz();
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (!q[`${vid}_r${round}_q${qi}`]) return false;
+  }
+  return true;
+}
+
+function isRoundAllClear(vid, round, qcount) {
+  if (qcount === 0) return false;
+  const q = loadQuiz();
+  for (let qi = 1; qi <= qcount; qi++) {
+    const mark = q[`${vid}_r${round}_q${qi}`];
+    if (mark !== '○' && mark !== 'ー') return false;
+  }
+  return true;
+}
+
+// 前の回で○だった問題番号のリストを返す
+function getPrevCircleQuestions(vid, prevRound, qcount) {
+  const q = loadQuiz();
+  const result = [];
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (q[`${vid}_r${prevRound}_q${qi}`] === '○') result.push(qi);
+  }
+  return result;
+}
+
+// 次の回を開始（autoSkip=trueなら前回○の問題にーをセット）
+function startNextRound(vid, nextRound, autoSkip) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const prevRound = nextRound - 1;
+
+  if (autoSkip) {
+    const circleQs = getPrevCircleQuestions(vid, prevRound, qcount);
+    circleQs.forEach(qi => {
+      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
     });
+    saveQuiz(q);
+  }
 
-    // リストの開閉
-    function toggleList() {
-        const list = document.getElementById('all-list');
-        list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+  setStartedRounds(vid, nextRound);
+  refreshQuiz(vid);
+}
+
+function getTryItUrl(vid) {
+  let chNum = '', secNum = '', lessonNum = '';
+  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
+    if (v.id === vid) { chNum = ch.chNum; secNum = sec.secNum; lessonNum = v.lesson; }
+  })));
+  return `https://www.try-it.jp/chapters-${chNum}/sections-${secNum}/lessons-${lessonNum}/practice-3/`;
+}
+
+// ─────────────────────────────────────────
+// QUIZ UI RENDER
+// ─────────────────────────────────────────
+function renderQuizArea(vid) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const startedRounds = getStartedRounds(vid);
+  const tryItUrl = getTryItUrl(vid);
+
+  // 問題数ボタン（1〜8）
+  let qcountHtml = '';
+  for (let n = 1; n <= MAX_Q; n++) {
+    qcountHtml += `<button class="qcount-btn${qcount === n ? ' active' : ''}"
+      onclick="onSetQcount('${vid}', ${n})">${n}</button>`;
+  }
+
+  // 回ごとの記録
+  let roundsHtml = '';
+  if (qcount === 0) {
+    roundsHtml = `<div class="qcount-hint">↑ まず問題数を登録してください</div>`;
+  } else {
+    for (let r = 1; r <= startedRounds; r++) {
+      const complete = isRoundComplete(vid, r, qcount);
+      const allClear = complete && isRoundAllClear(vid, r, qcount);
+
+      let qRowsHtml = '';
+      for (let qi = 1; qi <= qcount; qi++) {
+        const mark = q[`${vid}_r${r}_q${qi}`] || '';
+        const marks = ['○', '△', '×', 'ー'];
+        const btnsHtml = marks.map(m =>
+          `<button class="mark-btn${mark === m ? ' selected-' + m : ''}"
+            onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
+        ).join('');
+        qRowsHtml += `
+          <div class="question-row">
+            <div class="q-label">問${qi}</div>
+            <div class="mark-btns">${btnsHtml}</div>
+          </div>`;
+      }
+
+      roundsHtml += `
+        <div class="round-block">
+          <div class="round-header">
+            <div class="round-label">第${r}回</div>
+            ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
+          </div>
+          <div class="round-questions">${qRowsHtml}</div>
+        </div>`;
     }
-</script>
 
+    // 次の回ボタン（最新の回が全問記録済みかつ上限未満）
+    const latestComplete = isRoundComplete(vid, startedRounds, qcount);
+    if (latestComplete && startedRounds < MAX_R) {
+      const nextRound = startedRounds + 1;
+      const prevCircleCount = getPrevCircleQuestions(vid, startedRounds, qcount).length;
+      const hasCircles = prevCircleCount > 0;
+
+      roundsHtml += `
+        <div class="next-round-wrap">
+          <div class="next-round-label">第${nextRound}回の開始方法を選んでください</div>
+          <div class="next-round-btns">
+            <button class="btn-next-round primary"
+              onclick="startNextRound('${vid}', ${nextRound}, false)">
+              空白で始める
+            </button>
+            ${hasCircles ? `
+            <button class="btn-next-round"
+              onclick="startNextRound('${vid}', ${nextRound}, true)">
+              前回の○を<br>ーにして始める
+              <br><span style="font-size:0.65rem;font-weight:400;">(${prevCircleCount}問スキップ)</span>
+            </button>` : ''}
+          </div>
+        </div>`;
+    }
+  }
+
+  return `
+    <div class="quiz-area" id="quiz_${vid}">
+      <div class="quiz-header">
+        <span class="quiz-title">📝 確認問題</span>
+        <a class="quiz-link" href="${tryItUrl}" target="_blank">公式サイトで解く →</a>
+      </div>
+      <div class="qcount-wrap">
+        <span class="qcount-label">問題数:</span>
+        <div class="qcount-btns">${qcountHtml}</div>
+      </div>
+      ${roundsHtml}
+    </div>`;
+}
+
+// ─────────────────────────────────────────
+// QUIZ EVENT HANDLERS
+// ─────────────────────────────────────────
+function onSetQcount(vid, n) {
+  if (!setQcount(vid, n)) return;
+  refreshQuiz(vid);
+}
+
+function onSetMark(vid, round, qi, mark) {
+  const q = loadQuiz();
+  const key = `${vid}_r${round}_q${qi}`;
+  q[key] = (q[key] === mark) ? undefined : mark;
+  if (q[key] === undefined) delete q[key];
+  saveQuiz(q);
+  refreshQuiz(vid);
+}
+
+function refreshQuiz(vid) {
+  const quizEl = document.getElementById('quiz_' + vid);
+  if (!quizEl) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = renderQuizArea(vid);
+  quizEl.replaceWith(tmp.firstElementChild);
+}
+
+// ─────────────────────────────────────────
+// STREAK
+// ─────────────────────────────────────────
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  const s = loadStreak();
+  if (s.lastDate === today) {
+    document.getElementById('streakLabel').textContent = `🔥 連続学習: ${s.count}日`;
+    return;
+  }
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  s.count = (s.lastDate === yesterday) ? s.count + 1 : 1;
+  s.lastDate = today;
+  saveStreak(s);
+  document.getElementById('streakLabel').textContent = `🔥 連続学習: ${s.count}日`;
+}
+
+// ─────────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────────
+function updateProgress() {
+  const w = loadWatched();
+  let total = 0, done = 0;
+  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
+    total++;
+    if (w[v.id]) done++;
+  })));
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('globalBar').style.width = pct + '%';
+  document.getElementById('globalText').textContent = `${done} / ${total}`;
+
+  C.forEach(ch => {
+    let ct = 0, cd = 0;
+    ch.sections.forEach(sec => sec.videos.forEach(v => { ct++; if (w[v.id]) cd++; }));
+    const cpct = ct ? Math.round(cd / ct * 100) : 0;
+    const barEl = document.getElementById('chbar_' + ch.id);
+    const txtEl = document.getElementById('chtxt_' + ch.id);
+    if (barEl) barEl.style.width = cpct + '%';
+    if (txtEl) txtEl.textContent = `${cd} / ${ct}`;
+  });
+}
+
+// ─────────────────────────────────────────
+// TOGGLE WATCHED
+// ─────────────────────────────────────────
+function toggleWatched(vid, e) {
+  e.stopPropagation();
+  const w = loadWatched();
+  w[vid] = !w[vid];
+  saveWatched(w);
+  updateStreak();
+
+  const card    = document.getElementById('card_' + vid);
+  const header  = card.querySelector('.card-header');
+  const badge   = card.querySelector('.num-badge');
+  const titleEl = card.querySelector('.card-title');
+  const btn     = card.querySelector('.btn-watched');
+
+  if (w[vid]) {
+    header.classList.add('watched');
+    badge.classList.add('watched');
+    titleEl.classList.add('watched');
+    btn.classList.add('watched');
+    btn.textContent = '✓ 済み';
+  } else {
+    header.classList.remove('watched');
+    badge.classList.remove('watched');
+    titleEl.classList.remove('watched');
+    btn.classList.remove('watched');
+    btn.textContent = '済み';
+  }
+  updateProgress();
+}
+
+// ─────────────────────────────────────────
+// TOGGLE CARD
+// ─────────────────────────────────────────
+function toggleCard(vid) {
+  const body  = document.getElementById('body_' + vid);
+  const arrow = document.getElementById('arrow_' + vid);
+  const isOpen = body.classList.contains('open');
+
+  if (isOpen) {
+    body.classList.remove('open');
+    arrow.classList.remove('open');
+    body.innerHTML = '';
+  } else {
+    body.classList.add('open');
+    arrow.classList.add('open');
+    let ytId = '';
+    C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
+      if (v.id === vid) ytId = v.yt;
+    })));
+    body.innerHTML = `
+      <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&playsinline=1"
+                allowfullscreen allow="accelerometer; autoplay; clipboard-write;
+                encrypted-media; gyroscope; picture-in-picture">
+        </iframe>
+      </div>
+      ${renderQuizArea(vid)}`;
+  }
+}
+
+// ─────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────
+function resetAll() {
+  if (!confirm('視聴履歴・確認問題の記録をすべてリセットしますか？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(STREAK_KEY);
+  localStorage.removeItem(QUIZ_KEY);
+  build('all');
+  updateProgress();
+  updateStreak();
+}
+
+// ─────────────────────────────────────────
+// FILTER
+// ─────────────────────────────────────────
+let currentFilter = 'all';
+
+function applyFilter(chId) {
+  currentFilter = chId;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.ch === chId);
+  });
+  document.querySelectorAll('.chapter-block').forEach(el => {
+    el.style.display = (chId === 'all' || el.dataset.ch === chId) ? '' : 'none';
+  });
+}
+
+// ─────────────────────────────────────────
+// BUILD
+// ─────────────────────────────────────────
+function build(filter) {
+  const w = loadWatched();
+
+  const tabBar = document.getElementById('tabBar');
+  tabBar.innerHTML = '';
+  const allTab = document.createElement('button');
+  allTab.className = 'tab' + (filter === 'all' ? ' active' : '');
+  allTab.dataset.ch = 'all';
+  allTab.textContent = 'すべて';
+  allTab.onclick = () => applyFilter('all');
+  tabBar.appendChild(allTab);
+
+  C.forEach(ch => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (filter === ch.id ? ' active' : '');
+    t.dataset.ch = ch.id;
+    t.textContent = ch.title;
+    t.onclick = () => applyFilter(ch.id);
+    tabBar.appendChild(t);
+  });
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  C.forEach(ch => {
+    let ct = 0, cd = 0;
+    ch.sections.forEach(sec => sec.videos.forEach(v => { ct++; if (w[v.id]) cd++; }));
+    const cpct = ct ? Math.round(cd / ct * 100) : 0;
+
+    const block = document.createElement('div');
+    block.className = 'chapter-block';
+    block.dataset.ch = ch.id;
+    if (filter !== 'all' && filter !== ch.id) block.style.display = 'none';
+
+    block.innerHTML = `
+      <div class="chapter-header">
+        <div>
+          <div class="chapter-title">${ch.title}</div>
+          <div class="chapter-bar-outer">
+            <div class="chapter-bar-inner" id="chbar_${ch.id}" style="width:${cpct}%"></div>
+          </div>
+        </div>
+        <div class="chapter-progress" id="chtxt_${ch.id}">${cd} / ${ct}</div>
+      </div>
+      <div class="chapter-body" id="chbody_${ch.id}"></div>
+    `;
+    content.appendChild(block);
+
+    const chBody = block.querySelector('.chapter-body');
+
+    ch.sections.forEach(sec => {
+      const secLabel = document.createElement('div');
+      secLabel.className = 'section-label';
+      secLabel.textContent = sec.title;
+      chBody.appendChild(secLabel);
+
+      sec.videos.forEach(v => {
+        const isWatched = !!w[v.id];
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.id = 'card_' + v.id;
+        card.innerHTML = `
+          <div class="card-header${isWatched ? ' watched' : ''}" onclick="toggleCard('${v.id}')">
+            <div class="num-badge${isWatched ? ' watched' : ''}">${v.num}</div>
+            <div class="card-title${isWatched ? ' watched' : ''}">${v.title}</div>
+            <button class="btn-watched${isWatched ? ' watched' : ''}"
+                    onclick="toggleWatched('${v.id}', event)">
+              ${isWatched ? '✓ 済み' : '済み'}
+            </button>
+            <div class="arrow-icon" id="arrow_${v.id}">▼</div>
+          </div>
+          <div class="card-body" id="body_${v.id}"></div>
+        `;
+        chBody.appendChild(card);
+      });
+    });
+  });
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+build('all');
+updateProgress();
+updateStreak();
+</script>
 </body>
 </html>
