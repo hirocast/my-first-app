@@ -248,6 +248,11 @@ body {
 .mark-btn.sel-× { background: #e94560; color: #fff; border-color: #e94560; }
 .mark-legend { font-size: 0.68rem; color: #bbb; margin-bottom: 12px; }
 
+.retry-title { font-size: 1rem; font-weight: 700; color: #e94560; margin-bottom: 8px; }
+.retry-msg { font-size: 0.85rem; color: #555; line-height: 1.6; margin-bottom: 12px; }
+.retry-list { list-style: none; margin: 0 0 4px; }
+.retry-list li { font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid #f0f0f0; color: #333; }
+
 .btn-next {
   width: 100%;
   padding: 15px;
@@ -865,7 +870,7 @@ function renderProblems(item) {
 
     <div class="card">
       <div class="starttime-inline">
-        <span>⏱ 解説開始時間</span>
+        <span>⏱ 練習問題開始時間</span>
         <input id="startTimeInput" type="text" placeholder="例: 0345" value="${savedTime}">
         <span style="color:#bbb;font-size:0.72rem;">入力で復習時に自動スキップ</span>
       </div>
@@ -899,8 +904,34 @@ function onSubmit() {
     if (t) item.startTime = t;
   }
   updateSRS(item.id, currentMarks);
-  qIdx++;
-  nextItem();
+  if (currentMarks.every(m => m === '○')) {
+    qIdx++;
+    nextItem();
+  } else {
+    renderRetry(item);
+  }
+}
+
+function renderRetry(item) {
+  showVideoContainer(item);
+  const badRows = currentMarks
+    .map((m, i) => m !== '○'
+      ? `<li>問${i + 1}：${m === '×' ? '× 不正解' : '△ あいまい'}</li>`
+      : '')
+    .filter(Boolean).join('');
+  setScreen(`
+    <div class="study-top">
+      <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+    <div class="card">
+      <div class="retry-title">⚠ もう少しです！</div>
+      <div class="retry-msg">数学は積み上げの教科です。<br>この単元をしっかり習得してから次に進みましょう。</div>
+      <ul class="retry-list">${badRows}</ul>
+    </div>
+    <button class="btn-next" onclick="renderVideo(queue[qIdx])">▶ 動画を見直す</button>
+    <button class="btn-ghost" style="margin-top:6px;" onclick="renderProblems(queue[qIdx])">✏ 練習問題をもう一度解く</button>
+  `);
 }
 
 // ─────────────────────────────────────
