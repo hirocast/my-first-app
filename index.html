@@ -378,13 +378,24 @@
     text-align: center;
   }
 
-  /* 習得バッジ */
+  /* 習得バッジ（問題レベル） */
   .grad-badge {
     font-size: 0.65rem;
     background: linear-gradient(135deg, #f5a623, #e8900a);
     color: #fff;
     border-radius: 999px;
     padding: 1px 8px;
+    white-space: nowrap;
+  }
+
+  /* 習得バッジ（カードレベル） */
+  .card-grad-badge {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    background: linear-gradient(135deg, #f5a623, #e8900a);
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 8px;
     white-space: nowrap;
   }
 
@@ -831,6 +842,23 @@ function refreshQuiz(vid) {
   const tmp = document.createElement('div');
   tmp.innerHTML = renderQuizArea(vid);
   quizEl.replaceWith(tmp.firstElementChild);
+  updateCardGradBadge(vid);
+}
+
+function updateCardGradBadge(vid) {
+  const card = document.getElementById('card_' + vid);
+  if (!card) return;
+  const isVGrad = isVideoGraduated(vid);
+  let badge = card.querySelector('.card-grad-badge');
+  const titleEl = card.querySelector('.card-title');
+  if (isVGrad && !badge) {
+    const newBadge = document.createElement('span');
+    newBadge.className = 'card-grad-badge';
+    newBadge.textContent = '🎓 習得済み';
+    titleEl.insertAdjacentElement('afterend', newBadge);
+  } else if (!isVGrad && badge) {
+    badge.remove();
+  }
 }
 
 // ─────────────────────────────────────────
@@ -948,6 +976,17 @@ function resetAll() {
   build('all');
   updateProgress();
   updateStreak();
+}
+
+// 動画の全問が習得済みかどうか判定
+function isVideoGraduated(vid) {
+  const qcount = getQcount(vid);
+  if (qcount === 0) return false;
+  const startedRounds = getStartedRounds(vid);
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (!isGraduated(vid, startedRounds, qi)) return false;
+  }
+  return true;
 }
 
 // ─────────────────────────────────────────
@@ -1138,6 +1177,7 @@ function build(filter) {
 
       visibleVideos.forEach(v => {
         const isWatched = !!w[v.id];
+        const isVGrad = isVideoGraduated(v.id);
         const card = document.createElement('div');
         card.className = 'video-card';
         card.id = 'card_' + v.id;
@@ -1145,6 +1185,7 @@ function build(filter) {
           <div class="card-header${isWatched ? ' watched' : ''}" onclick="toggleCard('${v.id}')">
             <div class="num-badge${isWatched ? ' watched' : ''}">${v.num}</div>
             <div class="card-title${isWatched ? ' watched' : ''}">${v.title}</div>
+            ${isVGrad ? '<span class="card-grad-badge">🎓 習得済み</span>' : ''}
             <button class="btn-watched${isWatched ? ' watched' : ''}"
                     onclick="toggleWatched('${v.id}', event)">
               ${isWatched ? '✓ 済み' : '済み'}
