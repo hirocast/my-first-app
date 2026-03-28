@@ -839,10 +839,10 @@ function setVideoHeight() {
 }
 
 function updateLayout() {
-  // dvh 非対応環境: body を visualViewport.height に合わせる
-  if (!CSS.supports('height', '1dvh')) {
-    const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    document.body.style.height = h + 'px';
+  // dvh 非対応 かつ visualViewport 非対応環境向けフォールバック
+  // (visualViewport がある場合は onVisualViewport() が処理する)
+  if (!CSS.supports('height', '1dvh') && !window.visualViewport) {
+    document.body.style.height = window.innerHeight + 'px';
   }
 }
 
@@ -1188,15 +1188,31 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-// dvh 非対応の古い iOS 向けフォールバック
-if (!CSS.supports('height', '1dvh') && window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateLayout);
-}
 // 画面回転時に動画高さを再計算
 window.addEventListener('resize', setVideoHeight);
+
+// iOS Safari はキーボード表示時に visual viewport を上にスクロールして
+// フォーカスしたインプットを表示しようとする。この動作でヘッダーと動画が
+// 画面外に押し出されるため、offsetTop 分だけ body を下にずらして打ち消す。
+if (window.visualViewport) {
+  function onVisualViewport() {
+    const vv = window.visualViewport;
+    // dvh 非対応端末: body 高さを visual viewport の高さ（キーボード除いた領域）に合わせる
+    if (!CSS.supports('height', '1dvh')) {
+      document.body.style.height = vv.height + 'px';
+    }
+    // iOS が visual viewport をスクロールした分だけ body を下にずらし
+    // ヘッダー・動画が常に画面上部に表示されるようにする
+    document.body.style.transform =
+      vv.offsetTop > 0 ? `translateY(${vv.offsetTop}px)` : '';
+  }
+  window.visualViewport.addEventListener('resize', onVisualViewport);
+  window.visualViewport.addEventListener('scroll', onVisualViewport);
+}
+
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
-  if (e.target.matches && e.target.matches('.answer-input')) {
+  if (e.target.matches && (e.target.matches('.answer-input') || e.target.matches('#startTimeInput'))) {
     setTimeout(() => {
       e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, 400);
