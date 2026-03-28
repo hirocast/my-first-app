@@ -271,6 +271,13 @@ body {
   <div id="streakLabel" class="header-streak">🔥 0日</div>
 </div>
 
+<div id="videoContainer" style="display:none">
+  <div class="video-wrapper">
+    <iframe id="videoFrame" src="" allowfullscreen
+            allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+  </div>
+</div>
+
 <div id="app"></div>
 
 <script src="data.js"></script>
@@ -435,6 +442,7 @@ function setScreen(html) {
 // HOME
 // ─────────────────────────────────────
 function renderHome() {
+  hideVideoContainer();
   queue = buildQueue();
   const prog = getProgress();
   const pct  = prog.total ? Math.round(prog.watched / prog.total * 100) : 0;
@@ -513,13 +521,12 @@ function renderVideo(item) {
     ? (item.isGrad ? '🎓習得済み — 最終確認をしよう' : '前回の間違いを踏まえてもう一度！')
     : '動画を見て内容を理解しよう';
 
+  showVideoContainer(item);
   setScreen(`
     <div class="study-top">
       <span class="study-badge ${badgeCls}">${badgeTxt}</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
-
-    ${videoHtml(item)}
 
     <div class="card">
       <div class="video-title">${item.title}</div>
@@ -543,12 +550,18 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
-function videoHtml(item) {
-  return `<div class="video-wrapper">
-    <iframe src="https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1"
-            allowfullscreen allow="autoplay; encrypted-media; gyroscope; picture-in-picture">
-    </iframe>
-  </div>`;
+function showVideoContainer(item) {
+  const container = document.getElementById('videoContainer');
+  const frame = document.getElementById('videoFrame');
+  const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1`;
+  if (frame.src !== newSrc) frame.src = newSrc; // 同じ動画なら再ロードしない
+  container.style.display = '';
+}
+
+function hideVideoContainer() {
+  const container = document.getElementById('videoContainer');
+  container.style.display = 'none';
+  document.getElementById('videoFrame').src = '';
 }
 
 function renderQcount(item) {
@@ -561,8 +574,6 @@ function renderQcount(item) {
       <span class="study-badge badge-new">新着</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
-
-    ${videoHtml(item)}
 
     <div class="card">
       <div class="section-q">📝 確認問題は何問ありましたか？<br>
@@ -605,8 +616,6 @@ function renderProblems(item) {
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
 
-    ${videoHtml(item)}
-
     <div class="card">
       <div class="problems-lead">結果を記録しよう</div>
       <div class="mark-legend">○ 正解　△ あいまい　× 不正解</div>
@@ -640,6 +649,7 @@ function onSubmit() {
 // DONE
 // ─────────────────────────────────────
 function renderDone() {
+  hideVideoContainer();
   updateStreak();
   const db    = loadDB();
   const today = todayStr();
@@ -683,6 +693,7 @@ function renderDone() {
 // BROWSE (全動画一覧)
 // ─────────────────────────────────────
 function renderBrowse() {
+  hideVideoContainer();
   const db  = loadDB();
   const today = todayStr();
   let html = '';
