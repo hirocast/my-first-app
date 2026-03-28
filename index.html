@@ -3,2032 +3,735 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Try IT 中学1年数学</title>
+<title>最速先取りナビ</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
-    background: #f0f4f8;
-    color: #1a1a2e;
-    min-height: 100vh;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  background: #f8fafc;
+  color: #1a1a2e;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+}
 
-  /* ── Header ── */
-  header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    color: #fff;
-    padding: 10px 14px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  }
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 7px;
-  }
-  header h1 {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-  header h1 span { color: #e94560; }
-  .header-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-  .streak { font-size: 0.7rem; color: #f5a623; white-space: nowrap; }
+/* ── Header ── */
+.app-header {
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  color: #fff;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-title { font-size: 0.95rem; font-weight: 700; }
+.app-title span { color: #e94560; }
+.app-ver { font-size: 0.5rem; opacity: 0.4; font-weight: 400; margin-left: 4px; }
+.header-streak { font-size: 0.8rem; color: #f5a623; }
 
-  /* 2本のバーを1行に */
-  .progress-row {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 8px;
-  }
-  .pr-icon { font-size: 0.7rem; flex-shrink: 0; width: 14px; text-align: center; line-height: 1; }
-  .pr-icon.grad { color: #f5d78e; }
-  .pr-sep { color: rgba(255,255,255,0.25); font-size: 0.75rem; flex-shrink: 0; }
-  .progress-bar-outer {
-    flex: 1;
-    background: rgba(255,255,255,0.15);
-    border-radius: 999px;
-    height: 6px;
-    overflow: hidden;
-  }
-  .progress-bar-inner {
-    height: 100%;
-    background: linear-gradient(90deg, #e94560, #f5a623);
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .progress-bar-inner.grad { background: linear-gradient(90deg, #f5a623, #e8900a); }
-  .progress-text {
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.75);
-    white-space: nowrap;
-    min-width: 28px;
-    text-align: right;
-  }
-  .btn-reset {
-    font-size: 0.72rem;
-    background: rgba(233,69,96,0.25);
-    color: #e94560;
-    border: 1px solid rgba(233,69,96,0.5);
-    border-radius: 6px;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .btn-reset:hover { background: rgba(233,69,96,0.45); }
+/* ── Screen ── */
+.screen { padding: 16px; }
 
-  /* ── Filter Tabs ── */
-  .tabs {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding: 12px 16px 0;
-    background: #f0f4f8;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1.5px solid #c0ccd8;
-    background: #fff;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #444;
-    font-weight: 600;
-  }
-  .tab.active { background: #0f3460; color: #fff; border-color: #0f3460; }
+/* ── Cards ── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+}
 
-  /* ── Chapter blocks ── */
-  .chapter-block { margin: 14px 12px 0; }
-  .chapter-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, #0f3460, #16213e);
-    color: #fff;
-    border-radius: 12px 12px 0 0;
-    padding: 10px 14px;
-  }
-  .chapter-title { font-size: 0.95rem; font-weight: 700; }
-  .chapter-progress { font-size: 0.75rem; color: rgba(255,255,255,0.75); }
-  .chapter-bar-outer {
-    background: rgba(255,255,255,0.2);
-    border-radius: 999px;
-    height: 4px;
-    margin-top: 4px;
-    overflow: hidden;
-  }
-  .chapter-bar-inner {
-    height: 100%;
-    background: #e94560;
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .chapter-grad-bar-outer {
-    background: rgba(255,255,255,0.15);
-    border-radius: 999px;
-    height: 4px;
-    margin-top: 3px;
-    overflow: hidden;
-  }
-  .chapter-grad-bar-inner {
-    height: 100%;
-    background: linear-gradient(90deg, #f5a623, #e8900a);
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .chapter-progress-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-  }
-  .chapter-grad-text {
-    font-size: 0.68rem;
-    color: #f5d78e;
-    white-space: nowrap;
-  }
-  .chapter-body {
-    background: #fff;
-    border-radius: 0 0 12px 12px;
-    overflow: hidden;
-    border: 1px solid #dde3ea;
-    border-top: none;
-    margin-bottom: 6px;
-  }
+/* ── Progress ── */
+.prog-label { font-size: 0.72rem; color: #888; margin-bottom: 6px; }
+.prog-bar-outer {
+  background: #eef2f7;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.prog-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #0f3460, #e94560);
+  border-radius: 999px;
+  transition: width 0.4s;
+}
+.prog-count { font-size: 0.78rem; color: #555; }
 
-  /* ── Section label ── */
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #0f3460;
-    background: #eef2f7;
-    padding: 5px 14px;
-    border-bottom: 1px solid #dde3ea;
-    letter-spacing: 0.04em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-  }
+/* ── Queue ── */
+.queue-title { font-size: 0.95rem; font-weight: 700; color: #0f3460; margin-bottom: 14px; }
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f4f8;
+  font-size: 0.85rem;
+}
+.queue-item:last-child { border-bottom: none; }
+.q-badge {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.q-badge.new    { background: #dbeafe; color: #1d4ed8; }
+.q-badge.review { background: #fde8cc; color: #c05c00; }
+.queue-empty { text-align: center; color: #888; font-size: 0.88rem; padding: 12px 0; line-height: 1.8; }
 
-  /* ── 状態チップ ── */
-  .status-chip {
-    flex-shrink: 0;
-    font-size: 0.62rem;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 2px 7px;
-    white-space: nowrap;
-  }
-  .status-chip.untouched  { background: #e8edf3; color: #6b7a90; }
-  .status-chip.watched    { background: #dbeafe; color: #1d4ed8; }
-  .status-chip.in-progress{ background: #fde8cc; color: #c05c00; }
-  .status-chip.graduated  { background: linear-gradient(135deg,#f5a623,#e8900a); color:#fff; }
+/* ── Buttons ── */
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #0f3460, #1d4ed8);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-ghost {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #d0d8e4;
+  background: #fff;
+  color: #555;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.btn-ghost:active { background: #f0f4f8; }
+.btn-danger { border-color: #e94560 !important; color: #e94560 !important; }
 
-  /* ── ガイダンス（ヘッダー内） ── */
-  #guidanceToast {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    background: rgba(245,166,35,0.18);
-    border: 1px solid rgba(245,166,35,0.6);
-    border-radius: 10px;
-    animation: guidancePulse 2s ease-in-out infinite;
-  }
-  #guidanceToast.visible { display: flex; }
-  .guidance-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1; }
-  .guidance-body { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
-  .guidance-msg  { font-size: 0.78rem; font-weight: 700; color: #f5d78e; }
-  .guidance-sub  { font-size: 0.65rem; color: rgba(255,255,255,0.6); }
-  @keyframes guidancePulse {
-    0%,100% { border-color: rgba(245,166,35,0.6); }
-    50%      { border-color: rgba(245,166,35,1); }
-  }
+/* ── Video ── */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+.video-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.video-sub   { font-size: 0.75rem; color: #888; }
 
-  .sec-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  .sec-progress-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-  }
-  .sec-progress-bar-outer {
-    width: 56px;
-    height: 4px;
-    background: rgba(15,52,96,0.15);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .sec-progress-bar-inner {
-    height: 100%;
-    background: #0f3460;
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .sec-grad-bar-outer {
-    width: 56px;
-    height: 4px;
-    background: rgba(200,119,0,0.15);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .sec-grad-bar-inner {
-    height: 100%;
-    background: linear-gradient(90deg, #f5a623, #e8900a);
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .sec-progress-texts {
-    display: flex;
-    justify-content: space-between;
-    width: 56px;
-  }
-  .sec-progress-text {
-    font-size: 0.58rem;
-    color: #0f3460;
-    white-space: nowrap;
-  }
-  .sec-grad-text {
-    font-size: 0.58rem;
-    color: #c87700;
-    white-space: nowrap;
-  }
-  .sec-grad-count {
-    display: none; /* grad bar で置き換えたので非表示 */
-  }
-  /* 100%達成スタイル */
-  .section-label.completed {
-    background: linear-gradient(135deg, #fff8e0, #ffedb0);
-    border-bottom-color: #f5a623;
-  }
-  .section-label.completed:hover { background: linear-gradient(135deg, #fff3cc, #ffe89a); }
-  .section-label.completed .sec-progress-bar-inner {
-    background: linear-gradient(90deg, #f5a623, #e8900a);
-  }
-  .section-label.completed .sec-progress-text { color: #b36d00; font-weight: 700; }
-  .sec-complete-badge {
-    font-size: 0.65rem;
-    background: linear-gradient(135deg, #f5a623, #e8900a);
-    color: #fff;
-    border-radius: 999px;
-    padding: 1px 7px;
-    white-space: nowrap;
-    font-weight: 700;
-  }
+.btn-watched {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: #0f3460;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
 
-  /* ── Video card ── */
-  .video-card { border-bottom: 1px solid #eef2f7; }
-  .video-card:last-child { border-bottom: none; }
+/* ── Qcount ── */
+.section-q { font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+.qcount-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.qcount-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  border: 2px solid #d0d8e4;
+  background: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #0f3460;
+  transition: all 0.15s;
+}
+.qcount-btn:hover { border-color: #0f3460; background: #f0f4f8; }
+.tryit-link { font-size: 0.75rem; color: #0f3460; text-decoration: none; }
+.tryit-link:hover { text-decoration: underline; }
 
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: background 0.15s;
-    gap: 10px;
-  }
-  .card-header:hover { background: #f7f9fc; }
-  .card-header.watched { background: #f0fff4; }
+/* ── Problems ── */
+.problems-lead { font-size: 0.85rem; font-weight: 700; color: #0f3460; margin-bottom: 14px; }
+.problem-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4f8;
+}
+.problem-row:last-child { border-bottom: none; }
+.prob-num { font-size: 0.82rem; color: #999; width: 32px; flex-shrink: 0; }
+.mark-btns { display: flex; gap: 7px; }
+.mark-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 2px solid #d0d8e4;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #aaa;
+  transition: all 0.15s;
+}
+.mark-btn.sel-○ { background: #22c55e; color: #fff; border-color: #22c55e; }
+.mark-btn.sel-△ { background: #f5a623; color: #fff; border-color: #f5a623; }
+.mark-btn.sel-× { background: #e94560; color: #fff; border-color: #e94560; }
+.mark-legend { font-size: 0.68rem; color: #bbb; margin-bottom: 12px; }
 
-  .num-badge {
-    flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: #e8edf3;
-    color: #0f3460;
-    font-size: 0.7rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .num-badge.watched { background: #d4edda; color: #1a7a3f; }
+.btn-next {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: #e94560;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.btn-next.ready { opacity: 1; pointer-events: all; }
 
-  .card-title {
-    flex: 1;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #1a1a2e;
-    line-height: 1.3;
-  }
-  .card-title.watched { color: #888; text-decoration: line-through; }
+/* ── Study header ── */
+.study-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.study-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.badge-new    { background: #dbeafe; color: #1d4ed8; }
+.badge-review { background: #fde8cc; color: #c05c00; }
+.study-pos { font-size: 0.8rem; color: #aaa; }
 
-  .arrow-icon {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    color: #aaa;
-    transition: transform 0.25s ease;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .arrow-icon.open { transform: rotate(180deg); }
+/* ── Done ── */
+.done-emoji { font-size: 3.5rem; text-align: center; margin-bottom: 10px; }
+.done-title { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.done-sub { font-size: 0.82rem; color: #888; text-align: center; line-height: 1.7; margin-bottom: 20px; }
+.done-stats { display: flex; gap: 10px; }
+.stat-box { flex: 1; background: #f8fafc; border-radius: 12px; padding: 14px 8px; text-align: center; }
+.stat-num   { font-size: 1.3rem; font-weight: 700; color: #0f3460; }
+.stat-label { font-size: 0.65rem; color: #888; margin-top: 3px; }
 
-  .btn-watched {
-    flex-shrink: 0;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1.5px solid #0f3460;
-    background: transparent;
-    color: #0f3460;
-    font-size: 0.7rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .btn-watched.watched { background: #0f3460; color: #fff; }
-  .btn-watched:hover { opacity: 0.75; }
+/* ── Browse ── */
+.ch-block { margin-bottom: 10px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.ch-title { background: #0f3460; color: #fff; padding: 10px 14px; font-size: 0.85rem; font-weight: 700; }
+.browse-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f4f8;
+  background: #fff;
+  font-size: 0.84rem;
+}
+.browse-row:last-child { border-bottom: none; }
+.b-num { color: #bbb; font-size: 0.72rem; width: 22px; flex-shrink: 0; }
+.b-status { flex-shrink: 0; font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 
-  /* ── Video embed ── */
-  .card-body { display: none; padding: 0 12px 12px; background: #fafbfc; }
-  .card-body.open { display: block; }
-
-  .video-wrapper {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    border-radius: 10px;
-    background: #000;
-    margin-top: 8px;
-  }
-  .video-wrapper iframe {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    border: none;
-    border-radius: 10px;
-  }
-
-  /* ── Quiz area ── */
-  .quiz-area {
-    margin-top: 12px;
-    border: 1.5px solid #dde3ea;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .quiz-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #eef2f7;
-    padding: 8px 12px;
-    border-bottom: 1px solid #dde3ea;
-  }
-  .quiz-title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #0f3460;
-  }
-  .quiz-link {
-    font-size: 0.72rem;
-    color: #e94560;
-    text-decoration: none;
-    border: 1px solid #e94560;
-    border-radius: 999px;
-    padding: 2px 8px;
-    white-space: nowrap;
-  }
-  .quiz-link:hover { background: #e94560; color: #fff; }
-
-  /* 問題数設定 */
-  .qcount-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-bottom: 1px solid #eef2f7;
-    background: #fff;
-    flex-wrap: wrap;
-  }
-  .qcount-label { font-size: 0.78rem; color: #555; white-space: nowrap; }
-  .qcount-btns { display: flex; gap: 4px; flex-wrap: wrap; }
-  .qcount-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1.5px solid #c0ccd8;
-    background: #fff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    color: #444;
-    transition: all 0.15s;
-  }
-  .qcount-btn.active { background: #0f3460; color: #fff; border-color: #0f3460; }
-
-  /* 回ごとの記録 */
-  .round-block {
-    padding: 8px 12px;
-    border-bottom: 1px solid #eef2f7;
-    background: #fff;
-  }
-  .round-block:last-child { border-bottom: none; }
-  .round-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-    gap: 6px;
-  }
-  .round-label { font-size: 0.72rem; font-weight: 700; color: #0f3460; }
-  .all-clear-badge {
-    font-size: 0.68rem;
-    background: #28a745;
-    color: #fff;
-    border-radius: 999px;
-    padding: 1px 8px;
-  }
-
-  .round-questions { display: flex; flex-direction: column; gap: 5px; }
-  .question-row { display: flex; align-items: center; gap: 6px; }
-  .q-label { font-size: 0.72rem; color: #666; width: 32px; flex-shrink: 0; }
-  .mark-btns { display: flex; gap: 4px; }
-  .mark-btn {
-    min-width: 32px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1.5px solid #c0ccd8;
-    background: #fff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    color: #666;
-    transition: all 0.15s;
-    padding: 0 6px;
-  }
-  .mark-btn:hover { opacity: 0.8; }
-  .mark-btn.selected-○ { background: #28a745; color: #fff; border-color: #28a745; }
-  .mark-btn.selected-△ { background: #f5a623; color: #fff; border-color: #f5a623; }
-  .mark-btn.selected-× { background: #e94560; color: #fff; border-color: #e94560; }
-  .mark-btn.selected-ー { background: #aaa; color: #fff; border-color: #aaa; }
-
-  /* 次の回を始めるボタン */
-  .next-round-wrap {
-    padding: 10px 12px;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: center;
-    border-top: 1px solid #eef2f7;
-  }
-  .next-round-btns {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .btn-next-round {
-    padding: 6px 16px;
-    border-radius: 999px;
-    border: 1.5px solid #0f3460;
-    background: #fff;
-    color: #0f3460;
-    font-size: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    line-height: 1.4;
-    text-align: center;
-  }
-  .btn-next-round:hover { background: #0f3460; color: #fff; }
-  .btn-next-round.primary { background: #0f3460; color: #fff; }
-  .btn-next-round.primary:hover { opacity: 0.85; }
-  .next-round-label {
-    font-size: 0.72rem;
-    color: #888;
-  }
-
-  /* 全問習得バナー */
-  .all-grad-banner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    background: linear-gradient(135deg, #fff8e0, #ffedb0);
-    border: 1.5px solid #f5a623;
-    border-radius: 10px;
-    padding: 10px 16px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #b36d00;
-    width: 100%;
-    text-align: center;
-  }
-  .all-grad-sub {
-    font-size: 0.68rem;
-    font-weight: 400;
-    color: #b36d00;
-    opacity: 0.85;
-  }
-  .btn-recheck {
-    border-color: #f5a623 !important;
-    color: #b36d00 !important;
-  }
-  .btn-recheck:hover { background: #fff3cc !important; }
-
-  .qcount-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 8px 12px;
-    padding: 8px 12px;
-    background: #fff8e0;
-    border: 1.5px solid #f5a623;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    color: #8a5c00;
-  }
-  .qcount-hint-arrow { font-size: 1rem; color: #f5a623; }
-
-  .mark-legend {
-    font-size: 0.68rem;
-    color: #999;
-    padding: 4px 12px 2px;
-    letter-spacing: 0.03em;
-  }
-  .mark-legend span { margin-right: 10px; }
-
-  /* ── タイムアタック ── */
-  .q-time {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
-  .time-icon { font-size: 0.68rem; color: #bbb; }
-  .time-best  { font-size: 0.72rem; }
-  .time-input {
-    width: 42px;
-    border: 1.5px solid #c0ccd8;
-    border-radius: 5px;
-    padding: 2px 4px;
-    font-size: 0.72rem;
-    text-align: right;
-    color: #333;
-    -moz-appearance: textfield;
-  }
-  .time-input::-webkit-outer-spin-button,
-  .time-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .time-input:focus { outline: none; border-color: #0f3460; }
-  .time-unit  { font-size: 0.62rem; color: #bbb; }
-  .time-delta {
-    font-size: 0.62rem;
-    font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-  .time-delta.faster { color: #1a7a3f; background: #d4edda; }
-  .time-delta.slower { color: #e94560; background: #fde8ec; }
-  .round-time-total {
-    font-size: 0.68rem;
-    color: #888;
-    margin-left: auto;
-  }
-
-  /* 習得バッジ（問題レベル） */
-  .grad-badge {
-    font-size: 0.65rem;
-    background: linear-gradient(135deg, #f5a623, #e8900a);
-    color: #fff;
-    border-radius: 999px;
-    padding: 1px 8px;
-    white-space: nowrap;
-  }
-
-  /* 習得バッジ（カードレベル） */
-  .card-grad-badge {
-    flex-shrink: 0;
-    font-size: 0.68rem;
-    background: linear-gradient(135deg, #f5a623, #e8900a);
-    color: #fff;
-    border-radius: 999px;
-    padding: 2px 8px;
-    white-space: nowrap;
-  }
-
-  .bottom-pad { height: 40px; }
-
-  /* ── Practice area ── */
-  .practice-area {
-    margin-top: 12px;
-    border: 1.5px solid #b7e0c9;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .practice-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #e8f5ee;
-    padding: 8px 12px;
-    border-bottom: 1px solid #b7e0c9;
-  }
-  .practice-title { font-size: 0.78rem; font-weight: 700; color: #1a7a3f; }
-  .practice-body { padding: 12px; background: #fff; }
-  .practice-question { font-size: 0.88rem; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
-  .practice-input {
-    border: 1.5px solid #b7e0c9;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 0.88rem;
-    width: 100px;
-    margin-right: 8px;
-    -moz-appearance: textfield;
-  }
-  .practice-input::-webkit-outer-spin-button,
-  .practice-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .practice-input:focus { outline: none; border-color: #1a7a3f; }
-  .btn-practice-check {
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1.5px solid #1a7a3f;
-    background: #1a7a3f;
-    color: #fff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .btn-practice-reveal {
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1.5px solid #1a7a3f;
-    background: #fff;
-    color: #1a7a3f;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .practice-feedback { margin-top: 8px; font-size: 0.85rem; font-weight: 700; }
-  .practice-feedback.correct { color: #1a7a3f; }
-  .practice-feedback.incorrect { color: #e94560; }
-  .practice-answer { margin-top: 8px; font-size: 0.85rem; color: #333; }
-  .btn-practice-next {
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1.5px solid #b7e0c9;
-    background: #fff;
-    color: #555;
-    font-size: 0.72rem;
-    cursor: pointer;
-  }
-
-  /* ── 達成トースト ── */
-  .celeb-toast {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: linear-gradient(135deg, #fff8e0, #ffedb0);
-    border: 2px solid #f5a623;
-    border-radius: 16px;
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 8px 32px rgba(245,166,35,0.35);
-    z-index: 300;
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    white-space: nowrap;
-  }
-  .celeb-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  .celeb-emoji { font-size: 2rem; line-height: 1; }
-  .celeb-msg { font-size: 0.9rem; font-weight: 700; color: #b36d00; line-height: 1.4; }
-  .celeb-sub { font-size: 0.72rem; font-weight: 400; color: #c87700; }
-
-  /* ── Review Mode ── */
-  .btn-review-mode {
-    font-size: 0.72rem;
-    background: rgba(233,69,96,0.1);
-    color: #e94560;
-    border: 1px solid rgba(233,69,96,0.4);
-    border-radius: 6px;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .btn-review-mode.active { background: #e94560; color: #fff; border-color: #e94560; }
-
-  .review-active-banner {
-    display: none;
-    background: #fff3f5;
-    border: 1.5px solid #e94560;
-    border-radius: 10px;
-    padding: 8px 14px;
-    margin: 10px 12px 0;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: #e94560;
-    font-weight: 700;
-  }
-  .review-banner-exit {
-    font-size: 0.72rem;
-    background: none;
-    border: 1px solid #e94560;
-    color: #e94560;
-    border-radius: 6px;
-    padding: 2px 8px;
-    cursor: pointer;
-  }
-
-  .review-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 199;
-  }
-  .review-overlay.open { display: block; }
-
-  .review-panel {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #fff;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
-    padding: 20px 16px 32px;
-    z-index: 200;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    max-height: 85vh;
-    overflow-y: auto;
-  }
-  .review-panel.open { transform: translateY(0); }
-  .review-panel-title { font-size: 1rem; font-weight: 700; color: #0f3460; margin-bottom: 16px; }
-  .review-section-title {
-    font-size: 0.78rem; font-weight: 700; color: #555;
-    margin: 14px 0 8px; padding-bottom: 4px;
-    border-bottom: 1px solid #eef2f7;
-  }
-
-  .review-chapters { display: flex; flex-direction: column; gap: 8px; }
-  .review-chapter-item {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 0.85rem; cursor: pointer; padding: 4px 0;
-  }
-  .review-chapter-item input { width: 16px; height: 16px; cursor: pointer; }
-
-  .review-conditions { display: flex; flex-direction: column; gap: 10px; }
-  .review-condition-item {
-    display: flex; align-items: flex-start; gap: 10px;
-    cursor: pointer; padding: 4px 0;
-  }
-  .review-condition-item input { margin-top: 3px; cursor: pointer; }
-  .review-condition-label { font-size: 0.85rem; font-weight: 600; color: #1a1a2e; }
-  .review-condition-desc { font-size: 0.72rem; color: #888; margin-top: 2px; }
-
-  .review-btns { display: flex; gap: 8px; margin-top: 20px; }
-  .btn-review-start {
-    flex: 1; padding: 11px; border-radius: 10px;
-    border: none; background: #e94560; color: #fff;
-    font-size: 0.88rem; font-weight: 700; cursor: pointer;
-  }
-  .btn-review-cancel {
-    padding: 11px 18px; border-radius: 10px;
-    border: 1.5px solid #c0ccd8; background: #fff;
-    color: #555; font-size: 0.88rem; font-weight: 700; cursor: pointer;
-  }
-  .btn-review-exit-panel {
-    width: 100%; padding: 11px; border-radius: 10px; margin-top: 8px;
-    border: 1.5px solid #e94560; background: #fff3f5;
-    color: #e94560; font-size: 0.88rem; font-weight: 700; cursor: pointer;
-  }
+/* ── SRS Next badge ── */
+.next-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  color: #888;
+  background: #f0f4f8;
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-top">
-    <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.6</small></h1>
-    <div class="header-actions">
-      <span class="streak" id="streakLabel">🔥 0日</span>
-      <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習</button>
-      <button class="btn-reset" onclick="resetAll()">リセット</button>
-    </div>
+<div class="app-header">
+  <div class="app-title">
+    最速先取りナビ <span>中1数学</span>
+    <span class="app-ver">v2.0</span>
   </div>
-  <div class="progress-row">
-    <span class="pr-icon">▶</span>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
-    </div>
-    <span class="progress-text" id="globalText">0/0</span>
-    <span class="pr-sep">│</span>
-    <span class="pr-icon grad">🎓</span>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner grad" id="globalGradBar" style="width:0%"></div>
-    </div>
-    <span class="progress-text" id="globalGradText">0/0</span>
-  </div>
-  <div id="guidanceToast"></div>
-</header>
-
-<div class="review-active-banner" id="reviewBanner">
-  <span>📋 復習モード：<span class="review-banner-label"></span></span>
-  <button class="review-banner-exit" onclick="exitReview()">終了</button>
+  <div id="streakLabel" class="header-streak">🔥 0日</div>
 </div>
 
-<div class="tabs" id="tabBar"></div>
-<div id="content"></div>
-<div class="bottom-pad"></div>
-
-<div class="review-overlay" id="reviewOverlay" onclick="closeReviewPanel()"></div>
-<div class="review-panel" id="reviewPanel">
-  <div class="review-panel-title">📋 復習設定</div>
-
-  <div class="review-section-title">📚 復習範囲（章を選択）</div>
-  <div class="review-chapters" id="reviewChapters"></div>
-
-  <div class="review-section-title">🎯 どの動画を復習する？</div>
-  <div class="review-conditions">
-    <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="needs_work">
-      <div>
-        <div class="review-condition-label">❌ まちがえた問題がある（推奨）</div>
-        <div class="review-condition-desc">直近の回で × か △ がついた動画だけ表示。間違いをつぶそう！</div>
-      </div>
-    </label>
-    <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="in_progress">
-      <div>
-        <div class="review-condition-label">📝 習得中（まだ終わっていない）</div>
-        <div class="review-condition-desc">問題を設定したけど、まだ🎓がついていない動画を表示</div>
-      </div>
-    </label>
-    <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="graduated">
-      <div>
-        <div class="review-condition-label">🎓 習得済みを最終確認</div>
-        <div class="review-condition-desc">全問🎓の動画を再チェック。試験直前の総まとめに！</div>
-      </div>
-    </label>
-    <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="all">
-      <div>
-        <div class="review-condition-label">📋 全問（選択した章すべて）</div>
-        <div class="review-condition-desc">問題未設定の動画も含めて全部表示</div>
-      </div>
-    </label>
-  </div>
-
-  <div class="review-btns">
-    <button class="btn-review-start" id="btnReviewApply" onclick="applyReview()">復習モードを開始</button>
-    <button class="btn-review-cancel" onclick="closeReviewPanel()">キャンセル</button>
-  </div>
-  <button class="btn-review-exit-panel" id="btnReviewExitPanel" onclick="exitReviewFromPanel()" style="display:none">✕ 復習モードを終了する</button>
-</div>
+<div id="app"></div>
 
 <script src="data.js"></script>
-
 <script>
-// ─────────────────────────────────────────
-// PRACTICE PROBLEMS
-// ─────────────────────────────────────────
-var PROBLEMS = {};
-function ri(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
-function rc(arr)  { return arr[Math.floor(Math.random() * arr.length)]; }
-
-// v001: マイナスとは？
-PROBLEMS['v001'] = function() {
-  return rc([
-    function() { const n = ri(1,9); return { q: `+${n} の反対の数（反数）は？`, a: -n, type: 'calc' }; },
-    function() { const n = ri(1,9); return { q: `-${n} の反対の数（反数）は？`, a: n,  type: 'calc' }; },
-    function() { const n = ri(1,9); return { q: `|-${n}| の絶対値は？`,         a: n,  type: 'calc' }; },
-    function() { const n = ri(1,9); return { q: `|+${n}| の絶対値は？`,         a: n,  type: 'calc' }; },
-    function() {
-      const a = -ri(1,4), b = -ri(5,9);
-      return { q: `${a} と ${b} では、どちらが大きい？（数字で答えよ）`, a: a, type: 'calc' };
-    },
-    function() { return { q: '数直線上で、0 より左側にある数を何といいますか？', a: '負の数（マイナスの数）', type: 'self' }; },
-    function() { return { q: '「絶対値」とは何ですか？', a: '数直線上で 0 からの距離（符号を取り除いた数）', type: 'self' }; },
-  ])();
-};
-</script>
-
-<script>
-// ─────────────────────────────────────────
-// STORAGE KEYS
-// ─────────────────────────────────────────
-const STORAGE_KEY = 'tryit_math1_v6';
-const STREAK_KEY  = 'tryit_streak_v6';
-const QUIZ_KEY    = 'tryit_quiz_v1';
-
-function loadWatched() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+// ─────────────────────────────────────
+// DB
+// ─────────────────────────────────────
+const DB_KEY = 'tryit_simple_v1';
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
   catch { return {}; }
 }
-function saveWatched(w) { localStorage.setItem(STORAGE_KEY, JSON.stringify(w)); }
-function loadStreak() {
-  try { return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count: 0, lastDate: '' }; }
-  catch { return { count: 0, lastDate: '' }; }
-}
-function saveStreak(s) { localStorage.setItem(STREAK_KEY, JSON.stringify(s)); }
-function loadQuiz() {
-  try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveQuiz(q) { localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); }
+function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-// ─────────────────────────────────────────
-// QUIZ HELPERS
-// ─────────────────────────────────────────
-const MAX_Q = 8;
-const MAX_R = 10;
-
-function getQcount(vid) {
-  return loadQuiz()[vid + '_qcount'] || 0;
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function addDays(d, n) {
+  const date = new Date(d + 'T00:00:00');
+  date.setDate(date.getDate() + n);
+  return date.toISOString().slice(0, 10);
 }
 
-function getStartedRounds(vid) {
-  return loadQuiz()[vid + '_started'] || 1;
-}
-
-function setStartedRounds(vid, r) {
-  const q = loadQuiz();
-  q[vid + '_started'] = r;
-  saveQuiz(q);
-}
-
-function setQcount(vid, n) {
-  const q = loadQuiz();
-  const prev = q[vid + '_qcount'] || 0;
-  if (n < prev) {
-    let hasData = false;
-    for (let r = 1; r <= MAX_R; r++) {
-      for (let qi = n + 1; qi <= prev; qi++) {
-        if (q[`${vid}_r${r}_q${qi}`]) { hasData = true; break; }
-      }
-      if (hasData) break;
-    }
-    if (hasData && !confirm(`問題数を${n}問に変更すると、問${n+1}以降の記録が削除されます。よろしいですか？`)) {
-      return false;
-    }
-    for (let r = 1; r <= MAX_R; r++) {
-      for (let qi = n + 1; qi <= prev; qi++) {
-        delete q[`${vid}_r${r}_q${qi}`];
-      }
-    }
-  }
-  q[vid + '_qcount'] = n;
-  saveQuiz(q);
-  return true;
-}
-
-function isRoundComplete(vid, round, qcount) {
-  if (qcount === 0) return false;
-  const q = loadQuiz();
-  for (let qi = 1; qi <= qcount; qi++) {
-    if (!q[`${vid}_r${round}_q${qi}`]) return false;
-  }
-  return true;
-}
-
-function getRoundMarkCount(vid, round, qcount) {
-  const q = loadQuiz();
-  let count = 0;
-  for (let qi = 1; qi <= qcount; qi++) {
-    if (q[`${vid}_r${round}_q${qi}`]) count++;
-  }
-  return count;
-}
-
-function isRoundAllClear(vid, round, qcount) {
-  if (qcount === 0) return false;
-  const q = loadQuiz();
-  for (let qi = 1; qi <= qcount; qi++) {
-    const mark = q[`${vid}_r${round}_q${qi}`];
-    if (mark !== '○' && mark !== 'ー') return false;
-  }
-  return true;
-}
-
-// 2回連続○で「習得済み」判定（ーは無視、×・△で降格）
-function isGraduated(vid, round, qi) {
-  const q = loadQuiz();
-  let streak = 0;
-  for (let r = 1; r <= round; r++) {
-    const mark = q[`${vid}_r${r}_q${qi}`] || '';
-    if (mark === '○') {
-      streak++;
-    } else if (mark === '×' || mark === '△') {
-      streak = 0; // ×・△で降格（連続リセット）
-    }
-    // ー はカウント維持（スキップなので影響なし）
-  }
-  return streak >= 2;
-}
-
-// 賢く始める：習得済み（2回連続○）のみスキップ、それ以外は再挑戦
-function startSmartRound(vid, nextRound) {
-  const q = loadQuiz();
-  const qcount = getQcount(vid);
-  const prevRound = nextRound - 1;
-
-  for (let qi = 1; qi <= qcount; qi++) {
-    if (isGraduated(vid, prevRound, qi)) {
-      // 習得済み（2回連続○）→ スキップ（ー）
-      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
-    }
-    // 未習得の○、△、×、ー → 空白で再挑戦
-  }
-
-  saveQuiz(q);
-  setStartedRounds(vid, nextRound);
-  refreshQuiz(vid);
-}
-
-// 前の回で○だった問題番号のリストを返す
-function getPrevCircleQuestions(vid, prevRound, qcount) {
-  const q = loadQuiz();
-  const result = [];
-  for (let qi = 1; qi <= qcount; qi++) {
-    if (q[`${vid}_r${prevRound}_q${qi}`] === '○') result.push(qi);
-  }
-  return result;
-}
-
-// 次の回を開始（autoSkip=trueなら前回○の問題にーをセット）
-function startNextRound(vid, nextRound, autoSkip) {
-  const q = loadQuiz();
-  const qcount = getQcount(vid);
-  const prevRound = nextRound - 1;
-
-  if (autoSkip) {
-    const circleQs = getPrevCircleQuestions(vid, prevRound, qcount);
-    circleQs.forEach(qi => {
-      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
-    });
-    saveQuiz(q);
-  }
-
-  setStartedRounds(vid, nextRound);
-  refreshQuiz(vid);
-}
-
-function getTryItUrl(vid) {
-  let chNum = '', secNum = '', lessonNum = '';
+// ─────────────────────────────────────
+// DATA HELPERS
+// ─────────────────────────────────────
+function getAllVideos() {
+  const list = [];
   C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
-    if (v.id === vid) { chNum = ch.chNum; secNum = sec.secNum; lessonNum = v.lesson; }
+    list.push({ ...v, chTitle: ch.title, chNum: ch.chNum, secNum: sec.secNum });
   })));
-  return `https://www.try-it.jp/chapters-${chNum}/sections-${secNum}/lessons-${lessonNum}/practice-3/`;
+  return list;
 }
 
-// ─────────────────────────────────────────
-// QUIZ UI RENDER
-// ─────────────────────────────────────────
-function renderQuizArea(vid) {
-  const q = loadQuiz();
-  const qcount = getQcount(vid);
-  const startedRounds = getStartedRounds(vid);
-  const tryItUrl = getTryItUrl(vid);
-
-  // 問題数ボタン（1〜8）
-  let qcountHtml = '';
-  for (let n = 1; n <= MAX_Q; n++) {
-    qcountHtml += `<button class="qcount-btn${qcount === n ? ' active' : ''}"
-      onclick="onSetQcount('${vid}', ${n})">${n}</button>`;
-  }
-
-  // 回ごとの記録
-  let roundsHtml = '';
-  if (qcount === 0) {
-    roundsHtml = `<div class="qcount-hint"><span class="qcount-hint-arrow">↑</span>この動画に何問あるか確認して、数字をタップしよう</div>`;
-  } else {
-    for (let r = 1; r <= startedRounds; r++) {
-      const complete = isRoundComplete(vid, r, qcount);
-      const allClear = complete && isRoundAllClear(vid, r, qcount);
-
-      let qRowsHtml = '';
-      for (let qi = 1; qi <= qcount; qi++) {
-        const mark = q[`${vid}_r${r}_q${qi}`] || '';
-        const marks = ['○', '△', '×', 'ー'];
-        const btnsHtml = marks.map(m =>
-          `<button class="mark-btn${mark === m ? ' selected-' + m : ''}"
-            onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
-        ).join('');
-        const graduated = isGraduated(vid, r, qi);
-
-        // タイム
-        const currTime = q[`${vid}_r${r}_q${qi}_t`] || 0;
-        const prevTime = r > 1 ? (q[`${vid}_r${r-1}_q${qi}_t`] || 0) : 0;
-        let bestTime = 0;
-        for (let rr = 1; rr <= r; rr++) {
-          const t = q[`${vid}_r${rr}_q${qi}_t`] || 0;
-          if (t > 0 && (bestTime === 0 || t < bestTime)) bestTime = t;
-        }
-        const isBest = currTime > 0 && r > 1 && currTime === bestTime;
-        let deltaHtml = '';
-        if (currTime > 0 && prevTime > 0) {
-          const diff = prevTime - currTime;
-          if (diff > 0) deltaHtml = `<span class="time-delta faster">↑${diff}秒</span>`;
-          else if (diff < 0) deltaHtml = `<span class="time-delta slower">↓${Math.abs(diff)}秒</span>`;
-        }
-        const timeHtml = `
-          <div class="q-time">
-            ${isBest ? '<span class="time-best">🏆</span>' : '<span class="time-icon">⏱</span>'}
-            <input class="time-input" type="number" min="1" max="9999"
-                   placeholder="-" value="${currTime || ''}"
-                   onchange="onSetTime('${vid}', ${r}, ${qi}, this.value)">
-            <span class="time-unit">秒</span>
-            ${deltaHtml}
-          </div>`;
-
-        qRowsHtml += `
-          <div class="question-row">
-            <div class="q-label">問${qi}</div>
-            <div class="mark-btns">${btnsHtml}</div>
-            ${graduated ? '<span class="grad-badge">🎓 習得</span>' : ''}
-            ${timeHtml}
-          </div>`;
-      }
-
-      const roundTotal = getRoundTotalTime(q, vid, r, qcount);
-      const showLegend = r === 1 && startedRounds === 1 && !localStorage.getItem('tryit_legend_v1');
-      roundsHtml += `
-        <div class="round-block">
-          <div class="round-header">
-            <div class="round-label">第${r}回</div>
-            ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
-            <span class="round-time-total" id="rtime_${vid}_r${r}">${roundTotal > 0 ? `⏱ 合計 ${formatTime(roundTotal)}` : ''}</span>
-          </div>
-          ${showLegend ? `<div class="mark-legend"><span>○ 正解</span><span>△ あいまい</span><span>× 不正解</span><span>ー スキップ</span></div>` : ''}
-          <div class="round-questions">${qRowsHtml}</div>
-        </div>`;
-    }
-
-    // 次の回ボタン（最新の回が全問記録済みかつ上限未満）
-    const latestComplete = isRoundComplete(vid, startedRounds, qcount);
-    if (latestComplete && startedRounds < MAX_R) {
-      const nextRound = startedRounds + 1;
-      const allGraduated = isVideoGraduated(vid);
-
-      if (allGraduated) {
-        roundsHtml += `
-          <div class="next-round-wrap">
-            <div class="all-grad-banner" onclick="closeAndCelebrate('${vid}')" style="cursor:pointer;">
-              🎓 全問習得済み！
-              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じる</span>
-            </div>
-            <div class="next-round-btns">
-              <button class="btn-next-round btn-recheck"
-                onclick="startSmartRound('${vid}', ${nextRound})">
-                再確認する（習得済みをスキップ）
-              </button>
-              <button class="btn-next-round"
-                onclick="startNextRound('${vid}', ${nextRound}, false)">
-                空白で始める
-              </button>
-            </div>
-          </div>`;
-      } else {
-        roundsHtml += `
-          <div class="next-round-wrap">
-            <div class="next-round-label">第${nextRound}回の開始方法</div>
-            <div class="next-round-btns">
-              <button class="btn-next-round primary"
-                onclick="startSmartRound('${vid}', ${nextRound})">
-                賢く始める（推奨）<br>
-                <span style="font-size:0.65rem;font-weight:400;">🎓習得済み→スキップ／それ以外→再挑戦</span>
-              </button>
-              <button class="btn-next-round"
-                onclick="startNextRound('${vid}', ${nextRound}, false)">
-                空白で始める
-              </button>
-            </div>
-          </div>`;
-      }
-    }
-  }
-
-  return `
-    <div class="quiz-area" id="quiz_${vid}">
-      <div class="quiz-header">
-        <span class="quiz-title">📝 確認問題</span>
-        <a class="quiz-link" href="${tryItUrl}" target="_blank">公式サイトで解く →</a>
-      </div>
-      <div class="qcount-wrap">
-        <span class="qcount-label">問題数:</span>
-        <div class="qcount-btns">${qcountHtml}</div>
-      </div>
-      ${roundsHtml}
-    </div>`;
+function getTryItUrl(v) {
+  return `https://www.try-it.jp/chapters-${v.chNum}/sections-${v.secNum}/lessons-${v.lesson}/practice-3/`;
 }
 
-// ─────────────────────────────────────────
-// QUIZ EVENT HANDLERS
-// ─────────────────────────────────────────
-function onSetQcount(vid, n) {
-  if (!setQcount(vid, n)) return;
-  refreshQuiz(vid);
-  updateCardStatusChip(vid);
-  updateGuidanceToast();
+// ─────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────
+function getProgress() {
+  const db = loadDB();
+  const all = getAllVideos();
+  const watched   = all.filter(v => db[v.id + '_watched']).length;
+  const graduated = all.filter(v => db[v.id + '_graduated']).length;
+  return { total: all.length, watched, graduated };
 }
 
-function onSetMark(vid, round, qi, mark) {
-  const q = loadQuiz();
-  const key = `${vid}_r${round}_q${qi}`;
-  q[key] = (q[key] === mark) ? undefined : mark;
-  if (q[key] === undefined) delete q[key];
-  saveQuiz(q);
-  localStorage.setItem('tryit_legend_v1', 'seen'); // 凡例を非表示にする
-  refreshQuiz(vid);
-}
-
-function onSetTime(vid, round, qi, val) {
-  const sec = parseInt(val);
-  const q = loadQuiz();
-  const key = `${vid}_r${round}_q${qi}_t`;
-  if (isNaN(sec) || sec <= 0) delete q[key];
-  else q[key] = sec;
-  saveQuiz(q);
-  // ラウンド合計時間だけ更新（フル再レンダー不要）
-  const qcount = getQcount(vid);
-  const total = getRoundTotalTime(q, vid, round, qcount);
-  const el = document.getElementById(`rtime_${vid}_r${round}`);
-  if (el) el.textContent = total > 0 ? `⏱ 合計 ${formatTime(total)}` : '';
-}
-
-function getRoundTotalTime(q, vid, round, qcount) {
-  let total = 0;
-  for (let qi = 1; qi <= qcount; qi++) total += q[`${vid}_r${round}_q${qi}_t`] || 0;
-  return total;
-}
-
-function formatTime(sec) {
-  if (!sec) return '';
-  if (sec < 60) return `${sec}秒`;
-  const m = Math.floor(sec / 60), s = sec % 60;
-  return s > 0 ? `${m}分${s}秒` : `${m}分`;
-}
-
-function refreshQuiz(vid) {
-  const quizEl = document.getElementById('quiz_' + vid);
-  if (!quizEl) return;
-  const tmp = document.createElement('div');
-  tmp.innerHTML = renderQuizArea(vid);
-  quizEl.replaceWith(tmp.firstElementChild);
-  updateCardGradBadge(vid);
-  updateGradProgress();
-  updateGuidanceToast();
-}
-
-function getStatusChip(vid, isWatched) {
-  const qcount = getQcount(vid);
-  if (isVideoGraduated(vid))
-    return `<span class="status-chip graduated" id="chip_${vid}">🎓 習得済み</span>`;
-  if (qcount > 0)
-    return `<span class="status-chip in-progress" id="chip_${vid}">学習中</span>`;
-  if (isWatched)
-    return `<span class="status-chip watched" id="chip_${vid}">視聴済み</span>`;
-  return `<span class="status-chip untouched" id="chip_${vid}">未着手</span>`;
-}
-
-function updateCardStatusChip(vid) {
-  const chip = document.getElementById('chip_' + vid);
-  if (!chip) return;
-  const w = loadWatched();
-  const isWatched = !!w[vid];
-  const qcount = getQcount(vid);
-  if (isVideoGraduated(vid)) {
-    chip.className = 'status-chip graduated';
-    chip.textContent = '🎓 習得済み';
-  } else if (qcount > 0) {
-    chip.className = 'status-chip in-progress';
-    chip.textContent = '学習中';
-  } else if (isWatched) {
-    chip.className = 'status-chip watched';
-    chip.textContent = '視聴済み';
-  } else {
-    chip.className = 'status-chip untouched';
-    chip.textContent = '未着手';
-  }
-}
-
-function updateCardGradBadge(vid) {
-  updateCardStatusChip(vid);
-  const secInfo = findVideoSection(vid);
-  if (secInfo) refreshSectionLabel(secInfo.chId, secInfo.secNum);
-}
-
-// ─────────────────────────────────────────
+// ─────────────────────────────────────
 // STREAK
-// ─────────────────────────────────────────
+// ─────────────────────────────────────
 function updateStreak() {
-  const today = new Date().toISOString().slice(0, 10);
-  const s = loadStreak();
-  if (s.lastDate === today) {
-    document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
-    return;
+  const db = loadDB();
+  const today = todayStr();
+  const s = db['__streak'] || { count: 0, lastDate: '' };
+  if (s.lastDate !== today) {
+    s.count = s.lastDate === addDays(today, -1) ? s.count + 1 : 1;
+    s.lastDate = today;
+    db['__streak'] = s;
+    saveDB(db);
   }
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  s.count = (s.lastDate === yesterday) ? s.count + 1 : 1;
-  s.lastDate = today;
-  saveStreak(s);
   document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
 }
 
-// ─────────────────────────────────────────
-// PROGRESS
-// ─────────────────────────────────────────
-function updateProgress() {
-  const w = loadWatched();
-  let total = 0, done = 0;
-  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
-    total++;
-    if (w[v.id]) done++;
-  })));
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('globalBar').style.width = pct + '%';
-  document.getElementById('globalText').textContent = `${done} / ${total}`;
+// ─────────────────────────────────────
+// QUEUE
+// ─────────────────────────────────────
+const MAX_NEW = 5;
 
-  C.forEach(ch => {
-    let ct = 0, cd = 0;
-    ch.sections.forEach(sec => sec.videos.forEach(v => { ct++; if (w[v.id]) cd++; }));
-    const cpct = ct ? Math.round(cd / ct * 100) : 0;
-    const barEl = document.getElementById('chbar_' + ch.id);
-    const txtEl = document.getElementById('chtxt_' + ch.id);
-    if (barEl) barEl.style.width = cpct + '%';
-    if (txtEl) txtEl.textContent = `${cd} / ${ct}`;
-  });
+function buildQueue() {
+  const db = loadDB();
+  const today = todayStr();
+  const all = getAllVideos();
+  const queue = [];
 
-  updateGradProgress();
-}
-
-function updateGradProgress() {
-  let total = 0, gradTotal = 0;
-  C.forEach(ch => {
-    let ct = 0, cg = 0;
-    ch.sections.forEach(sec => sec.videos.forEach(v => {
-      ct++; total++;
-      if (isVideoGraduated(v.id)) { cg++; gradTotal++; }
-    }));
-    const cgpct = ct ? Math.round(cg / ct * 100) : 0;
-    const gradBarEl = document.getElementById('chgradbar_' + ch.id);
-    const gradTxtEl = document.getElementById('chgradtxt_' + ch.id);
-    if (gradBarEl) gradBarEl.style.width = cgpct + '%';
-    if (gradTxtEl) gradTxtEl.textContent = `🎓 ${cg} / ${ct}`;
-  });
-  const gpct = total ? Math.round(gradTotal / total * 100) : 0;
-  const gBar = document.getElementById('globalGradBar');
-  const gTxt = document.getElementById('globalGradText');
-  if (gBar) gBar.style.width = gpct + '%';
-  if (gTxt) gTxt.textContent = `${gradTotal} / ${total}`;
-}
-
-// ─────────────────────────────────────────
-// TOGGLE WATCHED
-// ─────────────────────────────────────────
-function toggleWatched(vid, e) {
-  e.stopPropagation();
-  const w = loadWatched();
-  w[vid] = !w[vid];
-  saveWatched(w);
-  clearTimeout(guidanceTimer);
-  guidanceTimer = null;
-  updateStreak();
-
-  const card    = document.getElementById('card_' + vid);
-  const header  = card.querySelector('.card-header');
-  const badge   = card.querySelector('.num-badge');
-  const titleEl = card.querySelector('.card-title');
-  const btn     = card.querySelector('.btn-watched');
-
-  if (w[vid]) {
-    header.classList.add('watched');
-    badge.classList.add('watched');
-    titleEl.classList.add('watched');
-    btn.classList.add('watched');
-    btn.textContent = '✓ 視聴済み';
-  } else {
-    header.classList.remove('watched');
-    badge.classList.remove('watched');
-    titleEl.classList.remove('watched');
-    btn.classList.remove('watched');
-    btn.textContent = '視聴した';
+  // 1. Reviews due today (not graduated)
+  for (const v of all) {
+    const next = db[v.id + '_next'];
+    const qcount = db[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && !db[v.id + '_graduated']) {
+      queue.push({ type: 'review', ...v, qcount });
+    }
   }
-  updateCardStatusChip(vid);
-  updateProgress();
-  updateGuidanceToast();
-  const secInfo = findVideoSection(vid);
-  if (secInfo) refreshSectionLabel(secInfo.chId, secInfo.secNum);
-}
 
-// ─────────────────────────────────────────
-// TOGGLE CARD
-// ─────────────────────────────────────────
-function toggleCard(vid) {
-  const body  = document.getElementById('body_' + vid);
-  const arrow = document.getElementById('arrow_' + vid);
-  const isOpen = body.classList.contains('open');
-
-  if (isOpen) {
-    body.classList.remove('open');
-    arrow.classList.remove('open');
-    body.innerHTML = '';
-    clearTimeout(guidanceTimer);
-    guidanceTimer = null;
-    cardOpenedAt = 0;
-  } else {
-    body.classList.add('open');
-    arrow.classList.add('open');
-    cardOpenedAt = Date.now();
-    clearTimeout(guidanceTimer);
-    guidanceTimer = setTimeout(() => {
-      if (document.querySelector('.card-body.open')) updateGuidanceToast();
-    }, 60000);
-    let ytId = '';
-    C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
-      if (v.id === vid) ytId = v.yt;
-    })));
-    body.innerHTML = `
-      <div class="video-wrapper">
-        <iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&playsinline=1"
-                allowfullscreen allow="accelerometer; autoplay; clipboard-write;
-                encrypted-media; gyroscope; picture-in-picture">
-        </iframe>
-      </div>
-      ${renderQuizArea(vid)}
-      <div id="prac_${vid}"></div>`;
-    renderPractice(vid);
+  // 2. Graduated videos due for periodic re-check
+  for (const v of all) {
+    const next = db[v.id + '_next'];
+    const qcount = db[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && db[v.id + '_graduated']) {
+      queue.push({ type: 'review', ...v, qcount, isGrad: true });
+    }
   }
-  updateGuidanceToast();
+
+  // 3. New videos (unwatched), in order, up to MAX_NEW
+  let newCount = 0;
+  for (const v of all) {
+    if (newCount >= MAX_NEW) break;
+    if (!db[v.id + '_watched']) {
+      queue.push({ type: 'new', ...v, qcount: 0 });
+      newCount++;
+    }
+  }
+
+  return queue;
 }
 
-// 現在の動画を閉じて達成トーストを表示
-function closeAndCelebrate(vid) {
-  toggleCard(vid);
-  showCelebrationToast();
-}
+// ─────────────────────────────────────
+// SRS UPDATE
+// ─────────────────────────────────────
+function updateSRS(vid, marks) {
+  const db = loadDB();
+  const today = todayStr();
+  const qcount = marks.length;
 
-function showCelebrationToast() {
-  const existing = document.getElementById('celebToast');
-  if (existing) existing.remove();
-  const toast = document.createElement('div');
-  toast.id = 'celebToast';
-  toast.className = 'celeb-toast';
-  toast.innerHTML = `
-    <div class="celeb-emoji">🎓</div>
-    <div class="celeb-msg">全問習得おめでとう！<br><span class="celeb-sub">この動画はコンプリートです</span></div>
-  `;
-  document.body.appendChild(toast);
-  // アニメーション開始
-  requestAnimationFrame(() => toast.classList.add('show'));
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 400);
-  }, 2500);
-}
+  db[vid + '_watched'] = true;
+  db[vid + '_qcount'] = qcount;
+  marks.forEach((m, i) => { db[`${vid}_q${i + 1}`] = m; });
 
-// ─────────────────────────────────────────
-// RESET
-// ─────────────────────────────────────────
-function resetAll() {
-  if (!confirm('視聴履歴・確認問題の記録をすべてリセットしますか？')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(STREAK_KEY);
-  localStorage.removeItem(QUIZ_KEY);
-  localStorage.removeItem('tryit_legend_v1');
-  build('all');
-  updateProgress();
-  updateStreak();
-}
+  const hasX   = marks.includes('×');
+  const hasTri = marks.includes('△');
+  const streak = db[vid + '_streak'] || 0;
+  const prevInterval = db[vid + '_interval'] || 0;
 
-// ─────────────────────────────────────────
-// GUIDANCE
-// ─────────────────────────────────────────
-function updateGuidanceToast() {
-  const toast = document.getElementById('guidanceToast');
-  if (!toast) return;
-
-  const html = (icon, msg, sub) =>
-    `<div class="guidance-icon">${icon}</div>
-     <div class="guidance-body">
-       <div class="guidance-msg">${msg}</div>
-       <div class="guidance-sub">${sub}</div>
-     </div>`;
-
-  const w = loadWatched();
-  const openBody = document.querySelector('.card-body.open');
-
-  if (openBody) {
-    const vid = openBody.id.replace('body_', '');
-    const isWatched = !!w[vid];
-    const qcount = getQcount(vid);
-    const elapsed = Date.now() - cardOpenedAt;
-
-    if (!isWatched) {
-      if (elapsed < 60000) {
-        toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
-      } else {
-        toast.innerHTML = html('✅', '「視聴した」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
-      }
-    } else if (qcount === 0) {
-      toast.innerHTML = html('📝', '確認問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
+  let interval, newStreak;
+  if (hasX) {
+    interval = 1; newStreak = 0;
+    delete db[vid + '_graduated'];
+  } else if (hasTri) {
+    interval = 3; newStreak = 0;
+    delete db[vid + '_graduated'];
+  } else {
+    // 全問○
+    newStreak = streak + 1;
+    if (newStreak >= 3) {
+      interval = 30;
+      db[vid + '_graduated'] = true;
     } else {
-      const r = getStartedRounds(vid);
-      const complete = isRoundComplete(vid, r, qcount);
-      if (!complete) {
-        const marked = getRoundMarkCount(vid, r, qcount);
-        if (marked === 0) {
-          toast.innerHTML = html('✏️', '問題を解いて○△×をつけよう', '「公式サイトで解く」で問題が見られます');
-        } else {
-          toast.innerHTML = html('✏️', '残りの問題にも○△×をつけよう', `あと${qcount - marked}問。全問記録したら次へ進めます`);
-        }
-      } else if (isVideoGraduated(vid)) {
-        toast.innerHTML = html('🎓', '全問習得！次へ進もう', '▲ 閉じて次の動画タイトルをタップしよう');
-      } else {
-        toast.innerHTML = html('🔄', '次の回を始めよう', '「賢く始める」で間違えた問題だけ再挑戦しよう');
-      }
-    }
-    toast.classList.add('visible');
-    return;
-  }
-
-  // カードが閉じている場合：全体の状態から案内
-  const hasAnyWatched = Object.values(w).some(Boolean);
-  if (!hasAnyWatched) {
-    toast.innerHTML = html('👆', '動画タイトルをタップしよう', '▼ を押すと動画と確認問題が開きます');
-    toast.classList.add('visible');
-    return;
-  }
-
-  let watchedNoQuiz = false;
-  for (const vid of Object.keys(w)) {
-    if (w[vid] && getQcount(vid) === 0) { watchedNoQuiz = true; break; }
-  }
-  if (watchedNoQuiz) {
-    toast.innerHTML = html('📝', '確認問題の数を設定しよう', '動画を開いて公式サイトの問題数をタップしよう');
-    toast.classList.add('visible');
-    return;
-  }
-
-  let hasPartialRound = false;
-  for (const vid of Object.keys(w)) {
-    if (!w[vid]) continue;
-    const qcount = getQcount(vid);
-    if (qcount === 0) continue;
-    const r = getStartedRounds(vid);
-    const marked = getRoundMarkCount(vid, r, qcount);
-    if (marked > 0 && !isRoundComplete(vid, r, qcount)) { hasPartialRound = true; break; }
-  }
-  if (hasPartialRound) {
-    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて残りの○△×を記録しよう');
-    toast.classList.add('visible');
-    return;
-  }
-
-  let hasNextRound = false;
-  for (const vid of Object.keys(w)) {
-    if (!w[vid]) continue;
-    const qcount = getQcount(vid);
-    if (qcount === 0) continue;
-    const r = getStartedRounds(vid);
-    if (isRoundComplete(vid, r, qcount) && !isVideoGraduated(vid) && r < 10) {
-      hasNextRound = true; break;
+      interval = prevInterval > 0 ? Math.min(prevInterval * 2, 28) : 7;
     }
   }
-  if (hasNextRound) {
-    toast.innerHTML = html('🔄', '次の回を始めよう', '動画を開いて「賢く始める」をタップしよう');
-    toast.classList.add('visible');
-    return;
-  }
 
-  toast.innerHTML = html('👆', '次の動画を開こう', 'タイトルをタップして学習を続けよう');
-  toast.classList.add('visible');
+  db[vid + '_interval'] = interval;
+  db[vid + '_streak']   = newStreak;
+  db[vid + '_next']     = addDays(today, interval);
+  saveDB(db);
 }
 
-// 動画の全問が習得済みかどうか判定
-function isVideoGraduated(vid) {
-  const qcount = getQcount(vid);
-  if (qcount === 0) return false;
-  const startedRounds = getStartedRounds(vid);
-  for (let qi = 1; qi <= qcount; qi++) {
-    if (!isGraduated(vid, startedRounds, qi)) return false;
-  }
-  return true;
+// ─────────────────────────────────────
+// STATE
+// ─────────────────────────────────────
+let queue = [];
+let qIdx  = 0;
+let currentMarks = [];
+
+// ─────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────
+function setScreen(html) {
+  document.getElementById('app').innerHTML = `<div class="screen">${html}</div>`;
 }
 
-// ─────────────────────────────────────────
-// REVIEW MODE
-// ─────────────────────────────────────────
-const REVIEW_KEY = 'tryit_review_v1';
-function loadReviewSettings() {
-  try { return JSON.parse(localStorage.getItem(REVIEW_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveReviewSettings(r) { localStorage.setItem(REVIEW_KEY, JSON.stringify(r)); }
+// ─────────────────────────────────────
+// HOME
+// ─────────────────────────────────────
+function renderHome() {
+  queue = buildQueue();
+  const prog = getProgress();
+  const pct  = prog.total ? Math.round(prog.watched / prog.total * 100) : 0;
+  const db   = loadDB();
+  const today = todayStr();
 
-let reviewActive = false;
-let reviewChapters = [];
-let reviewCondition = 'needs_work';
+  const reviews = queue.filter(i => i.type === 'review');
+  const news    = queue.filter(i => i.type === 'new');
 
-let cardOpenedAt = 0;
-let guidanceTimer = null;
-
-function videoMatchesCondition(vid, condition) {
-  const q = loadQuiz();
-  const qcount = getQcount(vid);
-  const startedRounds = getStartedRounds(vid);
-
-  if (condition === 'all') return true;
-
-  // 復習の前提：問題を設定済みであること（未着手は復習対象外）
-  if (qcount === 0) return false;
-
-  if (condition === 'needs_work') {
-    for (let qi = 1; qi <= qcount; qi++) {
-      const mark = q[`${vid}_r${startedRounds}_q${qi}`] || '';
-      if (mark === '×' || mark === '△') return true;
-    }
-    return false;
-  }
-  if (condition === 'in_progress') {
-    for (let qi = 1; qi <= qcount; qi++) {
-      if (!isGraduated(vid, startedRounds, qi)) return true;
-    }
-    return false;
-  }
-  if (condition === 'graduated') {
-    for (let qi = 1; qi <= qcount; qi++) {
-      if (!isGraduated(vid, startedRounds, qi)) return false;
-    }
-    return true;
-  }
-  return false;
-}
-
-function openReviewPanel() {
-  const settings = loadReviewSettings();
-  reviewChapters = settings.chapters || C.map(ch => ch.id);
-  const conditionMigration = { unmastered: 'in_progress', needs_review: 'needs_work' };
-  reviewCondition = conditionMigration[settings.condition] || settings.condition || 'needs_work';
-  if (!['needs_work', 'in_progress', 'graduated', 'all'].includes(reviewCondition)) {
-    reviewCondition = 'needs_work';
-  }
-
-  document.getElementById('reviewChapters').innerHTML = C.map(ch => `
-    <label class="review-chapter-item">
-      <input type="checkbox" value="${ch.id}" ${reviewChapters.includes(ch.id) ? 'checked' : ''}>
-      <span>${ch.title}</span>
-    </label>
-  `).join('');
-
-  document.querySelectorAll('input[name="reviewCond"]').forEach(r => {
-    r.checked = (r.value === reviewCondition);
-  });
-
-  const exitBtn = document.getElementById('btnReviewExitPanel');
-  const applyBtn = document.getElementById('btnReviewApply');
-  if (reviewActive) {
-    exitBtn.style.display = '';
-    applyBtn.textContent = '設定を変えて再開始';
-  } else {
-    exitBtn.style.display = 'none';
-    applyBtn.textContent = '復習モードを開始';
-  }
-
-  document.getElementById('reviewOverlay').classList.add('open');
-  document.getElementById('reviewPanel').classList.add('open');
-}
-
-function closeReviewPanel() {
-  document.getElementById('reviewOverlay').classList.remove('open');
-  document.getElementById('reviewPanel').classList.remove('open');
-}
-
-function applyReview() {
-  reviewChapters = [...document.querySelectorAll('#reviewChapters input:checked')].map(i => i.value);
-  reviewCondition = document.querySelector('input[name="reviewCond"]:checked')?.value || 'needs_work';
-  if (reviewChapters.length === 0) { alert('少なくとも1つの章を選択してください。'); return; }
-  saveReviewSettings({ chapters: reviewChapters, condition: reviewCondition });
-  reviewActive = true;
-  closeReviewPanel();
-  build('all');
-  updateProgress();
-  updateReviewUI();
-}
-
-function exitReview() {
-  reviewActive = false;
-  build('all');
-  updateProgress();
-  updateReviewUI();
-}
-
-function exitReviewFromPanel() {
-  closeReviewPanel();
-  exitReview();
-}
-
-function updateReviewUI() {
-  const btn = document.getElementById('btnReviewMode');
-  const banner = document.getElementById('reviewBanner');
-  const condLabels = { needs_work: 'まちがいを復習', in_progress: '習得中', graduated: '習得済み確認', all: '全問' };
-  if (reviewActive) {
-    btn.classList.add('active');
-    btn.textContent = '📋 復習中';
-    banner.style.display = 'flex';
-    banner.querySelector('.review-banner-label').textContent =
-      `${reviewChapters.length}章 ／ ${condLabels[reviewCondition]}`;
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = '📋 復習設定';
-    banner.style.display = 'none';
-  }
-}
-
-// ─────────────────────────────────────────
-// SECTION PROGRESS
-// ─────────────────────────────────────────
-function findVideoSection(vid) {
-  for (const ch of C) {
-    for (const sec of ch.sections) {
-      if (sec.videos.some(v => v.id === vid)) return { chId: ch.id, secNum: sec.secNum };
-    }
-  }
-  return null;
-}
-
-function refreshSectionLabel(chId, secNum) {
-  const secId = `sec_${chId}_${secNum}`;
-  const secBody = document.getElementById(secId);
-  if (!secBody) return;
-  const label = secBody.previousElementSibling;
-  if (!label || !label.classList.contains('section-label')) return;
-
-  let sec = null;
-  C.forEach(c => { if (c.id === chId) c.sections.forEach(s => { if (s.secNum === secNum) sec = s; }); });
-  if (!sec) return;
-
-  const w = loadWatched();
-  const visibleVideos = reviewActive
-    ? sec.videos.filter(v => videoMatchesCondition(v.id, reviewCondition))
-    : sec.videos;
-  const total = visibleVideos.length;
-  const watchedCount = visibleVideos.filter(v => w[v.id]).length;
-  const pct = total ? Math.round(watchedCount / total * 100) : 0;
-  const gradCount = visibleVideos.filter(v => isVideoGraduated(v.id)).length;
-
-  const bar        = document.getElementById('secbar_'      + secId);
-  const gradBar    = document.getElementById('secgradbar_'  + secId);
-  const txt        = document.getElementById('sectext_'     + secId);
-  const gradTxt    = document.getElementById('secgradtxt_'  + secId);
-  const gradCount2 = document.getElementById('secgrad_'     + secId);
-  const gradPct = total ? Math.round(gradCount / total * 100) : 0;
-  if (bar)        bar.style.width = pct + '%';
-  if (gradBar)    gradBar.style.width = gradPct + '%';
-  if (txt)        txt.textContent = `${watchedCount}/${total}`;
-  if (gradTxt)    gradTxt.textContent = `🎓${gradCount}`;
-  if (gradCount2) gradCount2.textContent = '';
-
-  label.classList.toggle('completed', pct === 100);
-
-  let badge = label.querySelector('.sec-complete-badge');
-  if (pct === 100 && !badge) {
-    badge = document.createElement('span');
-    badge.className = 'sec-complete-badge';
-    badge.textContent = '✨ 完了！';
-    label.querySelector('.sec-meta').prepend(badge);
-  } else if (pct < 100 && badge) {
-    badge.remove();
-  }
-}
-
-// ─────────────────────────────────────────
-// FILTER
-// ─────────────────────────────────────────
-let currentFilter = 'all';
-
-function applyFilter(chId) {
-  currentFilter = chId;
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.ch === chId);
-  });
-  document.querySelectorAll('.chapter-block').forEach(el => {
-    el.style.display = (chId === 'all' || el.dataset.ch === chId) ? '' : 'none';
-  });
-}
-
-// ─────────────────────────────────────────
-// BUILD
-// ─────────────────────────────────────────
-function build(filter) {
-  const w = loadWatched();
-
-  const tabBar = document.getElementById('tabBar');
-  tabBar.innerHTML = '';
-  const allTab = document.createElement('button');
-  allTab.className = 'tab' + (filter === 'all' ? ' active' : '');
-  allTab.dataset.ch = 'all';
-  allTab.textContent = 'すべて';
-  allTab.onclick = () => applyFilter('all');
-  tabBar.appendChild(allTab);
-  updateGuidanceToast();
-
-  C.forEach(ch => {
-    const t = document.createElement('button');
-    t.className = 'tab' + (filter === ch.id ? ' active' : '');
-    t.dataset.ch = ch.id;
-    t.textContent = ch.title;
-    t.onclick = () => applyFilter(ch.id);
-    tabBar.appendChild(t);
-  });
-
-  const content = document.getElementById('content');
-  content.innerHTML = '';
-
-  C.forEach(ch => {
-    // 復習モード：選択外の章をスキップ
-    if (reviewActive && !reviewChapters.includes(ch.id)) return;
-
-    let ct = 0, cd = 0, cg = 0;
-    ch.sections.forEach(sec => sec.videos.forEach(v => {
-      ct++; if (w[v.id]) cd++; if (isVideoGraduated(v.id)) cg++;
-    }));
-    const cpct = ct ? Math.round(cd / ct * 100) : 0;
-    const cgpct = ct ? Math.round(cg / ct * 100) : 0;
-
-    const block = document.createElement('div');
-    block.className = 'chapter-block';
-    block.dataset.ch = ch.id;
-    if (filter !== 'all' && filter !== ch.id) block.style.display = 'none';
-
-    block.innerHTML = `
-      <div class="chapter-header">
-        <div style="flex:1;min-width:0;">
-          <div class="chapter-title">${ch.title}</div>
-          <div class="chapter-bar-outer">
-            <div class="chapter-bar-inner" id="chbar_${ch.id}" style="width:${cpct}%"></div>
-          </div>
-          <div class="chapter-grad-bar-outer">
-            <div class="chapter-grad-bar-inner" id="chgradbar_${ch.id}" style="width:${cgpct}%"></div>
-          </div>
-        </div>
-        <div class="chapter-progress-wrap">
-          <div class="chapter-progress" id="chtxt_${ch.id}">${cd} / ${ct}</div>
-          <div class="chapter-grad-text" id="chgradtxt_${ch.id}">🎓 ${cg} / ${ct}</div>
-        </div>
-      </div>
-      <div class="chapter-body" id="chbody_${ch.id}"></div>
-    `;
-    content.appendChild(block);
-
-    const chBody = block.querySelector('.chapter-body');
-
-    ch.sections.forEach(sec => {
-      // 復習モード：条件に合う動画のみ表示
-      const visibleVideos = reviewActive
-        ? sec.videos.filter(v => videoMatchesCondition(v.id, reviewCondition))
-        : sec.videos;
-      if (visibleVideos.length === 0) return;
-
-      const secId = `sec_${ch.id}_${sec.secNum}`;
-      const totalSec = visibleVideos.length;
-      const watchedSec = visibleVideos.filter(v => w[v.id]).length;
-      const pctSec = totalSec ? Math.round(watchedSec / totalSec * 100) : 0;
-      const gradSec = visibleVideos.filter(v => isVideoGraduated(v.id)).length;
-      const secLabel = document.createElement('div');
-      secLabel.className = 'section-label' + (pctSec === 100 ? ' completed' : '');
-      secLabel.innerHTML = `
-        <span>${sec.title}</span>
-        <div class="sec-meta">
-          ${pctSec === 100 ? '<span class="sec-complete-badge">✨ 完了！</span>' : ''}
-          <span class="sec-grad-count" id="secgrad_${secId}"></span>
-          <div class="sec-progress-wrap">
-            <div class="sec-progress-bar-outer">
-              <div class="sec-progress-bar-inner" id="secbar_${secId}" style="width:${pctSec}%"></div>
-            </div>
-            <div class="sec-grad-bar-outer">
-              <div class="sec-grad-bar-inner" id="secgradbar_${secId}" style="width:${totalSec ? Math.round(gradSec/totalSec*100) : 0}%"></div>
-            </div>
-            <div class="sec-progress-texts">
-              <span class="sec-progress-text" id="sectext_${secId}">${watchedSec}/${totalSec}</span>
-              <span class="sec-grad-text" id="secgradtxt_${secId}">🎓${gradSec}</span>
-            </div>
-          </div>
-        </div>`;
-      chBody.appendChild(secLabel);
-
-      const secBody = document.createElement('div');
-      secBody.id = secId;
-      chBody.appendChild(secBody);
-
-      visibleVideos.forEach(v => {
-        const isWatched = !!w[v.id];
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.id = 'card_' + v.id;
-        card.innerHTML = `
-          <div class="card-header${isWatched ? ' watched' : ''}" onclick="toggleCard('${v.id}')">
-            <div class="num-badge${isWatched ? ' watched' : ''}">${v.num}</div>
-            <div class="card-title${isWatched ? ' watched' : ''}">${v.title}</div>
-            ${getStatusChip(v.id, isWatched)}
-            <button class="btn-watched${isWatched ? ' watched' : ''}"
-                    onclick="toggleWatched('${v.id}', event)">
-              ${isWatched ? '✓ 視聴済み' : '視聴した'}
-            </button>
-            <div class="arrow-icon" id="arrow_${v.id}">▼</div>
-          </div>
-          <div class="card-body" id="body_${v.id}"></div>
-        `;
-        secBody.appendChild(card);
-      });
-    });
-  });
-}
-
-// ─────────────────────────────────────────
-// PRACTICE PROBLEMS
-// ─────────────────────────────────────────
-function renderPractice(vid) {
-  const el = document.getElementById('prac_' + vid);
-  if (!el) return;
-  if (!window.PROBLEMS || !PROBLEMS[vid]) { el.style.display = 'none'; return; }
-
-  const prob = PROBLEMS[vid]();
-
-  let ctrlHtml;
-  if (prob.type === 'calc') {
-    ctrlHtml = `
-      <input class="practice-input" type="number" id="prac_input_${vid}" placeholder="答え">
-      <button class="btn-practice-check" onclick="checkPractice('${vid}', ${prob.a})">確認</button>`;
-  } else {
-    const escaped = prob.a.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    ctrlHtml = `<button class="btn-practice-reveal" onclick="revealPractice('${vid}', '${escaped}')">答えを確認する</button>`;
-  }
-
-  el.innerHTML = `
-    <div class="practice-area">
-      <div class="practice-header">
-        <span class="practice-title">🤖 AI作成類似問題</span>
-        <button class="btn-practice-next" onclick="renderPractice('${vid}')">別の問題</button>
-      </div>
-      <div class="practice-body">
-        <div class="practice-question">${prob.q}</div>
-        <div id="prac_ctrl_${vid}">${ctrlHtml}</div>
-        <div id="prac_feedback_${vid}"></div>
-      </div>
+  let listHtml = '';
+  if (queue.length === 0) {
+    // 明日の復習件数
+    const tomorrow = addDays(today, 1);
+    const tomorrowCount = getAllVideos().filter(v => {
+      const next = db[v.id + '_next'];
+      return next && next <= tomorrow && db[v.id + '_qcount'] && !db[v.id + '_graduated'];
+    }).length;
+    listHtml = `<div class="queue-empty">
+      🎉 今日のやることは完了！<br>
+      <span style="font-size:0.75rem;">明日の復習: ${tomorrowCount}件</span>
     </div>`;
-}
-
-function checkPractice(vid, correct) {
-  const input = document.getElementById('prac_input_' + vid);
-  const fb    = document.getElementById('prac_feedback_' + vid);
-  if (!input || !fb) return;
-  const val = parseFloat(input.value);
-  if (isNaN(val)) {
-    fb.className = 'practice-feedback incorrect';
-    fb.textContent = '数字を入力してください';
-    return;
-  }
-  if (val === correct) {
-    fb.className = 'practice-feedback correct';
-    fb.textContent = '⭕ 正解！';
   } else {
-    fb.className = 'practice-feedback incorrect';
-    fb.textContent = `❌ 不正解。正解は ${correct} です。`;
+    [...reviews, ...news].forEach(item => {
+      const badge = item.type === 'review'
+        ? `<span class="q-badge review">復習</span>`
+        : `<span class="q-badge new">新着</span>`;
+      listHtml += `<div class="queue-item">${badge}<span>${item.title}</span></div>`;
+    });
+  }
+
+  const startBtn = queue.length > 0
+    ? `<button class="btn-primary" onclick="startSession()">▶ 学習を始める（${queue.length}件）</button>`
+    : '';
+
+  setScreen(`
+    <div class="card">
+      <div class="prog-label">全体の進捗</div>
+      <div class="prog-bar-outer">
+        <div class="prog-bar-inner" style="width:${pct}%"></div>
+      </div>
+      <div class="prog-count">${prog.watched} / ${prog.total} 動画完了　🎓 ${prog.graduated}本習得</div>
+    </div>
+
+    <div class="card">
+      <div class="queue-title">📋 今日やること</div>
+      ${listHtml}
+      ${startBtn}
+    </div>
+
+    <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
+    <button class="btn-ghost btn-danger" onclick="resetAll()">リセット</button>
+  `);
+}
+
+// ─────────────────────────────────────
+// SESSION
+// ─────────────────────────────────────
+function startSession() {
+  qIdx = 0;
+  nextItem();
+}
+
+function nextItem() {
+  if (qIdx >= queue.length) { renderDone(); return; }
+  renderVideo(queue[qIdx]);
+}
+
+// ─────────────────────────────────────
+// VIDEO
+// ─────────────────────────────────────
+function renderVideo(item) {
+  const isReview = item.type === 'review';
+  const badgeCls = isReview ? 'badge-review' : 'badge-new';
+  const badgeTxt = isReview ? '復習' : '新着';
+  const subTxt   = isReview
+    ? (item.isGrad ? '🎓習得済み — 最終確認をしよう' : '前回の間違いを踏まえてもう一度！')
+    : '動画を見て内容を理解しよう';
+
+  setScreen(`
+    <div class="study-top">
+      <span class="study-badge ${badgeCls}">${badgeTxt}</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1"
+              allowfullscreen allow="autoplay; encrypted-media; gyroscope; picture-in-picture">
+      </iframe>
+    </div>
+
+    <div class="card">
+      <div class="video-title">${item.title}</div>
+      <div class="video-sub">${subTxt}</div>
+    </div>
+
+    <button class="btn-watched" onclick="onWatched()">✓ 見た</button>
+    <button class="btn-ghost" onclick="renderHome()">← ホームへ戻る</button>
+  `);
+}
+
+function onWatched() {
+  const item = queue[qIdx];
+  if (item.qcount > 0) {
+    renderProblems(item);
+  } else {
+    renderQcount(item);
   }
 }
 
-function revealPractice(vid, answer) {
-  const ctrl = document.getElementById('prac_ctrl_' + vid);
-  const fb   = document.getElementById('prac_feedback_' + vid);
-  if (ctrl) ctrl.style.display = 'none';
-  if (fb)   { fb.className = 'practice-answer'; fb.innerHTML = `答え：<strong>${answer}</strong>`; }
+// ─────────────────────────────────────
+// QCOUNT
+// ─────────────────────────────────────
+function renderQcount(item) {
+  let btns = '';
+  for (let n = 1; n <= 8; n++) {
+    btns += `<button class="qcount-btn" onclick="onSetQcount(${n})">${n}</button>`;
+  }
+  setScreen(`
+    <div class="study-top">
+      <span class="study-badge badge-new">新着</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="card">
+      <div class="section-q">📝 確認問題は何問ありましたか？<br>
+        <a class="tryit-link" href="${getTryItUrl(item)}" target="_blank">
+          公式サイトで確認する →
+        </a>
+      </div>
+      <div class="qcount-btns">${btns}</div>
+    </div>
+  `);
 }
 
-// ─────────────────────────────────────────
+function onSetQcount(n) {
+  queue[qIdx].qcount = n;
+  renderProblems(queue[qIdx]);
+}
+
+// ─────────────────────────────────────
+// PROBLEMS
+// ─────────────────────────────────────
+function renderProblems(item) {
+  currentMarks = new Array(item.qcount).fill('');
+
+  let rows = '';
+  for (let i = 0; i < item.qcount; i++) {
+    rows += `
+      <div class="problem-row" id="prow_${i}">
+        <span class="prob-num">問${i + 1}</span>
+        <div class="mark-btns">
+          <button class="mark-btn" onclick="setMark(${i},'○')">○</button>
+          <button class="mark-btn" onclick="setMark(${i},'△')">△</button>
+          <button class="mark-btn" onclick="setMark(${i},'×')">×</button>
+        </div>
+      </div>`;
+  }
+
+  setScreen(`
+    <div class="study-top">
+      <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="card">
+      <div class="problems-lead">結果を記録しよう</div>
+      <div class="mark-legend">○ 正解　△ あいまい　× 不正解</div>
+      ${rows}
+    </div>
+
+    <button class="btn-next" id="btnNext" onclick="onSubmit()">記録して次へ →</button>
+  `);
+}
+
+function setMark(i, mark) {
+  currentMarks[i] = mark;
+  const row = document.getElementById('prow_' + i);
+  row.querySelectorAll('.mark-btn').forEach(btn => {
+    btn.className = 'mark-btn';
+    if (btn.textContent === mark) btn.classList.add('sel-' + mark);
+  });
+  if (currentMarks.every(m => m !== '')) {
+    document.getElementById('btnNext').classList.add('ready');
+  }
+}
+
+function onSubmit() {
+  const item = queue[qIdx];
+  updateSRS(item.id, currentMarks);
+  qIdx++;
+  nextItem();
+}
+
+// ─────────────────────────────────────
+// DONE
+// ─────────────────────────────────────
+function renderDone() {
+  updateStreak();
+  const db    = loadDB();
+  const today = todayStr();
+  const streak = (db['__streak'] || {}).count || 0;
+
+  // 明日の件数
+  const tomorrow = addDays(today, 1);
+  const tomorrowCount = getAllVideos().filter(v => {
+    const next = db[v.id + '_next'];
+    return next && next <= tomorrow && db[v.id + '_qcount'];
+  }).length;
+
+  const prog = getProgress();
+
+  setScreen(`
+    <div class="card">
+      <div class="done-emoji">🎉</div>
+      <div class="done-title">今日の学習完了！</div>
+      <div class="done-sub">お疲れさまでした。<br>毎日続けることが一番の近道です！</div>
+      <div class="done-stats">
+        <div class="stat-box">
+          <div class="stat-num">${queue.length}</div>
+          <div class="stat-label">今日の件数</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">${tomorrowCount}</div>
+          <div class="stat-label">明日の復習</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">🔥${streak}</div>
+          <div class="stat-label">連続学習</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="renderHome()">ホームへ戻る</button>
+  `);
+}
+
+// ─────────────────────────────────────
+// BROWSE (全動画一覧)
+// ─────────────────────────────────────
+function renderBrowse() {
+  const db  = loadDB();
+  const today = todayStr();
+  let html = '';
+
+  C.forEach(ch => {
+    let rows = '';
+    ch.sections.forEach(sec => sec.videos.forEach(v => {
+      const watched   = db[v.id + '_watched'];
+      const graduated = db[v.id + '_graduated'];
+      const qcount    = db[v.id + '_qcount'] || 0;
+      const next      = db[v.id + '_next'];
+
+      let statusEl;
+      if (graduated)      statusEl = `<span class="b-status" style="background:#fef3c7;color:#b36d00;">🎓習得</span>`;
+      else if (qcount > 0) statusEl = `<span class="b-status" style="background:#fde8cc;color:#c05c00;">学習中</span>`;
+      else if (watched)    statusEl = `<span class="b-status" style="background:#dbeafe;color:#1d4ed8;">視聴済</span>`;
+      else                 statusEl = `<span class="b-status" style="background:#eef2f7;color:#999;">未着手</span>`;
+
+      let nextEl = '';
+      if (next && !graduated) {
+        const daysLeft = Math.ceil((new Date(next + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
+        if (daysLeft <= 0) nextEl = `<span class="next-badge" style="color:#e94560;">今日</span>`;
+        else if (daysLeft === 1) nextEl = `<span class="next-badge">明日</span>`;
+        else nextEl = `<span class="next-badge">${daysLeft}日後</span>`;
+      }
+
+      rows += `<div class="browse-row">
+        <span class="b-num">${v.num}</span>
+        <span style="flex:1;font-size:0.83rem;">${v.title}</span>
+        ${nextEl}
+        ${statusEl}
+      </div>`;
+    }));
+    html += `<div class="ch-block"><div class="ch-title">${ch.title}</div>${rows}</div>`;
+  });
+
+  setScreen(`
+    <button class="btn-ghost" onclick="renderHome()" style="margin-bottom:14px;">← ホームへ戻る</button>
+    ${html}
+  `);
+}
+
+// ─────────────────────────────────────
+// RESET
+// ─────────────────────────────────────
+function resetAll() {
+  if (!confirm('学習記録をすべてリセットしますか？')) return;
+  localStorage.removeItem(DB_KEY);
+  updateStreak();
+  renderHome();
+}
+
+// ─────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────
-build('all');
-updateProgress();
+// ─────────────────────────────────────
 updateStreak();
-updateReviewUI();
+renderHome();
 </script>
 </body>
 </html>
