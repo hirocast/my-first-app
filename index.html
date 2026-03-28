@@ -259,6 +259,19 @@ body {
   padding: 1px 7px;
   flex-shrink: 0;
 }
+
+/* ── 答え入力欄 ── */
+.answer-input {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid #d0d8e4;
+  border-radius: 8px;
+  padding: 8px 8px;
+  font-size: 0.88rem;
+  color: #1a1a2e;
+  background: #f8fafc;
+}
+.answer-input:focus { outline: none; border-color: #0f3460; background: #fff; }
 </style>
 </head>
 <body>
@@ -271,7 +284,7 @@ body {
   <div id="streakLabel" class="header-streak">🔥 0日</div>
 </div>
 
-<div id="videoContainer" style="display:none">
+<div id="videoContainer" style="display:none; position:sticky; top:52px; z-index:50; background:#000;">
   <div class="video-wrapper">
     <iframe id="videoFrame" src="" allowfullscreen
             allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
@@ -602,6 +615,7 @@ function renderProblems(item) {
     rows += `
       <div class="problem-row" id="prow_${i}">
         <span class="prob-num">問${i + 1}</span>
+        <input class="answer-input" type="text" placeholder="答え">
         <div class="mark-btns">
           <button class="mark-btn" onclick="setMark(${i},'○')">○</button>
           <button class="mark-btn" onclick="setMark(${i},'△')">△</button>
