@@ -630,6 +630,70 @@
 
   .bottom-pad { height: 40px; }
 
+  /* ── Practice area ── */
+  .practice-area {
+    margin-top: 12px;
+    border: 1.5px solid #b7e0c9;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .practice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #e8f5ee;
+    padding: 8px 12px;
+    border-bottom: 1px solid #b7e0c9;
+  }
+  .practice-title { font-size: 0.82rem; font-weight: 700; color: #1a7a3f; }
+  .practice-body { padding: 12px; background: #fff; }
+  .practice-question { font-size: 0.88rem; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
+  .practice-input {
+    border: 1.5px solid #b7e0c9;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.88rem;
+    width: 100px;
+    margin-right: 8px;
+    -moz-appearance: textfield;
+  }
+  .practice-input::-webkit-outer-spin-button,
+  .practice-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .practice-input:focus { outline: none; border-color: #1a7a3f; }
+  .btn-practice-check {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid #1a7a3f;
+    background: #1a7a3f;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-practice-reveal {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid #1a7a3f;
+    background: #fff;
+    color: #1a7a3f;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .practice-feedback { margin-top: 8px; font-size: 0.85rem; font-weight: 700; }
+  .practice-feedback.correct { color: #1a7a3f; }
+  .practice-feedback.incorrect { color: #e94560; }
+  .practice-answer { margin-top: 8px; font-size: 0.85rem; color: #333; }
+  .btn-practice-next {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid #b7e0c9;
+    background: #fff;
+    color: #555;
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+
   /* ── 達成トースト ── */
   .celeb-toast {
     position: fixed;
@@ -840,6 +904,7 @@
 </div>
 
 <script src="data.js"></script>
+<script src="problems.js"></script>
 
 <script>
 // ─────────────────────────────────────────
@@ -1383,7 +1448,9 @@ function toggleCard(vid) {
                 encrypted-media; gyroscope; picture-in-picture">
         </iframe>
       </div>
-      ${renderQuizArea(vid)}`;
+      ${renderQuizArea(vid)}
+      <div id="prac_${vid}"></div>`;
+    renderPractice(vid);
   }
   updateGuidanceToast();
 }
@@ -1869,6 +1936,66 @@ function build(filter) {
       });
     });
   });
+}
+
+// ─────────────────────────────────────────
+// PRACTICE PROBLEMS
+// ─────────────────────────────────────────
+function renderPractice(vid) {
+  const el = document.getElementById('prac_' + vid);
+  if (!el) return;
+  if (!window.PROBLEMS || !PROBLEMS[vid]) { el.style.display = 'none'; return; }
+
+  const prob = PROBLEMS[vid]();
+
+  let ctrlHtml;
+  if (prob.type === 'calc') {
+    ctrlHtml = `
+      <input class="practice-input" type="number" id="prac_input_${vid}" placeholder="答え">
+      <button class="btn-practice-check" onclick="checkPractice('${vid}', ${prob.a})">確認</button>`;
+  } else {
+    const escaped = prob.a.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    ctrlHtml = `<button class="btn-practice-reveal" onclick="revealPractice('${vid}', '${escaped}')">答えを確認する</button>`;
+  }
+
+  el.innerHTML = `
+    <div class="practice-area">
+      <div class="practice-header">
+        <span class="practice-title">✏️ 練習問題</span>
+        <button class="btn-practice-next" onclick="renderPractice('${vid}')">別の問題</button>
+      </div>
+      <div class="practice-body">
+        <div class="practice-question">${prob.q}</div>
+        <div id="prac_ctrl_${vid}">${ctrlHtml}</div>
+        <div id="prac_feedback_${vid}"></div>
+      </div>
+    </div>`;
+}
+
+function checkPractice(vid, correct) {
+  const input = document.getElementById('prac_input_' + vid);
+  const fb    = document.getElementById('prac_feedback_' + vid);
+  if (!input || !fb) return;
+  const val = parseFloat(input.value);
+  if (isNaN(val)) {
+    fb.className = 'practice-feedback incorrect';
+    fb.textContent = '数字を入力してください';
+    return;
+  }
+  if (val === correct) {
+    fb.className = 'practice-feedback correct';
+    fb.textContent = '⭕ 正解！';
+  } else {
+    fb.className = 'practice-feedback incorrect';
+    fb.textContent = `❌ 不正解。正解は ${correct} です。`;
+  }
+}
+
+function revealPractice(vid, answer) {
+  const ctrl = document.getElementById('prac_ctrl_' + vid);
+  const fb   = document.getElementById('prac_feedback_' + vid);
+  if (ctrl) ctrl.style.display = 'none';
+  if (fb)   { fb.className = 'practice-answer'; fb.innerHTML = `答え：<strong>${answer}</strong>`; }
 }
 
 // ─────────────────────────────────────────
