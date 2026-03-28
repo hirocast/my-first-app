@@ -530,6 +530,45 @@
     text-align: center;
   }
 
+  /* ── タイムアタック ── */
+  .q-time {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .time-icon { font-size: 0.68rem; color: #bbb; }
+  .time-best  { font-size: 0.72rem; }
+  .time-input {
+    width: 42px;
+    border: 1.5px solid #c0ccd8;
+    border-radius: 5px;
+    padding: 2px 4px;
+    font-size: 0.72rem;
+    text-align: right;
+    color: #333;
+    -moz-appearance: textfield;
+  }
+  .time-input::-webkit-outer-spin-button,
+  .time-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .time-input:focus { outline: none; border-color: #0f3460; }
+  .time-unit  { font-size: 0.62rem; color: #bbb; }
+  .time-delta {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .time-delta.faster { color: #1a7a3f; background: #d4edda; }
+  .time-delta.slower { color: #e94560; background: #fde8ec; }
+  .round-time-total {
+    font-size: 0.68rem;
+    color: #888;
+    margin-left: auto;
+  }
+
   /* 習得バッジ（問題レベル） */
   .grad-badge {
     font-size: 0.65rem;
@@ -951,19 +990,48 @@ function renderQuizArea(vid) {
             onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
         ).join('');
         const graduated = isGraduated(vid, r, qi);
+
+        // タイム
+        const currTime = q[`${vid}_r${r}_q${qi}_t`] || 0;
+        const prevTime = r > 1 ? (q[`${vid}_r${r-1}_q${qi}_t`] || 0) : 0;
+        let bestTime = 0;
+        for (let rr = 1; rr <= r; rr++) {
+          const t = q[`${vid}_r${rr}_q${qi}_t`] || 0;
+          if (t > 0 && (bestTime === 0 || t < bestTime)) bestTime = t;
+        }
+        const isBest = currTime > 0 && r > 1 && currTime === bestTime;
+        let deltaHtml = '';
+        if (currTime > 0 && prevTime > 0) {
+          const diff = prevTime - currTime;
+          if (diff > 0) deltaHtml = `<span class="time-delta faster">↑${diff}秒</span>`;
+          else if (diff < 0) deltaHtml = `<span class="time-delta slower">↓${Math.abs(diff)}秒</span>`;
+        }
+        const timeHtml = `
+          <div class="q-time">
+            ${isBest ? '<span class="time-best">🏆</span>' : '<span class="time-icon">⏱</span>'}
+            <input class="time-input" type="number" min="1" max="9999"
+                   placeholder="-" value="${currTime || ''}"
+                   onchange="onSetTime('${vid}', ${r}, ${qi}, this.value)">
+            <span class="time-unit">秒</span>
+            ${deltaHtml}
+          </div>`;
+
         qRowsHtml += `
           <div class="question-row">
             <div class="q-label">問${qi}</div>
             <div class="mark-btns">${btnsHtml}</div>
             ${graduated ? '<span class="grad-badge">🎓 習得</span>' : ''}
+            ${timeHtml}
           </div>`;
       }
 
+      const roundTotal = getRoundTotalTime(q, vid, r, qcount);
       roundsHtml += `
         <div class="round-block">
           <div class="round-header">
             <div class="round-label">第${r}回</div>
             ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
+            <span class="round-time-total" id="rtime_${vid}_r${r}">${roundTotal > 0 ? `⏱ 合計 ${formatTime(roundTotal)}` : ''}</span>
           </div>
           <div class="round-questions">${qRowsHtml}</div>
         </div>`;
@@ -1042,6 +1110,33 @@ function onSetMark(vid, round, qi, mark) {
   if (q[key] === undefined) delete q[key];
   saveQuiz(q);
   refreshQuiz(vid);
+}
+
+function onSetTime(vid, round, qi, val) {
+  const sec = parseInt(val);
+  const q = loadQuiz();
+  const key = `${vid}_r${round}_q${qi}_t`;
+  if (isNaN(sec) || sec <= 0) delete q[key];
+  else q[key] = sec;
+  saveQuiz(q);
+  // ラウンド合計時間だけ更新（フル再レンダー不要）
+  const qcount = getQcount(vid);
+  const total = getRoundTotalTime(q, vid, round, qcount);
+  const el = document.getElementById(`rtime_${vid}_r${round}`);
+  if (el) el.textContent = total > 0 ? `⏱ 合計 ${formatTime(total)}` : '';
+}
+
+function getRoundTotalTime(q, vid, round, qcount) {
+  let total = 0;
+  for (let qi = 1; qi <= qcount; qi++) total += q[`${vid}_r${round}_q${qi}_t`] || 0;
+  return total;
+}
+
+function formatTime(sec) {
+  if (!sec) return '';
+  if (sec < 60) return `${sec}秒`;
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return s > 0 ? `${m}分${s}秒` : `${m}分`;
 }
 
 function refreshQuiz(vid) {
@@ -1158,13 +1253,13 @@ function toggleWatched(vid, e) {
     badge.classList.add('watched');
     titleEl.classList.add('watched');
     btn.classList.add('watched');
-    btn.textContent = '✓ 済み';
+    btn.textContent = '✓ 視聴済み';
   } else {
     header.classList.remove('watched');
     badge.classList.remove('watched');
     titleEl.classList.remove('watched');
     btn.classList.remove('watched');
-    btn.textContent = '済み';
+    btn.textContent = '視聴済み';
   }
   updateProgress();
   const secInfo = findVideoSection(vid);
@@ -1556,7 +1651,7 @@ function build(filter) {
             ${isVGrad ? '<span class="card-grad-badge">🎓 習得済み</span>' : ''}
             <button class="btn-watched${isWatched ? ' watched' : ''}"
                     onclick="toggleWatched('${v.id}', event)">
-              ${isWatched ? '✓ 済み' : '済み'}
+              ${isWatched ? '✓ 視聴済み' : '視聴済み'}
             </button>
             <div class="arrow-icon" id="arrow_${v.id}">▼</div>
           </div>
