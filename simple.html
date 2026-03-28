@@ -24,9 +24,15 @@ body {
   overflow: hidden;
 }
 
-/* ── Header: flex 固定行 ── */
+/* ── Header: viewport 固定（iOS キーボード表示時も常に画面上部に留まる） ── */
 .app-header {
-  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 100;
   background: linear-gradient(135deg, #1a1a2e, #0f3460);
   color: #fff;
   padding: 13px 16px;
@@ -34,9 +40,14 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-/* ── Video: flex 固定行、高さは JS が setVideoHeight() で一度だけ設定 ── */
+/* ── Video: viewport 固定（top は JS が updateContentPadding() で設定） ── */
 #videoContainer {
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 99;
   background: #000;
 }
 #videoContainer .video-wrapper {
@@ -49,7 +60,7 @@ body {
   top: 0; left: 0; width: 100%; height: 100%;
   border: none;
 }
-/* ── App: 残り全高を占有してスクロール ── */
+/* ── App: 全高を占有してスクロール（padding-top は JS が setVideoHeight() で設定） ── */
 #app {
   flex: 1;
   min-height: 0; /* flex overflow に必須 */
@@ -836,11 +847,24 @@ function setVideoHeight() {
   const w = Math.min(window.innerWidth, 480);
   document.getElementById('videoContainer').style.height =
     Math.min(Math.floor(w * 0.5625), Math.floor(w * 0.40)) + 'px';
+  updateContentPadding();
+}
+
+// ヘッダー・動画が position:fixed のため、#app に padding-top を設定して
+// コンテンツが固定要素の下から始まるようにする
+function updateContentPadding() {
+  const header = document.querySelector('.app-header');
+  const video  = document.getElementById('videoContainer');
+  const app    = document.getElementById('app');
+  if (!header || !app) return;
+  const headerH = header.offsetHeight;
+  if (video) video.style.top = headerH + 'px';
+  const videoH = (video && video.style.display !== 'none') ? video.offsetHeight : 0;
+  app.style.paddingTop = (headerH + videoH) + 'px';
 }
 
 function updateLayout() {
   // dvh 非対応 かつ visualViewport 非対応環境向けフォールバック
-  // (visualViewport がある場合は onVisualViewport() が処理する)
   if (!CSS.supports('height', '1dvh') && !window.visualViewport) {
     document.body.style.height = window.innerHeight + 'px';
   }
@@ -862,6 +886,7 @@ function showVideoContainer(item) {
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
+  updateContentPadding();
 }
 
 function renderQcount(item) {
@@ -1188,27 +1213,17 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-// 画面回転時に動画高さを再計算
+// 画面回転時に動画高さと padding-top を再計算
 window.addEventListener('resize', setVideoHeight);
 
-// iOS Safari はキーボード表示時に visual viewport を上にスクロールして
-// フォーカスしたインプットを表示しようとする。この動作でヘッダーと動画が
-// 画面外に押し出されるため、offsetTop 分だけ body を下にずらして打ち消す。
-if (window.visualViewport) {
-  function onVisualViewport() {
-    const vv = window.visualViewport;
-    // dvh 非対応端末: body 高さを visual viewport の高さ（キーボード除いた領域）に合わせる
-    if (!CSS.supports('height', '1dvh')) {
-      document.body.style.height = vv.height + 'px';
-    }
-    // iOS が visual viewport をスクロールした分だけ body を下にずらし
-    // ヘッダー・動画が常に画面上部に表示されるようにする
-    document.body.style.transform =
-      vv.offsetTop > 0 ? `translateY(${vv.offsetTop}px)` : '';
-  }
-  window.visualViewport.addEventListener('resize', onVisualViewport);
-  window.visualViewport.addEventListener('scroll', onVisualViewport);
+// dvh 非対応の古い iOS 向けフォールバック
+if (!CSS.supports('height', '1dvh') && window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateLayout);
 }
+
+// 初期 padding-top を設定（ヘッダーが fixed になったため）
+// renderHome() の後に DOM が確定してから実行
+requestAnimationFrame(updateContentPadding);
 
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
