@@ -725,13 +725,11 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
-  updateLayout();
 }
 
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
-  updateLayout();
 }
 
 function renderQcount(item) {
