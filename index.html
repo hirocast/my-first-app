@@ -1422,7 +1422,7 @@ function resetAll() {
   localStorage.removeItem(STREAK_KEY);
   localStorage.removeItem(QUIZ_KEY);
   localStorage.removeItem('tryit_legend_v1');
-  build(C[0].id);
+  build('all');
   updateProgress();
   updateStreak();
 }
@@ -1637,14 +1637,14 @@ function applyReview() {
   saveReviewSettings({ chapters: reviewChapters, condition: reviewCondition });
   reviewActive = true;
   closeReviewPanel();
-  build(C[0].id);
+  build('all');
   updateProgress();
   updateReviewUI();
 }
 
 function exitReview() {
   reviewActive = false;
-  build(C[0].id);
+  build('all');
   updateProgress();
   updateReviewUI();
 }
