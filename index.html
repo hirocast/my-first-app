@@ -1371,7 +1371,7 @@ function toggleCard(vid) {
     clearTimeout(guidanceTimer);
     guidanceTimer = setTimeout(() => {
       if (document.querySelector('.card-body.open')) updateGuidanceToast();
-    }, 6000);
+    }, 60000);
     let ytId = '';
     C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
       if (v.id === vid) ytId = v.yt;
@@ -1451,13 +1451,13 @@ function updateGuidanceToast() {
     const elapsed = Date.now() - cardOpenedAt;
 
     if (!isWatched) {
-      if (elapsed < 6000) {
+      if (elapsed < 60000) {
         toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
       } else {
         toast.innerHTML = html('✅', '「視聴済み」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
       }
     } else if (qcount === 0) {
-      toast.innerHTML = html('📝', '問題数をタップしよう', '何問あるか確認して数字を選ぼう');
+      toast.innerHTML = html('📝', '確認問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
     } else {
       const r = getStartedRounds(vid);
       const complete = isRoundComplete(vid, r, qcount);
@@ -1491,7 +1491,7 @@ function updateGuidanceToast() {
     if (w[vid] && getQcount(vid) === 0) { watchedNoQuiz = true; break; }
   }
   if (watchedNoQuiz) {
-    toast.innerHTML = html('📝', '問題数を設定しよう', '動画を開いて1〜8の数字をタップしよう');
+    toast.innerHTML = html('📝', '確認問題の数を設定しよう', '動画を開いて公式サイトの問題数をタップしよう');
     toast.classList.add('visible');
     return;
   }
