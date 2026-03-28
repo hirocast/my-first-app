@@ -378,7 +378,111 @@
     text-align: center;
   }
 
+  /* 習得バッジ */
+  .grad-badge {
+    font-size: 0.65rem;
+    background: linear-gradient(135deg, #f5a623, #e8900a);
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+
   .bottom-pad { height: 40px; }
+
+  /* ── Review Mode ── */
+  .btn-review-mode {
+    font-size: 0.72rem;
+    background: rgba(233,69,96,0.1);
+    color: #e94560;
+    border: 1px solid rgba(233,69,96,0.4);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-review-mode.active { background: #e94560; color: #fff; border-color: #e94560; }
+
+  .review-active-banner {
+    display: none;
+    background: #fff3f5;
+    border: 1.5px solid #e94560;
+    border-radius: 10px;
+    padding: 8px 14px;
+    margin: 10px 12px 0;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #e94560;
+    font-weight: 700;
+  }
+  .review-banner-exit {
+    font-size: 0.72rem;
+    background: none;
+    border: 1px solid #e94560;
+    color: #e94560;
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+
+  .review-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 199;
+  }
+  .review-overlay.open { display: block; }
+
+  .review-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+    padding: 20px 16px 32px;
+    z-index: 200;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .review-panel.open { transform: translateY(0); }
+  .review-panel-title { font-size: 1rem; font-weight: 700; color: #0f3460; margin-bottom: 16px; }
+  .review-section-title {
+    font-size: 0.78rem; font-weight: 700; color: #555;
+    margin: 14px 0 8px; padding-bottom: 4px;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .review-chapters { display: flex; flex-direction: column; gap: 8px; }
+  .review-chapter-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.85rem; cursor: pointer; padding: 4px 0;
+  }
+  .review-chapter-item input { width: 16px; height: 16px; cursor: pointer; }
+
+  .review-conditions { display: flex; flex-direction: column; gap: 10px; }
+  .review-condition-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    cursor: pointer; padding: 4px 0;
+  }
+  .review-condition-item input { margin-top: 3px; cursor: pointer; }
+  .review-condition-label { font-size: 0.85rem; font-weight: 600; color: #1a1a2e; }
+  .review-condition-desc { font-size: 0.72rem; color: #888; margin-top: 2px; }
+
+  .review-btns { display: flex; gap: 8px; margin-top: 20px; }
+  .btn-review-start {
+    flex: 1; padding: 11px; border-radius: 10px;
+    border: none; background: #e94560; color: #fff;
+    font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-review-cancel {
+    padding: 11px 18px; border-radius: 10px;
+    border: 1.5px solid #c0ccd8; background: #fff;
+    color: #555; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -393,13 +497,66 @@
   </div>
   <div class="header-meta">
     <div class="streak" id="streakLabel">🔥 連続学習: 0日</div>
-    <button class="btn-reset" onclick="resetAll()">リセット</button>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習設定</button>
+      <button class="btn-reset" onclick="resetAll()">リセット</button>
+    </div>
   </div>
 </header>
+
+<div class="review-active-banner" id="reviewBanner">
+  <span>📋 復習モード：<span class="review-banner-label"></span></span>
+  <button class="review-banner-exit" onclick="exitReview()">終了</button>
+</div>
 
 <div class="tabs" id="tabBar"></div>
 <div id="content"></div>
 <div class="bottom-pad"></div>
+
+<div class="review-overlay" id="reviewOverlay" onclick="closeReviewPanel()"></div>
+<div class="review-panel" id="reviewPanel">
+  <div class="review-panel-title">📋 復習設定</div>
+
+  <div class="review-section-title">📚 復習範囲（章を選択）</div>
+  <div class="review-chapters" id="reviewChapters"></div>
+
+  <div class="review-section-title">🎯 表示条件（カスタマイズ）</div>
+  <div class="review-conditions">
+    <label class="review-condition-item">
+      <input type="radio" name="reviewCond" value="unmastered">
+      <div>
+        <div class="review-condition-label">未習得のみ（推奨）</div>
+        <div class="review-condition-desc">🎓 習得マークがついていない動画を表示</div>
+      </div>
+    </label>
+    <label class="review-condition-item">
+      <input type="radio" name="reviewCond" value="needs_review">
+      <div>
+        <div class="review-condition-label">要復習（×・△）</div>
+        <div class="review-condition-desc">直近の回で × か △ がついた動画のみ表示</div>
+      </div>
+    </label>
+    <label class="review-condition-item">
+      <input type="radio" name="reviewCond" value="graduated">
+      <div>
+        <div class="review-condition-label">習得確認（🎓のみ）</div>
+        <div class="review-condition-desc">習得済み問題を最終確認（試験直前に）</div>
+      </div>
+    </label>
+    <label class="review-condition-item">
+      <input type="radio" name="reviewCond" value="all">
+      <div>
+        <div class="review-condition-label">全問</div>
+        <div class="review-condition-desc">選択した章の動画をすべて表示</div>
+      </div>
+    </label>
+  </div>
+
+  <div class="review-btns">
+    <button class="btn-review-start" onclick="applyReview()">復習モードを開始</button>
+    <button class="btn-review-cancel" onclick="closeReviewPanel()">キャンセル</button>
+  </div>
+</div>
 
 <script src="data.js"></script>
 
@@ -491,6 +648,36 @@ function isRoundAllClear(vid, round, qcount) {
   return true;
 }
 
+// 2回連続○で「習得済み」判定
+function isGraduated(vid, round, qi) {
+  if (round < 2) return false;
+  const q = loadQuiz();
+  return q[`${vid}_r${round}_q${qi}`] === '○' &&
+         q[`${vid}_r${round-1}_q${qi}`] === '○';
+}
+
+// 賢く始める：○→ー、△×ー→再挑戦（空白）
+function startSmartRound(vid, nextRound) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const prevRound = nextRound - 1;
+
+  for (let qi = 1; qi <= qcount; qi++) {
+    const prevMark = q[`${vid}_r${prevRound}_q${qi}`] || '';
+    if (prevMark === '○') {
+      // ○ → 次の回はスキップ（ー）
+      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
+    }
+    // ー（前回スキップ）→ 空白で再挑戦
+    // △ → 空白で再挑戦
+    // × → 空白で再挑戦
+  }
+
+  saveQuiz(q);
+  setStartedRounds(vid, nextRound);
+  refreshQuiz(vid);
+}
+
 // 前の回で○だった問題番号のリストを返す
 function getPrevCircleQuestions(vid, prevRound, qcount) {
   const q = loadQuiz();
@@ -560,10 +747,12 @@ function renderQuizArea(vid) {
           `<button class="mark-btn${mark === m ? ' selected-' + m : ''}"
             onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
         ).join('');
+        const graduated = isGraduated(vid, r, qi);
         qRowsHtml += `
           <div class="question-row">
             <div class="q-label">問${qi}</div>
             <div class="mark-btns">${btnsHtml}</div>
+            ${graduated ? '<span class="grad-badge">🎓 習得</span>' : ''}
           </div>`;
       }
 
@@ -581,23 +770,20 @@ function renderQuizArea(vid) {
     const latestComplete = isRoundComplete(vid, startedRounds, qcount);
     if (latestComplete && startedRounds < MAX_R) {
       const nextRound = startedRounds + 1;
-      const prevCircleCount = getPrevCircleQuestions(vid, startedRounds, qcount).length;
-      const hasCircles = prevCircleCount > 0;
 
       roundsHtml += `
         <div class="next-round-wrap">
-          <div class="next-round-label">第${nextRound}回の開始方法を選んでください</div>
+          <div class="next-round-label">第${nextRound}回の開始方法</div>
           <div class="next-round-btns">
             <button class="btn-next-round primary"
+              onclick="startSmartRound('${vid}', ${nextRound})">
+              賢く始める（推奨）<br>
+              <span style="font-size:0.65rem;font-weight:400;">○→スキップ／△×ー→再挑戦</span>
+            </button>
+            <button class="btn-next-round"
               onclick="startNextRound('${vid}', ${nextRound}, false)">
               空白で始める
             </button>
-            ${hasCircles ? `
-            <button class="btn-next-round"
-              onclick="startNextRound('${vid}', ${nextRound}, true)">
-              前回の○を<br>ーにして始める
-              <br><span style="font-size:0.65rem;font-weight:400;">(${prevCircleCount}問スキップ)</span>
-            </button>` : ''}
           </div>
         </div>`;
     }
@@ -760,6 +946,109 @@ function resetAll() {
 }
 
 // ─────────────────────────────────────────
+// REVIEW MODE
+// ─────────────────────────────────────────
+const REVIEW_KEY = 'tryit_review_v1';
+function loadReviewSettings() {
+  try { return JSON.parse(localStorage.getItem(REVIEW_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveReviewSettings(r) { localStorage.setItem(REVIEW_KEY, JSON.stringify(r)); }
+
+let reviewActive = false;
+let reviewChapters = [];
+let reviewCondition = 'unmastered';
+
+function videoMatchesCondition(vid, condition) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const startedRounds = getStartedRounds(vid);
+  if (condition === 'all') return true;
+  if (qcount === 0) return condition === 'unmastered';
+  if (condition === 'unmastered') {
+    for (let qi = 1; qi <= qcount; qi++) {
+      if (!isGraduated(vid, startedRounds, qi)) return true;
+    }
+    return false;
+  }
+  if (condition === 'needs_review') {
+    for (let qi = 1; qi <= qcount; qi++) {
+      const mark = q[`${vid}_r${startedRounds}_q${qi}`] || '';
+      if (mark === '×' || mark === '△') return true;
+    }
+    return false;
+  }
+  if (condition === 'graduated') {
+    for (let qi = 1; qi <= qcount; qi++) {
+      if (!isGraduated(vid, startedRounds, qi)) return false;
+    }
+    return true;
+  }
+  return true;
+}
+
+function openReviewPanel() {
+  const settings = loadReviewSettings();
+  reviewChapters = settings.chapters || C.map(ch => ch.id);
+  reviewCondition = settings.condition || 'unmastered';
+
+  document.getElementById('reviewChapters').innerHTML = C.map(ch => `
+    <label class="review-chapter-item">
+      <input type="checkbox" value="${ch.id}" ${reviewChapters.includes(ch.id) ? 'checked' : ''}>
+      <span>${ch.title}</span>
+    </label>
+  `).join('');
+
+  document.querySelectorAll('input[name="reviewCond"]').forEach(r => {
+    r.checked = (r.value === reviewCondition);
+  });
+
+  document.getElementById('reviewOverlay').classList.add('open');
+  document.getElementById('reviewPanel').classList.add('open');
+}
+
+function closeReviewPanel() {
+  document.getElementById('reviewOverlay').classList.remove('open');
+  document.getElementById('reviewPanel').classList.remove('open');
+}
+
+function applyReview() {
+  reviewChapters = [...document.querySelectorAll('#reviewChapters input:checked')].map(i => i.value);
+  reviewCondition = document.querySelector('input[name="reviewCond"]:checked')?.value || 'unmastered';
+  if (reviewChapters.length === 0) { alert('少なくとも1つの章を選択してください。'); return; }
+  saveReviewSettings({ chapters: reviewChapters, condition: reviewCondition });
+  reviewActive = true;
+  closeReviewPanel();
+  build('all');
+  updateProgress();
+  updateReviewUI();
+}
+
+function exitReview() {
+  reviewActive = false;
+  build('all');
+  updateProgress();
+  updateReviewUI();
+}
+
+function updateReviewUI() {
+  const btn = document.getElementById('btnReviewMode');
+  const banner = document.getElementById('reviewBanner');
+  const condLabels = { unmastered: '未習得のみ', needs_review: '×・△のみ', graduated: '習得確認', all: '全問' };
+  if (reviewActive) {
+    btn.classList.add('active');
+    btn.textContent = '📋 復習中';
+    banner.style.display = 'flex';
+    banner.querySelector('.review-banner-label').textContent =
+      `${reviewChapters.length}章 ／ ${condLabels[reviewCondition]}`;
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '📋 復習設定';
+    banner.style.display = 'none';
+  }
+}
+
+// ─────────────────────────────────────────
 // FILTER
 // ─────────────────────────────────────────
 let currentFilter = 'all';
@@ -802,6 +1091,9 @@ function build(filter) {
   content.innerHTML = '';
 
   C.forEach(ch => {
+    // 復習モード：選択外の章をスキップ
+    if (reviewActive && !reviewChapters.includes(ch.id)) return;
+
     let ct = 0, cd = 0;
     ch.sections.forEach(sec => sec.videos.forEach(v => { ct++; if (w[v.id]) cd++; }));
     const cpct = ct ? Math.round(cd / ct * 100) : 0;
@@ -828,12 +1120,18 @@ function build(filter) {
     const chBody = block.querySelector('.chapter-body');
 
     ch.sections.forEach(sec => {
+      // 復習モード：条件に合う動画のみ表示
+      const visibleVideos = reviewActive
+        ? sec.videos.filter(v => videoMatchesCondition(v.id, reviewCondition))
+        : sec.videos;
+      if (visibleVideos.length === 0) return;
+
       const secLabel = document.createElement('div');
       secLabel.className = 'section-label';
       secLabel.textContent = sec.title;
       chBody.appendChild(secLabel);
 
-      sec.videos.forEach(v => {
+      visibleVideos.forEach(v => {
         const isWatched = !!w[v.id];
         const card = document.createElement('div');
         card.className = 'video-card';
@@ -862,6 +1160,7 @@ function build(filter) {
 build('all');
 updateProgress();
 updateStreak();
+updateReviewUI();
 </script>
 </body>
 </html>
