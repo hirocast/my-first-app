@@ -439,6 +439,34 @@
     color: #888;
   }
 
+  /* 全問習得バナー */
+  .all-grad-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: linear-gradient(135deg, #fff8e0, #ffedb0);
+    border: 1.5px solid #f5a623;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #b36d00;
+    width: 100%;
+    text-align: center;
+  }
+  .all-grad-sub {
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: #b36d00;
+    opacity: 0.85;
+  }
+  .btn-recheck {
+    border-color: #f5a623 !important;
+    color: #b36d00 !important;
+  }
+  .btn-recheck:hover { background: #fff3cc !important; }
+
   .qcount-hint {
     font-size: 0.72rem;
     color: #aaa;
@@ -854,22 +882,43 @@ function renderQuizArea(vid) {
     const latestComplete = isRoundComplete(vid, startedRounds, qcount);
     if (latestComplete && startedRounds < MAX_R) {
       const nextRound = startedRounds + 1;
+      const allGraduated = isVideoGraduated(vid);
 
-      roundsHtml += `
-        <div class="next-round-wrap">
-          <div class="next-round-label">第${nextRound}回の開始方法</div>
-          <div class="next-round-btns">
-            <button class="btn-next-round primary"
-              onclick="startSmartRound('${vid}', ${nextRound})">
-              賢く始める（推奨）<br>
-              <span style="font-size:0.65rem;font-weight:400;">🎓習得済み→スキップ／それ以外→再挑戦</span>
-            </button>
-            <button class="btn-next-round"
-              onclick="startNextRound('${vid}', ${nextRound}, false)">
-              空白で始める
-            </button>
-          </div>
-        </div>`;
+      if (allGraduated) {
+        roundsHtml += `
+          <div class="next-round-wrap">
+            <div class="all-grad-banner">
+              🎓 全問習得済み！
+              <span class="all-grad-sub">この動画の確認問題はすべて習得しました</span>
+            </div>
+            <div class="next-round-btns">
+              <button class="btn-next-round btn-recheck"
+                onclick="startSmartRound('${vid}', ${nextRound})">
+                再確認する（習得済みをスキップ）
+              </button>
+              <button class="btn-next-round"
+                onclick="startNextRound('${vid}', ${nextRound}, false)">
+                空白で始める
+              </button>
+            </div>
+          </div>`;
+      } else {
+        roundsHtml += `
+          <div class="next-round-wrap">
+            <div class="next-round-label">第${nextRound}回の開始方法</div>
+            <div class="next-round-btns">
+              <button class="btn-next-round primary"
+                onclick="startSmartRound('${vid}', ${nextRound})">
+                賢く始める（推奨）<br>
+                <span style="font-size:0.65rem;font-weight:400;">🎓習得済み→スキップ／それ以外→再挑戦</span>
+              </button>
+              <button class="btn-next-round"
+                onclick="startNextRound('${vid}', ${nextRound}, false)">
+                空白で始める
+              </button>
+            </div>
+          </div>`;
+      }
     }
   }
 
