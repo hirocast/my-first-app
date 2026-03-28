@@ -645,7 +645,7 @@
     padding: 8px 12px;
     border-bottom: 1px solid #b7e0c9;
   }
-  .practice-title { font-size: 0.82rem; font-weight: 700; color: #1a7a3f; }
+  .practice-title { font-size: 0.78rem; font-weight: 700; color: #1a7a3f; }
   .practice-body { padding: 12px; background: #fff; }
   .practice-question { font-size: 0.88rem; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
   .practice-input {
@@ -825,7 +825,7 @@
 
 <header>
   <div class="header-top">
-    <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.4</small></h1>
+    <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.5</small></h1>
     <div class="header-actions">
       <span class="streak" id="streakLabel">🔥 0日</span>
       <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習</button>
@@ -1985,7 +1985,7 @@ function renderPractice(vid) {
   el.innerHTML = `
     <div class="practice-area">
       <div class="practice-header">
-        <span class="practice-title">✏️ 練習問題</span>
+        <span class="practice-title">🤖 AI作成類似問題</span>
         <button class="btn-practice-next" onclick="renderPractice('${vid}')">別の問題</button>
       </div>
       <div class="practice-body">
