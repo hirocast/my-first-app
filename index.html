@@ -273,16 +273,8 @@
     background: #fff;
     flex-wrap: wrap;
   }
-  .qcount-label {
-    font-size: 0.78rem;
-    color: #555;
-    white-space: nowrap;
-  }
-  .qcount-btns {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
+  .qcount-label { font-size: 0.78rem; color: #555; white-space: nowrap; }
+  .qcount-btns { display: flex; gap: 4px; flex-wrap: wrap; }
   .qcount-btn {
     width: 28px;
     height: 28px;
@@ -295,11 +287,7 @@
     color: #444;
     transition: all 0.15s;
   }
-  .qcount-btn.active {
-    background: #0f3460;
-    color: #fff;
-    border-color: #0f3460;
-  }
+  .qcount-btn.active { background: #0f3460; color: #fff; border-color: #0f3460; }
 
   /* 回ごとの記録 */
   .round-block {
@@ -308,49 +296,25 @@
     background: #fff;
   }
   .round-block:last-child { border-bottom: none; }
-
   .round-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     margin-bottom: 6px;
+    gap: 6px;
   }
-  .round-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #0f3460;
-  }
+  .round-label { font-size: 0.72rem; font-weight: 700; color: #0f3460; }
   .all-clear-badge {
-    display: inline-block;
     font-size: 0.68rem;
     background: #28a745;
     color: #fff;
     border-radius: 999px;
     padding: 1px 8px;
-    margin-left: 6px;
-    vertical-align: middle;
   }
 
-  .round-questions {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .question-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .q-label {
-    font-size: 0.72rem;
-    color: #666;
-    width: 32px;
-    flex-shrink: 0;
-  }
-  .mark-btns {
-    display: flex;
-    gap: 4px;
-  }
+  .round-questions { display: flex; flex-direction: column; gap: 5px; }
+  .question-row { display: flex; align-items: center; gap: 6px; }
+  .q-label { font-size: 0.72rem; color: #666; width: 32px; flex-shrink: 0; }
+  .mark-btns { display: flex; gap: 4px; }
   .mark-btn {
     min-width: 32px;
     height: 28px;
@@ -374,21 +338,38 @@
   .next-round-wrap {
     padding: 10px 12px;
     background: #fff;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
     border-top: 1px solid #eef2f7;
   }
+  .next-round-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
   .btn-next-round {
-    padding: 6px 20px;
+    padding: 6px 16px;
     border-radius: 999px;
     border: 1.5px solid #0f3460;
     background: #fff;
     color: #0f3460;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    line-height: 1.4;
+    text-align: center;
   }
   .btn-next-round:hover { background: #0f3460; color: #fff; }
+  .btn-next-round.primary { background: #0f3460; color: #fff; }
+  .btn-next-round.primary:hover { opacity: 0.85; }
+  .next-round-label {
+    font-size: 0.72rem;
+    color: #888;
+  }
 
   .qcount-hint {
     font-size: 0.72rem;
@@ -449,16 +430,15 @@ function saveQuiz(q) { localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); }
 // ─────────────────────────────────────────
 // QUIZ HELPERS
 // ─────────────────────────────────────────
-const MAX_Q = 8;    // 問題数の上限
-const MAX_R = 10;   // 回数の上限
+const MAX_Q = 8;
+const MAX_R = 10;
 
 function getQcount(vid) {
   return loadQuiz()[vid + '_qcount'] || 0;
 }
 
-// 何回目まで「開始済み」か（localStorageに started フラグで管理）
 function getStartedRounds(vid) {
-  return loadQuiz()[vid + '_started'] || 1; // 第1回は常に開始済み
+  return loadQuiz()[vid + '_started'] || 1;
 }
 
 function setStartedRounds(vid, r) {
@@ -492,7 +472,6 @@ function setQcount(vid, n) {
   return true;
 }
 
-// 指定の回が全問記録済みか
 function isRoundComplete(vid, round, qcount) {
   if (qcount === 0) return false;
   const q = loadQuiz();
@@ -502,7 +481,6 @@ function isRoundComplete(vid, round, qcount) {
   return true;
 }
 
-// 指定の回が全問○またはーか
 function isRoundAllClear(vid, round, qcount) {
   if (qcount === 0) return false;
   const q = loadQuiz();
@@ -513,7 +491,34 @@ function isRoundAllClear(vid, round, qcount) {
   return true;
 }
 
-// Try ITの練習ページURL生成
+// 前の回で○だった問題番号のリストを返す
+function getPrevCircleQuestions(vid, prevRound, qcount) {
+  const q = loadQuiz();
+  const result = [];
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (q[`${vid}_r${prevRound}_q${qi}`] === '○') result.push(qi);
+  }
+  return result;
+}
+
+// 次の回を開始（autoSkip=trueなら前回○の問題にーをセット）
+function startNextRound(vid, nextRound, autoSkip) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const prevRound = nextRound - 1;
+
+  if (autoSkip) {
+    const circleQs = getPrevCircleQuestions(vid, prevRound, qcount);
+    circleQs.forEach(qi => {
+      q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
+    });
+    saveQuiz(q);
+  }
+
+  setStartedRounds(vid, nextRound);
+  refreshQuiz(vid);
+}
+
 function getTryItUrl(vid) {
   let chNum = '', secNum = '', lessonNum = '';
   C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
@@ -565,25 +570,35 @@ function renderQuizArea(vid) {
       roundsHtml += `
         <div class="round-block">
           <div class="round-header">
-            <div class="round-label">
-              第${r}回
-              ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
-            </div>
+            <div class="round-label">第${r}回</div>
+            ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
           </div>
           <div class="round-questions">${qRowsHtml}</div>
         </div>`;
     }
 
-    // 「次の回を始める」ボタン
-    // 条件: 最新の回が全問記録済み かつ まだ上限に達していない
+    // 次の回ボタン（最新の回が全問記録済みかつ上限未満）
     const latestComplete = isRoundComplete(vid, startedRounds, qcount);
     if (latestComplete && startedRounds < MAX_R) {
+      const nextRound = startedRounds + 1;
+      const prevCircleCount = getPrevCircleQuestions(vid, startedRounds, qcount).length;
+      const hasCircles = prevCircleCount > 0;
+
       roundsHtml += `
         <div class="next-round-wrap">
-          <button class="btn-next-round"
-            onclick="onStartNextRound('${vid}')">
-            第${startedRounds + 1}回を始める
-          </button>
+          <div class="next-round-label">第${nextRound}回の開始方法を選んでください</div>
+          <div class="next-round-btns">
+            <button class="btn-next-round primary"
+              onclick="startNextRound('${vid}', ${nextRound}, false)">
+              空白で始める
+            </button>
+            ${hasCircles ? `
+            <button class="btn-next-round"
+              onclick="startNextRound('${vid}', ${nextRound}, true)">
+              前回の○を<br>ーにして始める
+              <br><span style="font-size:0.65rem;font-weight:400;">(${prevCircleCount}問スキップ)</span>
+            </button>` : ''}
+          </div>
         </div>`;
     }
   }
@@ -605,7 +620,6 @@ function renderQuizArea(vid) {
 // ─────────────────────────────────────────
 // QUIZ EVENT HANDLERS
 // ─────────────────────────────────────────
-
 function onSetQcount(vid, n) {
   if (!setQcount(vid, n)) return;
   refreshQuiz(vid);
@@ -620,13 +634,6 @@ function onSetMark(vid, round, qi, mark) {
   refreshQuiz(vid);
 }
 
-function onStartNextRound(vid) {
-  const current = getStartedRounds(vid);
-  setStartedRounds(vid, current + 1);
-  refreshQuiz(vid);
-}
-
-// quizエリアだけ再描画（iframeはそのまま）
 function refreshQuiz(vid) {
   const quizEl = document.getElementById('quiz_' + vid);
   if (!quizEl) return;
