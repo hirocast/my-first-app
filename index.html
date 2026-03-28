@@ -553,6 +553,33 @@
 
   .bottom-pad { height: 40px; }
 
+  /* ── 達成トースト ── */
+  .celeb-toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(135deg, #fff8e0, #ffedb0);
+    border: 2px solid #f5a623;
+    border-radius: 16px;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(245,166,35,0.35);
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .celeb-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .celeb-emoji { font-size: 2rem; line-height: 1; }
+  .celeb-msg { font-size: 0.9rem; font-weight: 700; color: #b36d00; line-height: 1.4; }
+  .celeb-sub { font-size: 0.72rem; font-weight: 400; color: #c87700; }
+
   /* ── Review Mode ── */
   .btn-review-mode {
     font-size: 0.72rem;
@@ -951,9 +978,9 @@ function renderQuizArea(vid) {
       if (allGraduated) {
         roundsHtml += `
           <div class="next-round-wrap">
-            <div class="all-grad-banner" onclick="closeAndScrollToNext('${vid}')" style="cursor:pointer;">
+            <div class="all-grad-banner" onclick="closeAndCelebrate('${vid}')" style="cursor:pointer;">
               🎓 全問習得済み！
-              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じて次へ</span>
+              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じる</span>
             </div>
             <div class="next-round-btns">
               <button class="btn-next-round btn-recheck"
@@ -1174,9 +1201,8 @@ function toggleCard(vid) {
   }
 }
 
-// 現在の動画を閉じて次の動画へスクロール
-function closeAndScrollToNext(vid) {
-  // 閉じる
+// 現在の動画を閉じて達成トーストを表示
+function closeAndCelebrate(vid) {
   const body  = document.getElementById('body_' + vid);
   const arrow = document.getElementById('arrow_' + vid);
   if (body && body.classList.contains('open')) {
@@ -1184,16 +1210,26 @@ function closeAndScrollToNext(vid) {
     arrow.classList.remove('open');
     body.innerHTML = '';
   }
-  // 全動画リストから次を探す
-  const allVids = [];
-  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => allVids.push(v.id))));
-  const idx = allVids.indexOf(vid);
-  if (idx === -1 || idx + 1 >= allVids.length) return;
-  const nextVid = allVids[idx + 1];
-  const nextCard = document.getElementById('card_' + nextVid);
-  if (nextCard) {
-    setTimeout(() => nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
-  }
+  showCelebrationToast();
+}
+
+function showCelebrationToast() {
+  const existing = document.getElementById('celebToast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'celebToast';
+  toast.className = 'celeb-toast';
+  toast.innerHTML = `
+    <div class="celeb-emoji">🎓</div>
+    <div class="celeb-msg">全問習得おめでとう！<br><span class="celeb-sub">この動画はコンプリートです</span></div>
+  `;
+  document.body.appendChild(toast);
+  // アニメーション開始
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 2500);
 }
 
 // ─────────────────────────────────────────
