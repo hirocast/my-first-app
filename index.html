@@ -141,7 +141,20 @@
     padding: 5px 14px;
     border-bottom: 1px solid #dde3ea;
     letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
   }
+  .section-label:hover { background: #e4eaf2; }
+  .sec-arrow {
+    font-size: 0.6rem;
+    color: #0f3460;
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+  }
+  .sec-arrow.open { transform: rotate(90deg); }
 
   /* ── Video card ── */
   .video-card { border-bottom: 1px solid #eef2f7; }
@@ -1093,6 +1106,18 @@ function updateReviewUI() {
 }
 
 // ─────────────────────────────────────────
+// SECTION TOGGLE
+// ─────────────────────────────────────────
+function toggleSection(secId) {
+  const body  = document.getElementById(secId);
+  const label = body.previousElementSibling;
+  const arrow = label.querySelector('.sec-arrow');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ─────────────────────────────────────────
 // FILTER
 // ─────────────────────────────────────────
 let currentFilter = 'all';
@@ -1170,10 +1195,17 @@ function build(filter) {
         : sec.videos;
       if (visibleVideos.length === 0) return;
 
+      const secId = `sec_${ch.id}_${sec.secNum}`;
       const secLabel = document.createElement('div');
       secLabel.className = 'section-label';
-      secLabel.textContent = sec.title;
+      secLabel.innerHTML = `<span>${sec.title}</span><span class="sec-arrow">▶</span>`;
+      secLabel.onclick = () => toggleSection(secId);
       chBody.appendChild(secLabel);
+
+      const secBody = document.createElement('div');
+      secBody.id = secId;
+      secBody.style.display = 'none'; // 初期状態：折り畳み
+      chBody.appendChild(secBody);
 
       visibleVideos.forEach(v => {
         const isWatched = !!w[v.id];
@@ -1194,7 +1226,7 @@ function build(filter) {
           </div>
           <div class="card-body" id="body_${v.id}"></div>
         `;
-        chBody.appendChild(card);
+        secBody.appendChild(card);
       });
     });
   });
