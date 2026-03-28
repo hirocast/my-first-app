@@ -1496,16 +1496,17 @@ function updateGuidanceToast() {
     return;
   }
 
-  let hasIncomplete = false;
+  let hasPartialRound = false;
   for (const vid of Object.keys(w)) {
     if (!w[vid]) continue;
     const qcount = getQcount(vid);
     if (qcount === 0) continue;
     const r = getStartedRounds(vid);
-    if (!isRoundComplete(vid, r, qcount)) { hasIncomplete = true; break; }
+    const marked = getRoundMarkCount(vid, r, qcount);
+    if (marked > 0 && !isRoundComplete(vid, r, qcount)) { hasPartialRound = true; break; }
   }
-  if (hasIncomplete) {
-    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて○△×をつけよう');
+  if (hasPartialRound) {
+    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて残りの○△×を記録しよう');
     toast.classList.add('visible');
     return;
   }
