@@ -1196,6 +1196,7 @@ function refreshQuiz(vid) {
   quizEl.replaceWith(tmp.firstElementChild);
   updateCardGradBadge(vid);
   updateGradProgress();
+  updateGuidanceToast();
 }
 
 function getStatusChip(vid, isWatched) {
@@ -1401,7 +1402,6 @@ function resetAll() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(STREAK_KEY);
   localStorage.removeItem(QUIZ_KEY);
-  localStorage.removeItem(GUIDANCE_KEY);
   localStorage.removeItem('tryit_legend_v1');
   build(C[0].id);
   updateProgress();
@@ -1581,7 +1581,7 @@ function applyReview() {
   saveReviewSettings({ chapters: reviewChapters, condition: reviewCondition });
   reviewActive = true;
   closeReviewPanel();
-  build('all');
+  build(C[0].id);
   updateProgress();
   updateReviewUI();
 }
