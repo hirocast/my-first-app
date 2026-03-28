@@ -204,22 +204,23 @@
   #guidanceStrip {
     display: none;
     align-items: center;
-    gap: 10px;
-    padding: 13px 16px;
+    gap: 14px;
+    padding: 14px 18px;
     margin: 10px 12px 0;
     background: linear-gradient(135deg, #fff8e0, #ffedb0);
     border: 2px solid #f5a623;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    color: #7a4400;
-    font-weight: 700;
-    box-shadow: 0 2px 10px rgba(245,166,35,0.35);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
     animation: stripPulse 2s ease-in-out infinite;
   }
   #guidanceStrip.visible { display: flex; }
+  .guidance-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+  .guidance-body { display: flex; flex-direction: column; gap: 2px; }
+  .guidance-msg  { font-size: 0.9rem; font-weight: 700; color: #b36d00; line-height: 1.4; }
+  .guidance-sub  { font-size: 0.72rem; font-weight: 400; color: #c87700; }
   @keyframes stripPulse {
-    0%,100% { box-shadow: 0 2px 10px rgba(245,166,35,0.35); border-color: #f5a623; }
-    50%      { box-shadow: 0 4px 20px rgba(245,166,35,0.65); border-color: #e8900a; }
+    0%,100% { box-shadow: 0 4px 16px rgba(245,166,35,0.4); border-color: #f5a623; }
+    50%      { box-shadow: 0 6px 24px rgba(245,166,35,0.7); border-color: #e8900a; }
   }
 
   .sec-meta {
@@ -1445,12 +1446,19 @@ function updateGuidanceStrip() {
     strip.classList.remove('visible');
     return;
   }
+  const html = (icon, msg, sub) =>
+    `<div class="guidance-icon">${icon}</div>
+     <div class="guidance-body">
+       <div class="guidance-msg">${msg}</div>
+       <div class="guidance-sub">${sub}</div>
+     </div>`;
+
   if (hasAnyWatched) {
-    strip.innerHTML = '📝 問題数（1〜8）をタップして確認問題を始めよう';
+    strip.innerHTML = html('📝', '問題数をタップしよう', '1〜8の数字で確認問題を設定できます');
   } else if (anyCardOpen) {
-    strip.innerHTML = '▶ 動画を見たら「視聴済み」をタップしよう';
+    strip.innerHTML = html('▶️', '「視聴済み」をタップしよう', '動画を見たら忘れずに記録しよう');
   } else {
-    strip.innerHTML = '👆 動画タイトルをタップして動画を開こう';
+    strip.innerHTML = html('👆', '動画タイトルをタップしよう', '動画と確認問題が開きます');
   }
   strip.classList.add('visible');
 }
