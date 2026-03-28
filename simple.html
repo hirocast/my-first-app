@@ -832,12 +832,13 @@ function onWatched() {
 // ─────────────────────────────────────
 
 // キーボード開閉アニメーション中に動画がガタつかないよう、
-// 動画高さは debounce で安定後に更新。位置だけは即時更新。
+// 動画高さは debounce で安定後に更新。
+// offsetTop 補正は maximum-scale=1.0 により不要（むしろ一瞬ズレてガタつく原因になる）
 let _videoH = 0;
 let _resizeTimer;
 
 function _calcVideoH(vvH) {
-  const naturalH   = window.innerWidth * 0.5625;
+  const naturalH     = window.innerWidth * 0.5625;
   const keyboardOpen = vvH < window.innerHeight * 0.75;
   const maxH = keyboardOpen
     ? Math.floor(window.innerWidth * 0.40)
@@ -845,25 +846,26 @@ function _calcVideoH(vvH) {
   return Math.min(naturalH, maxH);
 }
 
-// 位置のみ更新（scroll イベントから即時呼び出し）
-function updatePositions() {
-  const vv = window.visualViewport;
-  const offsetTop = vv ? vv.offsetTop : 0;
-  const vvH       = vv ? vv.height   : window.innerHeight;
-  const headerEl  = document.querySelector('.app-header');
-  const headerH   = headerEl.offsetHeight;
+function updateLayout() {
+  const vv      = window.visualViewport;
+  const vvH     = vv ? vv.height : window.innerHeight;
+  const headerEl = document.querySelector('.app-header');
+  const headerH  = headerEl.offsetHeight;
   const vc  = document.getElementById('videoContainer');
   const app = document.getElementById('app');
 
-  headerEl.style.top = offsetTop + 'px';
+  // offsetTop は使わない：maximum-scale=1.0 でズーム無効化済みのため不要
+  // 使うとキーボードアニメーション中に一瞬ズレてガタつく
+  headerEl.style.top = '0px';
+
   if (vc.style.display === 'none') {
-    app.style.top    = (offsetTop + headerH) + 'px';
+    app.style.top    = headerH + 'px';
     app.style.height = (vvH - headerH) + 'px';
   } else {
-    if (!_videoH) _videoH = _calcVideoH(vvH); // 初期化
-    vc.style.top     = (offsetTop + headerH) + 'px';
+    if (!_videoH) _videoH = _calcVideoH(vvH);
+    vc.style.top     = headerH + 'px';
     vc.style.height  = _videoH + 'px';
-    app.style.top    = (offsetTop + headerH + _videoH) + 'px';
+    app.style.top    = (headerH + _videoH) + 'px';
     app.style.height = Math.max(60, vvH - headerH - _videoH) + 'px';
   }
   const active = document.activeElement;
@@ -872,21 +874,17 @@ function updatePositions() {
   }
 }
 
-// 高さも更新（resize 後 debounce で呼び出し）
-function updateLayout() {
-  const vv  = window.visualViewport;
-  const vvH = vv ? vv.height : window.innerHeight;
-  const vc  = document.getElementById('videoContainer');
-  if (vc.style.display !== 'none') {
-    _videoH = _calcVideoH(vvH);
-  }
-  updatePositions();
-}
-
-// resize は debounce してアニメーション完了後に動画高さを確定
+// resize は debounce してキーボードアニメーション完了後に動画高さを確定
 function onViewportResize() {
   clearTimeout(_resizeTimer);
-  _resizeTimer = setTimeout(updateLayout, 120);
+  _resizeTimer = setTimeout(() => {
+    const vv  = window.visualViewport;
+    const vvH = vv ? vv.height : window.innerHeight;
+    if (document.getElementById('videoContainer').style.display !== 'none') {
+      _videoH = _calcVideoH(vvH);
+    }
+    updateLayout();
+  }, 120);
 }
 
 function showVideoContainer(item) {
@@ -1235,10 +1233,8 @@ renderHome();
 updateLayout();
 window.addEventListener('resize', onViewportResize);
 if (window.visualViewport) {
-  // resize: debounce でアニメーション完了後に動画高さを確定（ガタつき防止）
-  // scroll: offsetTop 補正は即時（位置だけ更新）
+  // resize のみ監視（debounce）。scroll は不要：offsetTop 補正を廃止したため
   window.visualViewport.addEventListener('resize', onViewportResize);
-  window.visualViewport.addEventListener('scroll', updatePositions);
 }
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
