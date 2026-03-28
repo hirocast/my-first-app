@@ -345,7 +345,17 @@ body {
 // ─────────────────────────────────────
 function parseTimeToSeconds(str) {
   if (!str) return 0;
-  const parts = str.trim().split(':').map(Number);
+  const s = str.trim();
+  // 数字のみ（例: 0345 → 3:45、10030 → 1:00:30）
+  if (/^\d+$/.test(s)) {
+    const n = s.padStart(4, '0');
+    const sec = parseInt(n.slice(-2), 10);
+    const min = parseInt(n.slice(-4, -2), 10);
+    const hr  = n.length > 4 ? parseInt(n.slice(0, -4), 10) : 0;
+    return hr * 3600 + min * 60 + sec;
+  }
+  // コロン区切り（例: 3:45 / 1:00:30）
+  const parts = s.split(':').map(Number);
   if (parts.length === 2) return (parts[0] * 60 + parts[1]) || 0;
   if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || 0;
   return 0;
@@ -750,7 +760,7 @@ function renderQcount(item) {
 
     <div class="card">
       <div class="section-q">⏱ 練習問題の解説開始時間は？</div>
-      <input class="answer-input" id="startTimeInput" type="text" placeholder="例: 3:45"
+      <input class="answer-input" id="startTimeInput" type="text" placeholder="例: 0345 または 3:45"
              value="${savedTime}" style="width:100%;margin-bottom:4px;">
       <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px;">動画で練習問題の解説が始まる時間を入力（スキップ可）。入力しておくと復習がしやすくなります。</div>
     </div>

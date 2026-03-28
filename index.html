@@ -951,7 +951,15 @@ PROBLEMS['v001'] = function() {
 // ─────────────────────────────────────────
 function parseTimeToSeconds(str) {
   if (!str) return 0;
-  const parts = str.trim().split(':').map(Number);
+  const s = str.trim();
+  if (/^\d+$/.test(s)) {
+    const n = s.padStart(4, '0');
+    const sec = parseInt(n.slice(-2), 10);
+    const min = parseInt(n.slice(-4, -2), 10);
+    const hr  = n.length > 4 ? parseInt(n.slice(0, -4), 10) : 0;
+    return hr * 3600 + min * 60 + sec;
+  }
+  const parts = s.split(':').map(Number);
   if (parts.length === 2) return (parts[0] * 60 + parts[1]) || 0;
   if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || 0;
   return 0;
@@ -1261,7 +1269,7 @@ function renderQuizArea(vid) {
       <div class="qcount-wrap" style="margin-bottom:6px;">
         <span class="qcount-label">解説開始時間:</span>
         <input type="text" id="startTime_${vid}" value="${savedStartTime}"
-               placeholder="例: 3:45"
+               placeholder="例: 0345 または 3:45"
                style="width:70px;font-size:0.78rem;padding:3px 6px;border:1px solid #ccc;border-radius:6px;margin-left:4px;"
                onchange="onSaveStartTime('${vid}', this.value)">
       </div>
