@@ -800,34 +800,34 @@
   <div class="review-section-title">📚 復習範囲（章を選択）</div>
   <div class="review-chapters" id="reviewChapters"></div>
 
-  <div class="review-section-title">🎯 表示条件（カスタマイズ）</div>
+  <div class="review-section-title">🎯 どの動画を復習する？</div>
   <div class="review-conditions">
     <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="unmastered">
+      <input type="radio" name="reviewCond" value="needs_work">
       <div>
-        <div class="review-condition-label">未習得のみ（推奨）</div>
-        <div class="review-condition-desc">🎓 習得マークがついていない動画を表示</div>
+        <div class="review-condition-label">❌ まちがえた問題がある（推奨）</div>
+        <div class="review-condition-desc">直近の回で × か △ がついた動画だけ表示。間違いをつぶそう！</div>
       </div>
     </label>
     <label class="review-condition-item">
-      <input type="radio" name="reviewCond" value="needs_review">
+      <input type="radio" name="reviewCond" value="in_progress">
       <div>
-        <div class="review-condition-label">要復習（×・△）</div>
-        <div class="review-condition-desc">直近の回で × か △ がついた動画のみ表示</div>
+        <div class="review-condition-label">📝 習得中（まだ終わっていない）</div>
+        <div class="review-condition-desc">問題を設定したけど、まだ🎓がついていない動画を表示</div>
       </div>
     </label>
     <label class="review-condition-item">
       <input type="radio" name="reviewCond" value="graduated">
       <div>
-        <div class="review-condition-label">習得確認（🎓のみ）</div>
-        <div class="review-condition-desc">習得済み問題を最終確認（試験直前に）</div>
+        <div class="review-condition-label">🎓 習得済みを最終確認</div>
+        <div class="review-condition-desc">全問🎓の動画を再チェック。試験直前の総まとめに！</div>
       </div>
     </label>
     <label class="review-condition-item">
       <input type="radio" name="reviewCond" value="all">
       <div>
-        <div class="review-condition-label">全問</div>
-        <div class="review-condition-desc">選択した章の動画をすべて表示</div>
+        <div class="review-condition-label">📋 全問（選択した章すべて）</div>
+        <div class="review-condition-desc">問題未設定の動画も含めて全部表示</div>
       </div>
     </label>
   </div>
@@ -1509,24 +1509,28 @@ function saveReviewSettings(r) { localStorage.setItem(REVIEW_KEY, JSON.stringify
 
 let reviewActive = false;
 let reviewChapters = [];
-let reviewCondition = 'unmastered';
+let reviewCondition = 'needs_work';
 
 function videoMatchesCondition(vid, condition) {
   const q = loadQuiz();
   const qcount = getQcount(vid);
   const startedRounds = getStartedRounds(vid);
+
   if (condition === 'all') return true;
-  if (qcount === 0) return condition === 'unmastered';
-  if (condition === 'unmastered') {
-    for (let qi = 1; qi <= qcount; qi++) {
-      if (!isGraduated(vid, startedRounds, qi)) return true;
-    }
-    return false;
-  }
-  if (condition === 'needs_review') {
+
+  // 復習の前提：問題を設定済みであること（未着手は復習対象外）
+  if (qcount === 0) return false;
+
+  if (condition === 'needs_work') {
     for (let qi = 1; qi <= qcount; qi++) {
       const mark = q[`${vid}_r${startedRounds}_q${qi}`] || '';
       if (mark === '×' || mark === '△') return true;
+    }
+    return false;
+  }
+  if (condition === 'in_progress') {
+    for (let qi = 1; qi <= qcount; qi++) {
+      if (!isGraduated(vid, startedRounds, qi)) return true;
     }
     return false;
   }
@@ -1536,13 +1540,17 @@ function videoMatchesCondition(vid, condition) {
     }
     return true;
   }
-  return true;
+  return false;
 }
 
 function openReviewPanel() {
   const settings = loadReviewSettings();
   reviewChapters = settings.chapters || C.map(ch => ch.id);
-  reviewCondition = settings.condition || 'unmastered';
+  const conditionMigration = { unmastered: 'in_progress', needs_review: 'needs_work' };
+  reviewCondition = conditionMigration[settings.condition] || settings.condition || 'needs_work';
+  if (!['needs_work', 'in_progress', 'graduated', 'all'].includes(reviewCondition)) {
+    reviewCondition = 'needs_work';
+  }
 
   document.getElementById('reviewChapters').innerHTML = C.map(ch => `
     <label class="review-chapter-item">
@@ -1576,7 +1584,7 @@ function closeReviewPanel() {
 
 function applyReview() {
   reviewChapters = [...document.querySelectorAll('#reviewChapters input:checked')].map(i => i.value);
-  reviewCondition = document.querySelector('input[name="reviewCond"]:checked')?.value || 'unmastered';
+  reviewCondition = document.querySelector('input[name="reviewCond"]:checked')?.value || 'needs_work';
   if (reviewChapters.length === 0) { alert('少なくとも1つの章を選択してください。'); return; }
   saveReviewSettings({ chapters: reviewChapters, condition: reviewCondition });
   reviewActive = true;
@@ -1601,7 +1609,7 @@ function exitReviewFromPanel() {
 function updateReviewUI() {
   const btn = document.getElementById('btnReviewMode');
   const banner = document.getElementById('reviewBanner');
-  const condLabels = { unmastered: '未習得のみ', needs_review: '×・△のみ', graduated: '習得確認', all: '全問' };
+  const condLabels = { needs_work: 'まちがいを復習', in_progress: '習得中', graduated: '習得済み確認', all: '全問' };
   if (reviewActive) {
     btn.classList.add('active');
     btn.textContent = '📋 復習中';
