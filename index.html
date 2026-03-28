@@ -680,7 +680,7 @@
 <header>
   <h1>Try IT <span>中学1年数学</span></h1>
   <div class="progress-wrap">
-    <span class="progress-label">視聴</span>
+    <span class="progress-label">▶ 視聴</span>
     <div class="progress-bar-outer">
       <div class="progress-bar-inner" id="globalBar" style="width:0%"></div>
     </div>
@@ -1203,13 +1203,7 @@ function toggleCard(vid) {
 
 // 現在の動画を閉じて達成トーストを表示
 function closeAndCelebrate(vid) {
-  const body  = document.getElementById('body_' + vid);
-  const arrow = document.getElementById('arrow_' + vid);
-  if (body && body.classList.contains('open')) {
-    body.classList.remove('open');
-    arrow.classList.remove('open');
-    body.innerHTML = '';
-  }
+  toggleCard(vid);
   showCelebrationToast();
 }
 
