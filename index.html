@@ -2044,8 +2044,8 @@ function switchMode(mode) {
   window.location.href = mode === 'simple' ? 'simple.html' : 'index.html';
 }
 
-// 前回シンプルモードを選んでいたら自動遷移
-if (localStorage.getItem('tryit_mode') === 'simple') {
+// デフォルトはシンプルモード（明示的に 'full' を選んでいる場合のみここに留まる）
+if (localStorage.getItem('tryit_mode') !== 'full') {
   window.location.replace('simple.html');
 }
 

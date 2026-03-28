@@ -112,6 +112,18 @@ body {
 .btn-ghost:active { background: #f0f4f8; }
 .btn-danger { border-color: #e94560 !important; color: #e94560 !important; }
 
+/* ── Start Selection ── */
+.start-ch-list { display: flex; flex-direction: column; gap: 8px; }
+.start-ch-btn {
+  display: flex; flex-direction: column; align-items: flex-start;
+  width: 100%; background: #fff; border: 1.5px solid #e0e7ef;
+  border-radius: 12px; padding: 12px 16px; cursor: pointer;
+  text-align: left; transition: background 0.15s, border-color 0.15s;
+}
+.start-ch-btn:active { background: #f0f4f8; border-color: #1565c0; }
+.start-ch-title { font-size: 0.95rem; font-weight: 700; color: #0f3460; }
+.start-ch-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
+
 /* ── Video ── */
 .video-wrapper {
   position: relative;
@@ -373,6 +385,45 @@ function updateStreak() {
 }
 
 // ─────────────────────────────────────
+// START SELECTION
+// ─────────────────────────────────────
+function getStartFrom() {
+  try { return JSON.parse(localStorage.getItem('tryit_start_from')) || null; }
+  catch { return null; }
+}
+function saveStartFrom(vid) {
+  localStorage.setItem('tryit_start_from', JSON.stringify(vid));
+}
+
+function renderStartSelection() {
+  hideVideoContainer();
+  const all = getAllVideos();
+  let chaptersHtml = '';
+  C.forEach(ch => {
+    const firstVid = ch.sections[0].videos[0];
+    chaptersHtml += `
+      <button class="start-ch-btn" onclick="selectStartFrom('${firstVid.id}')">
+        <span class="start-ch-title">${ch.title}</span>
+        <span class="start-ch-sub">${firstVid.title} から</span>
+      </button>`;
+  });
+  document.getElementById('app').innerHTML = `<div class="screen">
+    <div style="text-align:center; padding: 16px 0 8px;">
+      <div style="font-size:1.5rem;">📚</div>
+      <div style="font-size:1.1rem; font-weight:700; margin:6px 0 4px;">どこから始める？</div>
+      <div style="font-size:0.8rem; color:#666; margin-bottom:16px;">学習を始める単元を選んでください</div>
+    </div>
+    <div class="start-ch-list">${chaptersHtml}</div>
+    <button class="btn-ghost" style="margin-top:8px;" onclick="selectStartFrom('v001')">最初（${all[0].title}）から始める</button>
+  </div>`;
+}
+
+function selectStartFrom(vid) {
+  saveStartFrom(vid);
+  renderHome();
+}
+
+// ─────────────────────────────────────
 // QUEUE
 // ─────────────────────────────────────
 const MAX_NEW = 5;
@@ -383,6 +434,10 @@ function buildQueue() {
   const today = todayStr();
   const all = getAllVideos();
   const queue = [];
+
+  // Determine start index
+  const startVid = getStartFrom();
+  const startIdx = startVid ? Math.max(0, all.findIndex(v => v.id === startVid)) : 0;
 
   // 1. Reviews due today (not graduated)
   for (const v of all) {
@@ -402,10 +457,11 @@ function buildQueue() {
     }
   }
 
-  // 3. New videos (unwatched), in order, up to MAX_NEW
+  // 3. New videos (unwatched), in order from startIdx, up to MAX_NEW
   let newCount = 0;
-  for (const v of all) {
+  for (let i = startIdx; i < all.length; i++) {
     if (newCount >= MAX_NEW) break;
+    const v = all[i];
     if (!w[v.id]) {
       queue.push({ type: 'new', ...v, qcount: 0 });
       newCount++;
@@ -481,6 +537,15 @@ function setScreen(html) {
 // ─────────────────────────────────────
 function renderHome() {
   hideVideoContainer();
+
+  // First launch: no progress and no start position chosen → show start selection
+  const w = loadWatched();
+  const hasAnyProgress = Object.values(w).some(Boolean);
+  if (!hasAnyProgress && !getStartFrom()) {
+    renderStartSelection();
+    return;
+  }
+
   queue = buildQueue();
   const prog = getProgress();
   const pct  = prog.total ? Math.round(prog.watched / prog.total * 100) : 0;
@@ -784,6 +849,7 @@ function resetAll() {
   localStorage.removeItem(WATCHED_KEY);
   localStorage.removeItem(QUIZ_KEY);
   localStorage.removeItem(STREAK_KEY);
+  localStorage.removeItem('tryit_start_from');
   updateStreak();
   renderHome();
 }
