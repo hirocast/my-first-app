@@ -302,14 +302,27 @@ body {
 <script src="data.js"></script>
 <script>
 // ─────────────────────────────────────
-// DB
+// DB（多機能モードと共有キー）
 // ─────────────────────────────────────
-const DB_KEY = 'tryit_simple_v1';
-function loadDB() {
-  try { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
+const WATCHED_KEY = 'tryit_math1_v6';
+const QUIZ_KEY    = 'tryit_quiz_v1';
+const STREAK_KEY  = 'tryit_streak_v6';
+
+function loadWatched() {
+  try { return JSON.parse(localStorage.getItem(WATCHED_KEY)) || {}; }
   catch { return {}; }
 }
-function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function saveWatched(w) { localStorage.setItem(WATCHED_KEY, JSON.stringify(w)); }
+function loadQuiz() {
+  try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveQuiz(q) { localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); }
+function loadStreak() {
+  try { return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count: 0, lastDate: '' }; }
+  catch { return { count: 0, lastDate: '' }; }
+}
+function saveStreak(s) { localStorage.setItem(STREAK_KEY, JSON.stringify(s)); }
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function addDays(d, n) {
@@ -337,10 +350,11 @@ function getTryItUrl(v) {
 // PROGRESS
 // ─────────────────────────────────────
 function getProgress() {
-  const db = loadDB();
+  const w = loadWatched();
+  const q = loadQuiz();
   const all = getAllVideos();
-  const watched   = all.filter(v => db[v.id + '_watched']).length;
-  const graduated = all.filter(v => db[v.id + '_graduated']).length;
+  const watched   = all.filter(v => w[v.id]).length;
+  const graduated = all.filter(v => q[v.id + '_graduated']).length;
   return { total: all.length, watched, graduated };
 }
 
@@ -348,14 +362,12 @@ function getProgress() {
 // STREAK
 // ─────────────────────────────────────
 function updateStreak() {
-  const db = loadDB();
   const today = todayStr();
-  const s = db['__streak'] || { count: 0, lastDate: '' };
+  const s = loadStreak();
   if (s.lastDate !== today) {
     s.count = s.lastDate === addDays(today, -1) ? s.count + 1 : 1;
     s.lastDate = today;
-    db['__streak'] = s;
-    saveDB(db);
+    saveStreak(s);
   }
   document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
 }
@@ -366,25 +378,26 @@ function updateStreak() {
 const MAX_NEW = 5;
 
 function buildQueue() {
-  const db = loadDB();
+  const w = loadWatched();
+  const q = loadQuiz();
   const today = todayStr();
   const all = getAllVideos();
   const queue = [];
 
   // 1. Reviews due today (not graduated)
   for (const v of all) {
-    const next = db[v.id + '_next'];
-    const qcount = db[v.id + '_qcount'] || 0;
-    if (next && next <= today && qcount > 0 && !db[v.id + '_graduated']) {
+    const next = q[v.id + '_next'];
+    const qcount = q[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && !q[v.id + '_graduated']) {
       queue.push({ type: 'review', ...v, qcount });
     }
   }
 
   // 2. Graduated videos due for periodic re-check
   for (const v of all) {
-    const next = db[v.id + '_next'];
-    const qcount = db[v.id + '_qcount'] || 0;
-    if (next && next <= today && qcount > 0 && db[v.id + '_graduated']) {
+    const next = q[v.id + '_next'];
+    const qcount = q[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && q[v.id + '_graduated']) {
       queue.push({ type: 'review', ...v, qcount, isGrad: true });
     }
   }
@@ -393,7 +406,7 @@ function buildQueue() {
   let newCount = 0;
   for (const v of all) {
     if (newCount >= MAX_NEW) break;
-    if (!db[v.id + '_watched']) {
+    if (!w[v.id]) {
       queue.push({ type: 'new', ...v, qcount: 0 });
       newCount++;
     }
@@ -406,41 +419,47 @@ function buildQueue() {
 // SRS UPDATE
 // ─────────────────────────────────────
 function updateSRS(vid, marks) {
-  const db = loadDB();
+  const w = loadWatched();
+  const q = loadQuiz();
   const today = todayStr();
   const qcount = marks.length;
 
-  db[vid + '_watched'] = true;
-  db[vid + '_qcount'] = qcount;
-  marks.forEach((m, i) => { db[`${vid}_q${i + 1}`] = m; });
+  // 視聴済みを多機能モードと共有キーに保存
+  w[vid] = true;
+  saveWatched(w);
+
+  // 問題数・マークを多機能モードと同じラウンド形式で保存
+  q[vid + '_qcount'] = qcount;
+  const round = q[vid + '_started'] || 1;
+  marks.forEach((m, i) => { q[`${vid}_r${round}_q${i + 1}`] = m; });
+  q[vid + '_started'] = round + 1; // 次回は次のラウンドへ
 
   const hasX   = marks.includes('×');
   const hasTri = marks.includes('△');
-  const streak = db[vid + '_streak'] || 0;
-  const prevInterval = db[vid + '_interval'] || 0;
+  const streak = q[vid + '_streak'] || 0;
+  const prevInterval = q[vid + '_interval'] || 0;
 
   let interval, newStreak;
   if (hasX) {
     interval = 1; newStreak = 0;
-    delete db[vid + '_graduated'];
+    delete q[vid + '_graduated'];
   } else if (hasTri) {
     interval = 3; newStreak = 0;
-    delete db[vid + '_graduated'];
+    delete q[vid + '_graduated'];
   } else {
-    // 全問○
     newStreak = streak + 1;
     if (newStreak >= 3) {
       interval = 30;
-      db[vid + '_graduated'] = true;
+      q[vid + '_graduated'] = true;
     } else {
       interval = prevInterval > 0 ? Math.min(prevInterval * 2, 28) : 7;
     }
   }
 
-  db[vid + '_interval'] = interval;
-  db[vid + '_streak']   = newStreak;
-  db[vid + '_next']     = addDays(today, interval);
-  saveDB(db);
+  q[vid + '_interval'] = interval;
+  q[vid + '_streak']   = newStreak;
+  q[vid + '_next']     = addDays(today, interval);
+  saveQuiz(q);
 }
 
 // ─────────────────────────────────────
@@ -465,7 +484,7 @@ function renderHome() {
   queue = buildQueue();
   const prog = getProgress();
   const pct  = prog.total ? Math.round(prog.watched / prog.total * 100) : 0;
-  const db   = loadDB();
+  const q    = loadQuiz();
   const today = todayStr();
 
   const reviews = queue.filter(i => i.type === 'review');
@@ -476,8 +495,8 @@ function renderHome() {
     // 明日の復習件数
     const tomorrow = addDays(today, 1);
     const tomorrowCount = getAllVideos().filter(v => {
-      const next = db[v.id + '_next'];
-      return next && next <= tomorrow && db[v.id + '_qcount'] && !db[v.id + '_graduated'];
+      const next = q[v.id + '_next'];
+      return next && next <= tomorrow && q[v.id + '_qcount'] && !q[v.id + '_graduated'];
     }).length;
     listHtml = `<div class="queue-empty">
       🎉 今日のやることは完了！<br>
@@ -671,15 +690,15 @@ function onSubmit() {
 function renderDone() {
   hideVideoContainer();
   updateStreak();
-  const db    = loadDB();
+  const q2    = loadQuiz();
   const today = todayStr();
-  const streak = (db['__streak'] || {}).count || 0;
+  const streak = loadStreak().count || 0;
 
   // 明日の件数
   const tomorrow = addDays(today, 1);
   const tomorrowCount = getAllVideos().filter(v => {
-    const next = db[v.id + '_next'];
-    return next && next <= tomorrow && db[v.id + '_qcount'];
+    const next = q2[v.id + '_next'];
+    return next && next <= tomorrow && q2[v.id + '_qcount'];
   }).length;
 
   const prog = getProgress();
@@ -714,17 +733,18 @@ function renderDone() {
 // ─────────────────────────────────────
 function renderBrowse() {
   hideVideoContainer();
-  const db  = loadDB();
+  const bw  = loadWatched();
+  const bq  = loadQuiz();
   const today = todayStr();
   let html = '';
 
   C.forEach(ch => {
     let rows = '';
     ch.sections.forEach(sec => sec.videos.forEach(v => {
-      const watched   = db[v.id + '_watched'];
-      const graduated = db[v.id + '_graduated'];
-      const qcount    = db[v.id + '_qcount'] || 0;
-      const next      = db[v.id + '_next'];
+      const watched   = bw[v.id];
+      const graduated = bq[v.id + '_graduated'];
+      const qcount    = bq[v.id + '_qcount'] || 0;
+      const next      = bq[v.id + '_next'];
 
       let statusEl;
       if (graduated)      statusEl = `<span class="b-status" style="background:#fef3c7;color:#b36d00;">🎓習得</span>`;
@@ -761,7 +781,9 @@ function renderBrowse() {
 // ─────────────────────────────────────
 function resetAll() {
   if (!confirm('学習記録をすべてリセットしますか？')) return;
-  localStorage.removeItem(DB_KEY);
+  localStorage.removeItem(WATCHED_KEY);
+  localStorage.removeItem(QUIZ_KEY);
+  localStorage.removeItem(STREAK_KEY);
   updateStreak();
   renderHome();
 }
