@@ -499,6 +499,10 @@ function updateSRS(vid, marks) {
   w[vid] = true;
   saveWatched(w);
 
+  // 解説開始時間を保存（入力されていた場合）
+  const item = queue[qIdx - 1] || queue[qIdx];
+  if (item && item.startTime) q[vid + '_startTime'] = item.startTime;
+
   // 問題数・マークを多機能モードと同じラウンド形式で保存
   q[vid + '_qcount'] = qcount;
   const round = q[vid + '_started'] || 1;
@@ -652,7 +656,7 @@ function renderVideo(item) {
       <div class="video-sub">${subTxt}</div>
     </div>
 
-    <button class="btn-watched" onclick="onWatched()">✓ 見た</button>
+    <button class="btn-watched" onclick="onWatched()">✓ 例題の解き方解説まで見た</button>
     <button class="btn-ghost" onclick="renderHome()">← ホームへ戻る</button>
   `);
 }
@@ -684,18 +688,30 @@ function hideVideoContainer() {
 }
 
 function renderQcount(item) {
+  const q = loadQuiz();
+  const savedTime = item.startTime || q[item.id + '_startTime'] || '';
+  const savedCount = q[item.id + '_qcount'] || 0;
+
   let btns = '';
   for (let n = 1; n <= 8; n++) {
-    btns += `<button class="qcount-btn" onclick="onSetQcount(${n})">${n}</button>`;
+    const sel = savedCount === n ? ' style="border-color:#0f3460;background:#e8f0fe;"' : '';
+    btns += `<button class="qcount-btn"${sel} onclick="onSetQcount(${n})">${n}</button>`;
   }
   setScreen(`
     <div class="study-top">
-      <span class="study-badge badge-new">新着</span>
+      <span class="study-badge badge-new">練習問題</span>
       <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
     </div>
 
     <div class="card">
-      <div class="section-q">📝 練習問題は何問ありましたか？<br>
+      <div class="section-q">⏱ 練習問題の解説開始時間は？</div>
+      <input class="answer-input" id="startTimeInput" type="text" placeholder="例: 3:45"
+             value="${savedTime}" style="width:100%;margin-bottom:4px;">
+      <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px;">動画で練習問題の解説が始まる時間を入力（スキップ可）</div>
+    </div>
+
+    <div class="card">
+      <div class="section-q">📝 練習問題は何問ありますか？<br>
         <a class="tryit-link" href="${getTryItUrl(item)}" target="_blank">
           公式サイトで確認する →
         </a>
@@ -706,6 +722,9 @@ function renderQcount(item) {
 }
 
 function onSetQcount(n) {
+  const timeInput = document.getElementById('startTimeInput');
+  const t = timeInput ? timeInput.value.trim() : '';
+  if (t) queue[qIdx].startTime = t;
   queue[qIdx].qcount = n;
   renderProblems(queue[qIdx]);
 }
@@ -743,6 +762,7 @@ function renderProblems(item) {
     </div>
 
     <button class="btn-next" id="btnNext" onclick="onSubmit()">記録して次へ →</button>
+    <button class="btn-ghost" style="margin-top:6px;" onclick="renderQcount(queue[qIdx])">問題数を変更する</button>
   `);
 }
 
