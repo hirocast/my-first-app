@@ -656,21 +656,18 @@ function isGraduated(vid, round, qi) {
          q[`${vid}_r${round-1}_q${qi}`] === '○';
 }
 
-// 賢く始める：○→ー、△×ー→再挑戦（空白）
+// 賢く始める：習得済み（2回連続○）のみスキップ、それ以外は再挑戦
 function startSmartRound(vid, nextRound) {
   const q = loadQuiz();
   const qcount = getQcount(vid);
   const prevRound = nextRound - 1;
 
   for (let qi = 1; qi <= qcount; qi++) {
-    const prevMark = q[`${vid}_r${prevRound}_q${qi}`] || '';
-    if (prevMark === '○') {
-      // ○ → 次の回はスキップ（ー）
+    if (isGraduated(vid, prevRound, qi)) {
+      // 習得済み（2回連続○）→ スキップ（ー）
       q[`${vid}_r${nextRound}_q${qi}`] = 'ー';
     }
-    // ー（前回スキップ）→ 空白で再挑戦
-    // △ → 空白で再挑戦
-    // × → 空白で再挑戦
+    // 未習得の○、△、×、ー → 空白で再挑戦
   }
 
   saveQuiz(q);
@@ -778,7 +775,7 @@ function renderQuizArea(vid) {
             <button class="btn-next-round primary"
               onclick="startSmartRound('${vid}', ${nextRound})">
               賢く始める（推奨）<br>
-              <span style="font-size:0.65rem;font-weight:400;">○→スキップ／△×ー→再挑戦</span>
+              <span style="font-size:0.65rem;font-weight:400;">🎓習得済み→スキップ／それ以外→再挑戦</span>
             </button>
             <button class="btn-next-round"
               onclick="startNextRound('${vid}', ${nextRound}, false)">
