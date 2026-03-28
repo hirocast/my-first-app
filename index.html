@@ -951,9 +951,9 @@ function renderQuizArea(vid) {
       if (allGraduated) {
         roundsHtml += `
           <div class="next-round-wrap">
-            <div class="all-grad-banner" onclick="toggleCard('${vid}')" style="cursor:pointer;">
+            <div class="all-grad-banner" onclick="closeAndScrollToNext('${vid}')" style="cursor:pointer;">
               🎓 全問習得済み！
-              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じる</span>
+              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じて次へ</span>
             </div>
             <div class="next-round-btns">
               <button class="btn-next-round btn-recheck"
@@ -1171,6 +1171,28 @@ function toggleCard(vid) {
         </iframe>
       </div>
       ${renderQuizArea(vid)}`;
+  }
+}
+
+// 現在の動画を閉じて次の動画へスクロール
+function closeAndScrollToNext(vid) {
+  // 閉じる
+  const body  = document.getElementById('body_' + vid);
+  const arrow = document.getElementById('arrow_' + vid);
+  if (body && body.classList.contains('open')) {
+    body.classList.remove('open');
+    arrow.classList.remove('open');
+    body.innerHTML = '';
+  }
+  // 全動画リストから次を探す
+  const allVids = [];
+  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => allVids.push(v.id))));
+  const idx = allVids.indexOf(vid);
+  if (idx === -1 || idx + 1 >= allVids.length) return;
+  const nextVid = allVids[idx + 1];
+  const nextCard = document.getElementById('card_' + nextVid);
+  if (nextCard) {
+    setTimeout(() => nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
   }
 }
 
