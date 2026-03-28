@@ -1595,10 +1595,10 @@ function updateGuidanceToast() {
     const elapsed = Date.now() - cardOpenedAt;
 
     if (!isWatched) {
-      if (elapsed < 60000) {
+      if (elapsed < 6000) {
         toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
       } else {
-        toast.innerHTML = html('✅', '「未視聴」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
+        toast.innerHTML = html('✅', '「視聴済み」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
       }
     } else if (qcount === 0) {
       toast.innerHTML = html('📝', '練習問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
@@ -1646,11 +1646,10 @@ function updateGuidanceToast() {
     const qcount = getQcount(vid);
     if (qcount === 0) continue;
     const r = getStartedRounds(vid);
-    const marked = getRoundMarkCount(vid, r, qcount);
-    if (marked > 0 && !isRoundComplete(vid, r, qcount)) { hasPartialRound = true; break; }
+    if (!isRoundComplete(vid, r, qcount)) { hasPartialRound = true; break; }
   }
   if (hasPartialRound) {
-    toast.innerHTML = html('✏️', '練習問題の続きをやろう', '動画を開いて残りの○△×を記録しよう');
+    toast.innerHTML = html('✏️', '確認問題の続きをやろう', '動画を開いて○△×をつけよう');
     toast.classList.add('visible');
     return;
   }
