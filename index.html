@@ -1438,13 +1438,13 @@ function toggleWatched(vid, e) {
     badge.classList.add('watched');
     titleEl.classList.add('watched');
     btn.classList.add('watched');
-    btn.textContent = '✓ 視聴済み';
+    btn.textContent = '視聴済';
   } else {
     header.classList.remove('watched');
     badge.classList.remove('watched');
     titleEl.classList.remove('watched');
     btn.classList.remove('watched');
-    btn.textContent = '視聴した';
+    btn.textContent = '未視聴';
   }
   updateCardStatusChip(vid);
   updateProgress();
@@ -1560,7 +1560,7 @@ function updateGuidanceToast() {
       if (elapsed < 60000) {
         toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
       } else {
-        toast.innerHTML = html('✅', '「視聴した」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
+        toast.innerHTML = html('✅', '「未視聴」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
       }
     } else if (qcount === 0) {
       toast.innerHTML = html('📝', '確認問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
@@ -1965,7 +1965,7 @@ function build(filter) {
             ${getStatusChip(v.id, isWatched)}
             <button class="btn-watched${isWatched ? ' watched' : ''}"
                     onclick="toggleWatched('${v.id}', event)">
-              ${isWatched ? '✓ 視聴済み' : '視聴した'}
+              ${isWatched ? '視聴済' : '未視聴'}
             </button>
             <div class="arrow-icon" id="arrow_${v.id}">▼</div>
           </div>
