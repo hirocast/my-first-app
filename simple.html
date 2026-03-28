@@ -252,6 +252,17 @@ body {
 .retry-msg { font-size: 0.85rem; color: #555; line-height: 1.6; margin-bottom: 12px; }
 .retry-list { list-style: none; margin: 0 0 4px; }
 .retry-list li { font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid #f0f0f0; color: #333; }
+.btn-skip { color: #888 !important; font-size: 0.82rem !important; }
+.btn-pending { color: #e94560 !important; border-color: #e94560 !important; }
+.pending-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.pending-card { margin-bottom: 12px; }
+.pending-title { font-size: 0.88rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.pending-probs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.pending-prob { padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; }
+.prob-x   { background: #fde8ec; color: #e94560; }
+.prob-tri { background: #fff4e0; color: #f5a623; }
+.pending-date { font-size: 0.72rem; color: #bbb; margin-bottom: 10px; }
+.btn-resolve { font-size: 0.82rem !important; padding: 8px !important; }
 
 .btn-next {
   width: 100%;
@@ -391,6 +402,28 @@ function parseTimeToSeconds(str) {
 const WATCHED_KEY = 'tryit_math1_v6';
 const QUIZ_KEY    = 'tryit_quiz_v1';
 const STREAK_KEY  = 'tryit_streak_v6';
+const PENDING_KEY = 'tryit_pending_v1';
+
+function loadPending() {
+  try { return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; }
+  catch { return []; }
+}
+function savePending(list) { localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }
+
+function savePendingProblems(item, marks) {
+  const problems = marks
+    .map((m, i) => m !== '○' ? { num: i + 1, mark: m } : null)
+    .filter(Boolean);
+  if (!problems.length) return;
+  const list = loadPending().filter(e => e.vid !== item.id); // 上書き
+  list.push({ vid: item.id, title: item.title, problems, date: todayStr() });
+  savePending(list);
+}
+
+function resolvePending(vid) {
+  savePending(loadPending().filter(e => e.vid !== vid));
+  renderPending();
+}
 
 function loadWatched() {
   try { return JSON.parse(localStorage.getItem(WATCHED_KEY)) || {}; }
@@ -686,6 +719,7 @@ function renderHome() {
 
     <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
     <button class="btn-ghost" onclick="renderStartSelection()">📍 開始位置を変更</button>
+    ${loadPending().length > 0 ? `<button class="btn-ghost btn-pending" onclick="renderPending()">❓ 保留中の問題 ${loadPending().length}件</button>` : ''}
     <button class="btn-ghost btn-danger" onclick="resetAll()">リセット</button>
   `);
 }
@@ -931,6 +965,71 @@ function renderRetry(item) {
     </div>
     <button class="btn-next" onclick="renderVideo(queue[qIdx])">▶ 動画を見直す</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="renderProblems(queue[qIdx])">✏ 練習問題をもう一度解く</button>
+    <button class="btn-ghost btn-skip" style="margin-top:6px;" onclick="skipWithPending()">❓ 解き方がわからないので保留して次へ進む</button>
+  `);
+}
+
+function skipWithPending() {
+  const item = queue[qIdx];
+  savePendingProblems(item, currentMarks);
+  hideVideoContainer();
+  setScreen(`
+    <div class="card" style="text-align:center;padding:28px 20px;">
+      <div style="font-size:2rem;margin-bottom:12px;">📌</div>
+      <div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:10px;">わからない問題を保留しました！</div>
+      <div style="font-size:0.85rem;color:#555;line-height:1.7;">
+        どこがわからないかが見える化できたのは大きな前進です。<br>
+        保留した問題は後でまとめて確認できます。<br><br>
+        学校・塾の先生や友達、AIに見せて<br>解き方を聞いてみましょう！<br><br>
+        <span style="color:#e94560;font-weight:700;">わからないことを「わかる」に変える力が、<br>数学の本当の力になります。</span>
+      </div>
+    </div>
+    <button class="btn-next" onclick="skipAdvance()">次の学習へ進む →</button>
+    <button class="btn-ghost" style="margin-top:6px;" onclick="renderPending()">📋 保留問題を確認する</button>
+  `);
+}
+
+function skipAdvance() {
+  qIdx++;
+  nextItem();
+}
+
+function renderPending() {
+  hideVideoContainer();
+  const list = loadPending();
+  if (list.length === 0) {
+    setScreen(`
+      <div class="card" style="text-align:center;padding:28px 20px;">
+        <div style="font-size:1.5rem;margin-bottom:8px;">✅</div>
+        <div style="font-weight:700;color:#0f3460;">保留中の問題はありません</div>
+        <div style="font-size:0.82rem;color:#888;margin-top:6px;">すべて解決済みです！</div>
+      </div>
+      <button class="btn-ghost" onclick="renderHome()">← ホームへ戻る</button>
+    `);
+    return;
+  }
+  const items = list.map(e => {
+    const probs = e.problems.map(p =>
+      `<span class="pending-prob ${p.mark === '×' ? 'prob-x' : 'prob-tri'}">${p.mark} 問${p.num}</span>`
+    ).join('');
+    return `
+      <div class="card pending-card">
+        <div class="pending-title">${e.title}</div>
+        <div class="pending-probs">${probs}</div>
+        <div class="pending-date">保留日: ${e.date}</div>
+        <button class="btn-ghost btn-resolve" onclick="resolvePending('${e.vid}')">✅ 解決済みにする</button>
+      </div>`;
+  }).join('');
+  setScreen(`
+    <div class="pending-header">
+      <span style="font-size:0.95rem;font-weight:700;color:#0f3460;">❓ 保留中の問題一覧</span>
+      <span style="font-size:0.78rem;color:#888;">${list.length}件</span>
+    </div>
+    <div style="font-size:0.78rem;color:#888;margin-bottom:12px;">
+      先生・友達・AIにこの画面を見せて解き方を聞いてみよう！
+    </div>
+    ${items}
+    <button class="btn-ghost" style="margin-top:4px;" onclick="renderHome()">← ホームへ戻る</button>
   `);
 }
 
