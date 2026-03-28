@@ -208,6 +208,19 @@ body {
 
 /* ── Problems ── */
 .problems-lead { font-size: 0.85rem; font-weight: 700; color: #0f3460; margin-bottom: 14px; }
+.starttime-inline {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.78rem; color: #888;
+}
+.starttime-inline input {
+  width: 110px; flex: none;
+  border: 1.5px solid #d0d8e4; border-radius: 8px;
+  padding: 4px 8px; font-size: 16px; color: #1a1a2e;
+  background: #f8fafc;
+}
+.starttime-inline input:focus { outline: none; border-color: #0f3460; background: #fff; }
 .problem-row {
   display: flex;
   align-items: center;
@@ -792,7 +805,6 @@ function hideVideoContainer() {
 
 function renderQcount(item) {
   const q = loadQuiz();
-  const savedTime = item.startTime || q[item.id + '_startTime'] || '';
   const savedCount = q[item.id + '_qcount'] || 0;
 
   let btns = '';
@@ -807,13 +819,6 @@ function renderQcount(item) {
     </div>
 
     <div class="card">
-      <div class="section-q">⏱ 練習問題の解説開始時間は？</div>
-      <input class="answer-input" id="startTimeInput" type="text" placeholder="例: 0345 または 3:45"
-             value="${savedTime}" style="width:100%;margin-bottom:4px;">
-      <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px;">動画で練習問題の解説が始まる時間を入力（スキップ可）。入力しておくと復習がしやすくなります。</div>
-    </div>
-
-    <div class="card">
       <div class="section-q">📝 練習問題は何問ありますか？<br>
         <a class="tryit-link" href="${getTryItUrl(item)}" target="_blank">
           公式サイトで確認する →
@@ -825,9 +830,6 @@ function renderQcount(item) {
 }
 
 function onSetQcount(n) {
-  const timeInput = document.getElementById('startTimeInput');
-  const t = timeInput ? timeInput.value.trim() : '';
-  if (t) queue[qIdx].startTime = t;
   queue[qIdx].qcount = n;
   renderProblems(queue[qIdx]);
 }
@@ -838,6 +840,8 @@ function onSetQcount(n) {
 function renderProblems(item) {
   showVideoContainer(item); // 問題中も動画を表示（問題文が動画にあるため）
   currentMarks = new Array(item.qcount).fill('');
+  const q = loadQuiz();
+  const savedTime = item.startTime || q[item.id + '_startTime'] || '';
 
   let rows = '';
   for (let i = 0; i < item.qcount; i++) {
@@ -860,6 +864,11 @@ function renderProblems(item) {
     </div>
 
     <div class="card">
+      <div class="starttime-inline">
+        <span>⏱ 解説開始時間</span>
+        <input id="startTimeInput" type="text" placeholder="例: 0345" value="${savedTime}">
+        <span style="color:#bbb;font-size:0.72rem;">入力で復習時に自動スキップ</span>
+      </div>
       <div class="problems-lead">結果を記録しよう</div>
       <div class="mark-legend">○ 正解　△ あいまい　× 不正解</div>
       ${rows}
@@ -884,6 +893,11 @@ function setMark(i, mark) {
 
 function onSubmit() {
   const item = queue[qIdx];
+  const timeInput = document.getElementById('startTimeInput');
+  if (timeInput) {
+    const t = timeInput.value.trim();
+    if (t) item.startTime = t;
+  }
   updateSRS(item.id, currentMarks);
   qIdx++;
   nextItem();
