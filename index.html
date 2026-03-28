@@ -55,16 +55,12 @@
     color: rgba(255,255,255,0.85);
     white-space: nowrap;
   }
-
   .header-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .streak {
-    font-size: 0.82rem;
-    color: #f5a623;
-  }
+  .streak { font-size: 0.82rem; color: #f5a623; }
   .btn-reset {
     font-size: 0.72rem;
     background: rgba(233,69,96,0.25);
@@ -99,11 +95,7 @@
     color: #444;
     font-weight: 600;
   }
-  .tab.active {
-    background: #0f3460;
-    color: #fff;
-    border-color: #0f3460;
-  }
+  .tab.active { background: #0f3460; color: #fff; border-color: #0f3460; }
 
   /* ── Chapter blocks ── */
   .chapter-block { margin: 14px 12px 0; }
@@ -230,7 +222,7 @@
     overflow: hidden;
     border-radius: 10px;
     background: #000;
-    margin-top: 4px;
+    margin-top: 8px;
   }
   .video-wrapper iframe {
     position: absolute;
@@ -238,6 +230,148 @@
     width: 100%; height: 100%;
     border: none;
     border-radius: 10px;
+  }
+
+  /* ── Quiz area ── */
+  .quiz-area {
+    margin-top: 12px;
+    border: 1.5px solid #dde3ea;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef2f7;
+    padding: 8px 12px;
+    border-bottom: 1px solid #dde3ea;
+  }
+  .quiz-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .quiz-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f3460;
+  }
+  .quiz-link {
+    font-size: 0.72rem;
+    color: #e94560;
+    text-decoration: none;
+    border: 1px solid #e94560;
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .quiz-link:hover { background: #e94560; color: #fff; }
+
+  /* 問題数設定 */
+  .qcount-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eef2f7;
+    background: #fff;
+  }
+  .qcount-label {
+    font-size: 0.78rem;
+    color: #555;
+  }
+  .qcount-btns {
+    display: flex;
+    gap: 4px;
+  }
+  .qcount-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #c0ccd8;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #444;
+    transition: all 0.15s;
+  }
+  .qcount-btn.active {
+    background: #0f3460;
+    color: #fff;
+    border-color: #0f3460;
+  }
+
+  /* 回ごとの記録 */
+  .round-block {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eef2f7;
+    background: #fff;
+  }
+  .round-block:last-child { border-bottom: none; }
+  .round-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0f3460;
+    margin-bottom: 6px;
+  }
+  .round-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .question-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .q-label {
+    font-size: 0.72rem;
+    color: #666;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .mark-btns {
+    display: flex;
+    gap: 4px;
+  }
+  .mark-btn {
+    min-width: 32px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #c0ccd8;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s;
+    padding: 0 6px;
+  }
+  .mark-btn:hover { opacity: 0.8; }
+  .mark-btn.selected-○ { background: #28a745; color: #fff; border-color: #28a745; }
+  .mark-btn.selected-△ { background: #f5a623; color: #fff; border-color: #f5a623; }
+  .mark-btn.selected-× { background: #e94560; color: #fff; border-color: #e94560; }
+  .mark-btn.selected-ー { background: #aaa; color: #fff; border-color: #aaa; }
+
+  .round-pending {
+    font-size: 0.75rem;
+    color: #aaa;
+    padding: 6px 0;
+    text-align: center;
+  }
+
+  /* 全問○バッジ */
+  .all-clear-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    background: #28a745;
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
   }
 
   .bottom-pad { height: 40px; }
@@ -263,16 +397,16 @@
 <div id="content"></div>
 <div class="bottom-pad"></div>
 
-<!-- ① data.js を先に読み込んで C を定義する -->
+<!-- データファイルを先に読み込む -->
 <script src="data.js"></script>
 
-<!-- ② アプリのロジックはCが定義された後に実行する -->
 <script>
 // ─────────────────────────────────────────
-// STORAGE
+// STORAGE KEYS
 // ─────────────────────────────────────────
 const STORAGE_KEY = 'tryit_math1_v6';
 const STREAK_KEY  = 'tryit_streak_v6';
+const QUIZ_KEY    = 'tryit_quiz_v1';
 
 function loadWatched() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -287,6 +421,197 @@ function loadStreak() {
 }
 function saveStreak(s) {
   localStorage.setItem(STREAK_KEY, JSON.stringify(s));
+}
+function loadQuiz() {
+  try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveQuiz(q) {
+  localStorage.setItem(QUIZ_KEY, JSON.stringify(q));
+}
+
+// ─────────────────────────────────────────
+// QUIZ HELPERS
+// ─────────────────────────────────────────
+
+// 問題数を取得（未設定なら0）
+function getQcount(vid) {
+  return loadQuiz()[vid + '_qcount'] || 0;
+}
+
+// 問題数を設定
+function setQcount(vid, n) {
+  const q = loadQuiz();
+  const prev = q[vid + '_qcount'] || 0;
+  if (n < prev) {
+    // 減らす場合: 削除される問題の記録を確認
+    let hasData = false;
+    for (let r = 1; r <= 10; r++) {
+      for (let qi = n + 1; qi <= prev; qi++) {
+        if (q[`${vid}_r${r}_q${qi}`]) { hasData = true; break; }
+      }
+      if (hasData) break;
+    }
+    if (hasData && !confirm(`問題数を${n}問に変更すると、問${n+1}以降の記録が削除されます。よろしいですか？`)) {
+      return false;
+    }
+    // 削除
+    for (let r = 1; r <= 10; r++) {
+      for (let qi = n + 1; qi <= prev; qi++) {
+        delete q[`${vid}_r${r}_q${qi}`];
+      }
+    }
+  }
+  q[vid + '_qcount'] = n;
+  saveQuiz(q);
+  return true;
+}
+
+// 指定の回の全問が記録済みかチェック
+function isRoundComplete(vid, round, qcount) {
+  if (qcount === 0) return false;
+  const q = loadQuiz();
+  for (let qi = 1; qi <= qcount; qi++) {
+    if (!q[`${vid}_r${round}_q${qi}`]) return false;
+  }
+  return true;
+}
+
+// 最大表示回数（最後の完了回+1、最低1回目は常に表示）
+function maxVisibleRound(vid, qcount) {
+  if (qcount === 0) return 1;
+  let max = 1;
+  for (let r = 1; r <= 10; r++) {
+    if (isRoundComplete(vid, r, qcount)) {
+      max = r + 1;
+    } else {
+      break;
+    }
+  }
+  return Math.min(max, 10);
+}
+
+// その回の全問が○かーかチェック（全○なら次回スキップ候補）
+function isRoundAllClear(vid, round, qcount) {
+  if (qcount === 0) return false;
+  const q = loadQuiz();
+  for (let qi = 1; qi <= qcount; qi++) {
+    const mark = q[`${vid}_r${round}_q${qi}`];
+    if (mark !== '○' && mark !== 'ー') return false;
+  }
+  return true;
+}
+
+// ─────────────────────────────────────────
+// QUIZ UI RENDER
+// ─────────────────────────────────────────
+function renderQuizArea(vid) {
+  const q = loadQuiz();
+  const qcount = getQcount(vid);
+  const tryItUrl = getTryItUrl(vid);
+
+  // 問題数ボタン
+  let qcountHtml = '';
+  for (let n = 1; n <= 5; n++) {
+    qcountHtml += `<button class="qcount-btn${qcount === n ? ' active' : ''}"
+      onclick="onSetQcount('${vid}', ${n})">${n}</button>`;
+  }
+
+  // 回ごとの記録
+  let roundsHtml = '';
+  if (qcount === 0) {
+    roundsHtml = `<div class="round-pending">↑ まず問題数を登録してください</div>`;
+  } else {
+    const maxRound = maxVisibleRound(vid, qcount);
+    for (let r = 1; r <= maxRound; r++) {
+      const complete = isRoundComplete(vid, r, qcount);
+      const allClear = complete && isRoundAllClear(vid, r, qcount);
+      let qRowsHtml = '';
+      for (let qi = 1; qi <= qcount; qi++) {
+        const mark = q[`${vid}_r${r}_q${qi}`] || '';
+        const marks = ['○', '△', '×', 'ー'];
+        let btnsHtml = marks.map(m =>
+          `<button class="mark-btn${mark === m ? ' selected-' + m : ''}"
+            onclick="onSetMark('${vid}', ${r}, ${qi}, '${m}')">${m}</button>`
+        ).join('');
+        qRowsHtml += `
+          <div class="question-row">
+            <div class="q-label">問${qi}</div>
+            <div class="mark-btns">${btnsHtml}</div>
+          </div>`;
+      }
+      roundsHtml += `
+        <div class="round-block">
+          <div class="round-label">
+            第${r}回
+            ${allClear ? '<span class="all-clear-badge">✓ 全問クリア</span>' : ''}
+          </div>
+          <div class="round-questions">${qRowsHtml}</div>
+        </div>`;
+    }
+  }
+
+  return `
+    <div class="quiz-area">
+      <div class="quiz-header">
+        <div class="quiz-header-left">
+          <span class="quiz-title">📝 確認問題</span>
+        </div>
+        <a class="quiz-link" href="${tryItUrl}" target="_blank">公式サイトで解く →</a>
+      </div>
+      <div class="qcount-wrap">
+        <span class="qcount-label">問題数:</span>
+        <div class="qcount-btns">${qcountHtml}</div>
+      </div>
+      ${roundsHtml}
+    </div>`;
+}
+
+// Try ITの練習ページURLを生成
+function getTryItUrl(vid) {
+  let chNum = '', secNum = '', lessonNum = '';
+  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
+    if (v.id === vid) {
+      chNum = ch.chNum;
+      secNum = sec.secNum;
+      lessonNum = v.lesson;
+    }
+  })));
+  return `https://www.try-it.jp/chapters-${chNum}/sections-${secNum}/lessons-${lessonNum}/practice-3/`;
+}
+
+// 問題数変更
+function onSetQcount(vid, n) {
+  if (!setQcount(vid, n)) return; // キャンセルされた
+  refreshCardBody(vid);
+}
+
+// マーク記録
+function onSetMark(vid, round, qi, mark) {
+  const q = loadQuiz();
+  const key = `${vid}_r${round}_q${qi}`;
+  // 同じマークをタップしたら解除
+  if (q[key] === mark) {
+    delete q[key];
+  } else {
+    q[key] = mark;
+  }
+  saveQuiz(q);
+  refreshCardBody(vid);
+}
+
+// カードbodyを再描画（開いた状態を維持）
+function refreshCardBody(vid) {
+  const body = document.getElementById('body_' + vid);
+  if (!body || !body.classList.contains('open')) return;
+  // iframeを保持しつつquizだけ更新
+  const quizEl = body.querySelector('.quiz-area');
+  if (quizEl) {
+    quizEl.outerHTML; // 参照用
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderQuizArea(vid);
+    quizEl.replaceWith(tmp.firstElementChild);
+  }
 }
 
 // ─────────────────────────────────────────
@@ -388,7 +713,8 @@ function toggleCard(vid) {
                 allowfullscreen allow="accelerometer; autoplay; clipboard-write;
                 encrypted-media; gyroscope; picture-in-picture">
         </iframe>
-      </div>`;
+      </div>
+      ${renderQuizArea(vid)}`;
   }
 }
 
@@ -396,9 +722,10 @@ function toggleCard(vid) {
 // RESET
 // ─────────────────────────────────────────
 function resetAll() {
-  if (!confirm('視聴履歴をすべてリセットしますか？')) return;
+  if (!confirm('視聴履歴・確認問題の記録をすべてリセットしますか？')) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(STREAK_KEY);
+  localStorage.removeItem(QUIZ_KEY);
   build('all');
   updateProgress();
   updateStreak();
@@ -510,6 +837,5 @@ build('all');
 updateProgress();
 updateStreak();
 </script>
-
 </body>
 </html>
