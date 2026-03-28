@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最速先取りナビ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  background: #f8fafc;
+  color: #1a1a2e;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.app-header {
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  color: #fff;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-title { font-size: 0.95rem; font-weight: 700; }
+.app-title span { color: #e94560; }
+.app-ver { font-size: 0.5rem; opacity: 0.4; font-weight: 400; margin-left: 4px; }
+.header-streak { font-size: 0.8rem; color: #f5a623; }
+
+/* ── Screen ── */
+.screen { padding: 16px; }
+
+/* ── Cards ── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+}
+
+/* ── Progress ── */
+.prog-label { font-size: 0.72rem; color: #888; margin-bottom: 6px; }
+.prog-bar-outer {
+  background: #eef2f7;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.prog-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #0f3460, #e94560);
+  border-radius: 999px;
+  transition: width 0.4s;
+}
+.prog-count { font-size: 0.78rem; color: #555; }
+
+/* ── Queue ── */
+.queue-title { font-size: 0.95rem; font-weight: 700; color: #0f3460; margin-bottom: 14px; }
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f4f8;
+  font-size: 0.85rem;
+}
+.queue-item:last-child { border-bottom: none; }
+.q-badge {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.q-badge.new    { background: #dbeafe; color: #1d4ed8; }
+.q-badge.review { background: #fde8cc; color: #c05c00; }
+.queue-empty { text-align: center; color: #888; font-size: 0.88rem; padding: 12px 0; line-height: 1.8; }
+
+/* ── Buttons ── */
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #0f3460, #1d4ed8);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-ghost {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #d0d8e4;
+  background: #fff;
+  color: #555;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.btn-ghost:active { background: #f0f4f8; }
+.btn-danger { border-color: #e94560 !important; color: #e94560 !important; }
+
+/* ── Video ── */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+.video-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.video-sub   { font-size: 0.75rem; color: #888; }
+
+.btn-watched {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: #0f3460;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+/* ── Qcount ── */
+.section-q { font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+.qcount-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.qcount-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  border: 2px solid #d0d8e4;
+  background: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #0f3460;
+  transition: all 0.15s;
+}
+.qcount-btn:hover { border-color: #0f3460; background: #f0f4f8; }
+.tryit-link { font-size: 0.75rem; color: #0f3460; text-decoration: none; }
+.tryit-link:hover { text-decoration: underline; }
+
+/* ── Problems ── */
+.problems-lead { font-size: 0.85rem; font-weight: 700; color: #0f3460; margin-bottom: 14px; }
+.problem-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4f8;
+}
+.problem-row:last-child { border-bottom: none; }
+.prob-num { font-size: 0.82rem; color: #999; width: 32px; flex-shrink: 0; }
+.mark-btns { display: flex; gap: 7px; }
+.mark-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 2px solid #d0d8e4;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #aaa;
+  transition: all 0.15s;
+}
+.mark-btn.sel-○ { background: #22c55e; color: #fff; border-color: #22c55e; }
+.mark-btn.sel-△ { background: #f5a623; color: #fff; border-color: #f5a623; }
+.mark-btn.sel-× { background: #e94560; color: #fff; border-color: #e94560; }
+.mark-legend { font-size: 0.68rem; color: #bbb; margin-bottom: 12px; }
+
+.btn-next {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: #e94560;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.btn-next.ready { opacity: 1; pointer-events: all; }
+
+/* ── Study header ── */
+.study-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.study-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.badge-new    { background: #dbeafe; color: #1d4ed8; }
+.badge-review { background: #fde8cc; color: #c05c00; }
+.study-pos { font-size: 0.8rem; color: #aaa; }
+
+/* ── Done ── */
+.done-emoji { font-size: 3.5rem; text-align: center; margin-bottom: 10px; }
+.done-title { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.done-sub { font-size: 0.82rem; color: #888; text-align: center; line-height: 1.7; margin-bottom: 20px; }
+.done-stats { display: flex; gap: 10px; }
+.stat-box { flex: 1; background: #f8fafc; border-radius: 12px; padding: 14px 8px; text-align: center; }
+.stat-num   { font-size: 1.3rem; font-weight: 700; color: #0f3460; }
+.stat-label { font-size: 0.65rem; color: #888; margin-top: 3px; }
+
+/* ── Browse ── */
+.ch-block { margin-bottom: 10px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.ch-title { background: #0f3460; color: #fff; padding: 10px 14px; font-size: 0.85rem; font-weight: 700; }
+.browse-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f4f8;
+  background: #fff;
+  font-size: 0.84rem;
+}
+.browse-row:last-child { border-bottom: none; }
+.b-num { color: #bbb; font-size: 0.72rem; width: 22px; flex-shrink: 0; }
+.b-status { flex-shrink: 0; font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+
+/* ── SRS Next badge ── */
+.next-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  color: #888;
+  background: #f0f4f8;
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
+/* ── 答え入力欄 ── */
+.answer-input {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid #d0d8e4;
+  border-radius: 8px;
+  padding: 8px 8px;
+  font-size: 0.88rem;
+  color: #1a1a2e;
+  background: #f8fafc;
+}
+.answer-input:focus { outline: none; border-color: #0f3460; background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">
+    最速先取りナビ <span>中1数学</span>
+    <span class="app-ver">v2.0</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <button onclick="switchMode('full')"
+            style="font-size:0.72rem;background:rgba(245,166,35,0.15);color:#f5d78e;border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:4px 8px;cursor:pointer;white-space:nowrap;">
+      ⚙️ 多機能
+    </button>
+    <div id="streakLabel" class="header-streak">🔥 0日</div>
+  </div>
+</div>
+
+<div id="videoContainer" style="display:none; position:sticky; top:52px; z-index:50; background:#000;">
+  <div class="video-wrapper">
+    <iframe id="videoFrame" src="" allowfullscreen
+            allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script src="data.js"></script>
+<script>
+// ─────────────────────────────────────
+// DB
+// ─────────────────────────────────────
+const DB_KEY = 'tryit_simple_v1';
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function addDays(d, n) {
+  const date = new Date(d + 'T00:00:00');
+  date.setDate(date.getDate() + n);
+  return date.toISOString().slice(0, 10);
+}
+
+// ─────────────────────────────────────
+// DATA HELPERS
+// ─────────────────────────────────────
+function getAllVideos() {
+  const list = [];
+  C.forEach(ch => ch.sections.forEach(sec => sec.videos.forEach(v => {
+    list.push({ ...v, chTitle: ch.title, chNum: ch.chNum, secNum: sec.secNum });
+  })));
+  return list;
+}
+
+function getTryItUrl(v) {
+  return `https://www.try-it.jp/chapters-${v.chNum}/sections-${v.secNum}/lessons-${v.lesson}/practice-3/`;
+}
+
+// ─────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────
+function getProgress() {
+  const db = loadDB();
+  const all = getAllVideos();
+  const watched   = all.filter(v => db[v.id + '_watched']).length;
+  const graduated = all.filter(v => db[v.id + '_graduated']).length;
+  return { total: all.length, watched, graduated };
+}
+
+// ─────────────────────────────────────
+// STREAK
+// ─────────────────────────────────────
+function updateStreak() {
+  const db = loadDB();
+  const today = todayStr();
+  const s = db['__streak'] || { count: 0, lastDate: '' };
+  if (s.lastDate !== today) {
+    s.count = s.lastDate === addDays(today, -1) ? s.count + 1 : 1;
+    s.lastDate = today;
+    db['__streak'] = s;
+    saveDB(db);
+  }
+  document.getElementById('streakLabel').textContent = `🔥 ${s.count}日`;
+}
+
+// ─────────────────────────────────────
+// QUEUE
+// ─────────────────────────────────────
+const MAX_NEW = 5;
+
+function buildQueue() {
+  const db = loadDB();
+  const today = todayStr();
+  const all = getAllVideos();
+  const queue = [];
+
+  // 1. Reviews due today (not graduated)
+  for (const v of all) {
+    const next = db[v.id + '_next'];
+    const qcount = db[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && !db[v.id + '_graduated']) {
+      queue.push({ type: 'review', ...v, qcount });
+    }
+  }
+
+  // 2. Graduated videos due for periodic re-check
+  for (const v of all) {
+    const next = db[v.id + '_next'];
+    const qcount = db[v.id + '_qcount'] || 0;
+    if (next && next <= today && qcount > 0 && db[v.id + '_graduated']) {
+      queue.push({ type: 'review', ...v, qcount, isGrad: true });
+    }
+  }
+
+  // 3. New videos (unwatched), in order, up to MAX_NEW
+  let newCount = 0;
+  for (const v of all) {
+    if (newCount >= MAX_NEW) break;
+    if (!db[v.id + '_watched']) {
+      queue.push({ type: 'new', ...v, qcount: 0 });
+      newCount++;
+    }
+  }
+
+  return queue;
+}
+
+// ─────────────────────────────────────
+// SRS UPDATE
+// ─────────────────────────────────────
+function updateSRS(vid, marks) {
+  const db = loadDB();
+  const today = todayStr();
+  const qcount = marks.length;
+
+  db[vid + '_watched'] = true;
+  db[vid + '_qcount'] = qcount;
+  marks.forEach((m, i) => { db[`${vid}_q${i + 1}`] = m; });
+
+  const hasX   = marks.includes('×');
+  const hasTri = marks.includes('△');
+  const streak = db[vid + '_streak'] || 0;
+  const prevInterval = db[vid + '_interval'] || 0;
+
+  let interval, newStreak;
+  if (hasX) {
+    interval = 1; newStreak = 0;
+    delete db[vid + '_graduated'];
+  } else if (hasTri) {
+    interval = 3; newStreak = 0;
+    delete db[vid + '_graduated'];
+  } else {
+    // 全問○
+    newStreak = streak + 1;
+    if (newStreak >= 3) {
+      interval = 30;
+      db[vid + '_graduated'] = true;
+    } else {
+      interval = prevInterval > 0 ? Math.min(prevInterval * 2, 28) : 7;
+    }
+  }
+
+  db[vid + '_interval'] = interval;
+  db[vid + '_streak']   = newStreak;
+  db[vid + '_next']     = addDays(today, interval);
+  saveDB(db);
+}
+
+// ─────────────────────────────────────
+// STATE
+// ─────────────────────────────────────
+let queue = [];
+let qIdx  = 0;
+let currentMarks = [];
+
+// ─────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────
+function setScreen(html) {
+  document.getElementById('app').innerHTML = `<div class="screen">${html}</div>`;
+}
+
+// ─────────────────────────────────────
+// HOME
+// ─────────────────────────────────────
+function renderHome() {
+  hideVideoContainer();
+  queue = buildQueue();
+  const prog = getProgress();
+  const pct  = prog.total ? Math.round(prog.watched / prog.total * 100) : 0;
+  const db   = loadDB();
+  const today = todayStr();
+
+  const reviews = queue.filter(i => i.type === 'review');
+  const news    = queue.filter(i => i.type === 'new');
+
+  let listHtml = '';
+  if (queue.length === 0) {
+    // 明日の復習件数
+    const tomorrow = addDays(today, 1);
+    const tomorrowCount = getAllVideos().filter(v => {
+      const next = db[v.id + '_next'];
+      return next && next <= tomorrow && db[v.id + '_qcount'] && !db[v.id + '_graduated'];
+    }).length;
+    listHtml = `<div class="queue-empty">
+      🎉 今日のやることは完了！<br>
+      <span style="font-size:0.75rem;">明日の復習: ${tomorrowCount}件</span>
+    </div>`;
+  } else {
+    [...reviews, ...news].forEach(item => {
+      const badge = item.type === 'review'
+        ? `<span class="q-badge review">復習</span>`
+        : `<span class="q-badge new">新着</span>`;
+      listHtml += `<div class="queue-item">${badge}<span>${item.title}</span></div>`;
+    });
+  }
+
+  const startBtn = queue.length > 0
+    ? `<button class="btn-primary" onclick="startSession()">▶ 学習を始める（${queue.length}件）</button>`
+    : '';
+
+  setScreen(`
+    <div class="card">
+      <div class="prog-label">全体の進捗</div>
+      <div class="prog-bar-outer">
+        <div class="prog-bar-inner" style="width:${pct}%"></div>
+      </div>
+      <div class="prog-count">${prog.watched} / ${prog.total} 動画完了　🎓 ${prog.graduated}本習得</div>
+    </div>
+
+    <div class="card">
+      <div class="queue-title">📋 今日やること</div>
+      ${listHtml}
+      ${startBtn}
+    </div>
+
+    <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
+    <button class="btn-ghost btn-danger" onclick="resetAll()">リセット</button>
+  `);
+}
+
+// ─────────────────────────────────────
+// SESSION
+// ─────────────────────────────────────
+function startSession() {
+  qIdx = 0;
+  nextItem();
+}
+
+function nextItem() {
+  if (qIdx >= queue.length) { renderDone(); return; }
+  renderVideo(queue[qIdx]);
+}
+
+// ─────────────────────────────────────
+// VIDEO
+// ─────────────────────────────────────
+function renderVideo(item) {
+  const isReview = item.type === 'review';
+  const badgeCls = isReview ? 'badge-review' : 'badge-new';
+  const badgeTxt = isReview ? '復習' : '新着';
+  const subTxt   = isReview
+    ? (item.isGrad ? '🎓習得済み — 最終確認をしよう' : '前回の間違いを踏まえてもう一度！')
+    : '動画を見て内容を理解しよう';
+
+  showVideoContainer(item);
+  setScreen(`
+    <div class="study-top">
+      <span class="study-badge ${badgeCls}">${badgeTxt}</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="card">
+      <div class="video-title">${item.title}</div>
+      <div class="video-sub">${subTxt}</div>
+    </div>
+
+    <button class="btn-watched" onclick="onWatched()">✓ 見た</button>
+    <button class="btn-ghost" onclick="renderHome()">← ホームへ戻る</button>
+  `);
+}
+
+function onWatched() {
+  const item = queue[qIdx];
+  if (item.qcount > 0) {
+    renderProblems(item);
+  } else {
+    renderQcount(item);
+  }
+}
+
+// ─────────────────────────────────────
+// QCOUNT
+// ─────────────────────────────────────
+function showVideoContainer(item) {
+  const container = document.getElementById('videoContainer');
+  const frame = document.getElementById('videoFrame');
+  const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1`;
+  if (frame.src !== newSrc) frame.src = newSrc; // 同じ動画なら再ロードしない
+  container.style.display = '';
+}
+
+function hideVideoContainer() {
+  const container = document.getElementById('videoContainer');
+  container.style.display = 'none';
+  document.getElementById('videoFrame').src = '';
+}
+
+function renderQcount(item) {
+  let btns = '';
+  for (let n = 1; n <= 8; n++) {
+    btns += `<button class="qcount-btn" onclick="onSetQcount(${n})">${n}</button>`;
+  }
+  setScreen(`
+    <div class="study-top">
+      <span class="study-badge badge-new">新着</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="card">
+      <div class="section-q">📝 確認問題は何問ありましたか？<br>
+        <a class="tryit-link" href="${getTryItUrl(item)}" target="_blank">
+          公式サイトで確認する →
+        </a>
+      </div>
+      <div class="qcount-btns">${btns}</div>
+    </div>
+  `);
+}
+
+function onSetQcount(n) {
+  queue[qIdx].qcount = n;
+  renderProblems(queue[qIdx]);
+}
+
+// ─────────────────────────────────────
+// PROBLEMS
+// ─────────────────────────────────────
+function renderProblems(item) {
+  currentMarks = new Array(item.qcount).fill('');
+
+  let rows = '';
+  for (let i = 0; i < item.qcount; i++) {
+    rows += `
+      <div class="problem-row" id="prow_${i}">
+        <span class="prob-num">問${i + 1}</span>
+        <input class="answer-input" type="text" placeholder="答え">
+        <div class="mark-btns">
+          <button class="mark-btn" onclick="setMark(${i},'○')">○</button>
+          <button class="mark-btn" onclick="setMark(${i},'△')">△</button>
+          <button class="mark-btn" onclick="setMark(${i},'×')">×</button>
+        </div>
+      </div>`;
+  }
+
+  setScreen(`
+    <div class="study-top">
+      <span style="font-size:0.88rem;font-weight:700;color:#0f3460;">${item.title}</span>
+      <span class="study-pos">${qIdx + 1} / ${queue.length}</span>
+    </div>
+
+    <div class="card">
+      <div class="problems-lead">結果を記録しよう</div>
+      <div class="mark-legend">○ 正解　△ あいまい　× 不正解</div>
+      ${rows}
+    </div>
+
+    <button class="btn-next" id="btnNext" onclick="onSubmit()">記録して次へ →</button>
+  `);
+}
+
+function setMark(i, mark) {
+  currentMarks[i] = mark;
+  const row = document.getElementById('prow_' + i);
+  row.querySelectorAll('.mark-btn').forEach(btn => {
+    btn.className = 'mark-btn';
+    if (btn.textContent === mark) btn.classList.add('sel-' + mark);
+  });
+  if (currentMarks.every(m => m !== '')) {
+    document.getElementById('btnNext').classList.add('ready');
+  }
+}
+
+function onSubmit() {
+  const item = queue[qIdx];
+  updateSRS(item.id, currentMarks);
+  qIdx++;
+  nextItem();
+}
+
+// ─────────────────────────────────────
+// DONE
+// ─────────────────────────────────────
+function renderDone() {
+  hideVideoContainer();
+  updateStreak();
+  const db    = loadDB();
+  const today = todayStr();
+  const streak = (db['__streak'] || {}).count || 0;
+
+  // 明日の件数
+  const tomorrow = addDays(today, 1);
+  const tomorrowCount = getAllVideos().filter(v => {
+    const next = db[v.id + '_next'];
+    return next && next <= tomorrow && db[v.id + '_qcount'];
+  }).length;
+
+  const prog = getProgress();
+
+  setScreen(`
+    <div class="card">
+      <div class="done-emoji">🎉</div>
+      <div class="done-title">今日の学習完了！</div>
+      <div class="done-sub">お疲れさまでした。<br>毎日続けることが一番の近道です！</div>
+      <div class="done-stats">
+        <div class="stat-box">
+          <div class="stat-num">${queue.length}</div>
+          <div class="stat-label">今日の件数</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">${tomorrowCount}</div>
+          <div class="stat-label">明日の復習</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">🔥${streak}</div>
+          <div class="stat-label">連続学習</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="renderHome()">ホームへ戻る</button>
+  `);
+}
+
+// ─────────────────────────────────────
+// BROWSE (全動画一覧)
+// ─────────────────────────────────────
+function renderBrowse() {
+  hideVideoContainer();
+  const db  = loadDB();
+  const today = todayStr();
+  let html = '';
+
+  C.forEach(ch => {
+    let rows = '';
+    ch.sections.forEach(sec => sec.videos.forEach(v => {
+      const watched   = db[v.id + '_watched'];
+      const graduated = db[v.id + '_graduated'];
+      const qcount    = db[v.id + '_qcount'] || 0;
+      const next      = db[v.id + '_next'];
+
+      let statusEl;
+      if (graduated)      statusEl = `<span class="b-status" style="background:#fef3c7;color:#b36d00;">🎓習得</span>`;
+      else if (qcount > 0) statusEl = `<span class="b-status" style="background:#fde8cc;color:#c05c00;">学習中</span>`;
+      else if (watched)    statusEl = `<span class="b-status" style="background:#dbeafe;color:#1d4ed8;">視聴済</span>`;
+      else                 statusEl = `<span class="b-status" style="background:#eef2f7;color:#999;">未着手</span>`;
+
+      let nextEl = '';
+      if (next && !graduated) {
+        const daysLeft = Math.ceil((new Date(next + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
+        if (daysLeft <= 0) nextEl = `<span class="next-badge" style="color:#e94560;">今日</span>`;
+        else if (daysLeft === 1) nextEl = `<span class="next-badge">明日</span>`;
+        else nextEl = `<span class="next-badge">${daysLeft}日後</span>`;
+      }
+
+      rows += `<div class="browse-row">
+        <span class="b-num">${v.num}</span>
+        <span style="flex:1;font-size:0.83rem;">${v.title}</span>
+        ${nextEl}
+        ${statusEl}
+      </div>`;
+    }));
+    html += `<div class="ch-block"><div class="ch-title">${ch.title}</div>${rows}</div>`;
+  });
+
+  setScreen(`
+    <button class="btn-ghost" onclick="renderHome()" style="margin-bottom:14px;">← ホームへ戻る</button>
+    ${html}
+  `);
+}
+
+// ─────────────────────────────────────
+// RESET
+// ─────────────────────────────────────
+function resetAll() {
+  if (!confirm('学習記録をすべてリセットしますか？')) return;
+  localStorage.removeItem(DB_KEY);
+  updateStreak();
+  renderHome();
+}
+
+// ─────────────────────────────────────
+// MODE SWITCH
+// ─────────────────────────────────────
+function switchMode(mode) {
+  localStorage.setItem('tryit_mode', mode);
+  window.location.href = mode === 'full' ? 'index.html' : 'simple.html';
+}
+
+// 前回多機能モードを選んでいたら自動遷移
+if (localStorage.getItem('tryit_mode') === 'full') {
+  window.location.replace('index.html');
+}
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+updateStreak();
+renderHome();
+</script>
+</body>
+</html>

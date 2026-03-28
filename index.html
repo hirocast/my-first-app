@@ -69,6 +69,19 @@
     min-width: 28px;
     text-align: right;
   }
+  .btn-mode-switch {
+    font-size: 0.72rem;
+    background: rgba(245,166,35,0.15);
+    color: #f5d78e;
+    border: 1px solid rgba(245,166,35,0.4);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-mode-switch:hover { background: rgba(245,166,35,0.3); }
+
   .btn-reset {
     font-size: 0.72rem;
     background: rgba(233,69,96,0.25);
@@ -828,6 +841,7 @@
     <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.6</small></h1>
     <div class="header-actions">
       <span class="streak" id="streakLabel">🔥 0日</span>
+      <button class="btn-mode-switch" onclick="switchMode('simple')" title="シンプルモードへ切り替え">✨ シンプル</button>
       <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習</button>
       <button class="btn-reset" onclick="resetAll()">リセット</button>
     </div>
@@ -2020,6 +2034,19 @@ function revealPractice(vid, answer) {
   const fb   = document.getElementById('prac_feedback_' + vid);
   if (ctrl) ctrl.style.display = 'none';
   if (fb)   { fb.className = 'practice-answer'; fb.innerHTML = `答え：<strong>${answer}</strong>`; }
+}
+
+// ─────────────────────────────────────────
+// MODE SWITCH
+// ─────────────────────────────────────────
+function switchMode(mode) {
+  localStorage.setItem('tryit_mode', mode);
+  window.location.href = mode === 'simple' ? 'simple.html' : 'index.html';
+}
+
+// 前回シンプルモードを選んでいたら自動遷移
+if (localStorage.getItem('tryit_mode') === 'simple') {
+  window.location.replace('simple.html');
 }
 
 // ─────────────────────────────────────────
