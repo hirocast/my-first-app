@@ -825,7 +825,7 @@
 
 <header>
   <div class="header-top">
-    <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.5</small></h1>
+    <h1>Try IT <span>中学1年数学</span> <small style="font-size:0.5rem;opacity:0.45;font-weight:400;">v1.6</small></h1>
     <div class="header-actions">
       <span class="streak" id="streakLabel">🔥 0日</span>
       <button class="btn-review-mode" id="btnReviewMode" onclick="openReviewPanel()">📋 復習</button>
@@ -1302,7 +1302,7 @@ function getStatusChip(vid, isWatched) {
   if (isVideoGraduated(vid))
     return `<span class="status-chip graduated" id="chip_${vid}">🎓 習得済み</span>`;
   if (qcount > 0)
-    return `<span class="status-chip in-progress" id="chip_${vid}">問題中</span>`;
+    return `<span class="status-chip in-progress" id="chip_${vid}">学習中</span>`;
   if (isWatched)
     return `<span class="status-chip watched" id="chip_${vid}">視聴済み</span>`;
   return `<span class="status-chip untouched" id="chip_${vid}">未着手</span>`;
@@ -1319,7 +1319,7 @@ function updateCardStatusChip(vid) {
     chip.textContent = '🎓 習得済み';
   } else if (qcount > 0) {
     chip.className = 'status-chip in-progress';
-    chip.textContent = '問題中';
+    chip.textContent = '学習中';
   } else if (isWatched) {
     chip.className = 'status-chip watched';
     chip.textContent = '視聴済み';
@@ -1429,7 +1429,7 @@ function toggleWatched(vid, e) {
     badge.classList.remove('watched');
     titleEl.classList.remove('watched');
     btn.classList.remove('watched');
-    btn.textContent = '視聴済み';
+    btn.textContent = '視聴した';
   }
   updateCardStatusChip(vid);
   updateProgress();
@@ -1545,7 +1545,7 @@ function updateGuidanceToast() {
       if (elapsed < 60000) {
         toast.innerHTML = html('▶️', '動画を再生しよう', '上の動画をタップして再生できます');
       } else {
-        toast.innerHTML = html('✅', '「視聴済み」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
+        toast.innerHTML = html('✅', '「視聴した」をタップしよう', 'タイトル右のボタンで視聴を記録しよう');
       }
     } else if (qcount === 0) {
       toast.innerHTML = html('📝', '確認問題の数を設定しよう', '公式サイトで問題数を確認して下の数字をタップ');
@@ -1950,7 +1950,7 @@ function build(filter) {
             ${getStatusChip(v.id, isWatched)}
             <button class="btn-watched${isWatched ? ' watched' : ''}"
                     onclick="toggleWatched('${v.id}', event)">
-              ${isWatched ? '✓ 視聴済み' : '視聴済み'}
+              ${isWatched ? '✓ 視聴済み' : '視聴した'}
             </button>
             <div class="arrow-icon" id="arrow_${v.id}">▼</div>
           </div>
