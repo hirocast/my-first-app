@@ -8,31 +8,35 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 /* iOS Safari のフォーカス時自動ズームを防止: font-size が 16px 未満だとズームが発生する */
 input, select, textarea { font-size: 16px; }
-html { height: 100%; }
+html { height: 100%; overflow: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
-  background: #f8fafc;
   color: #1a1a2e;
+  overflow: hidden;
+}
+
+/* ── Viewport Wrapper: position:fixed でキーボード上部の領域にぴったり収まる ──
+   iOS Safari ではキーボード表示時にレイアウトビューポートはリサイズされないため
+   position:fixed 要素が画面外に消える。このラッパーを全体に被せ、
+   visualViewport.resize イベントで bottom をキーボード高さ分に更新することで
+   ヘッダー・動画・コンテンツが常にキーボード上部の領域内に表示される。 */
+#viewport-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   max-width: 480px;
   margin: 0 auto;
-  /* dvh: キーボード表示時に高さが自動縮小（iOS 15.4+ / Chrome 108+）
-     非対応の場合は JS が body.style.height を window.innerHeight で補正 */
-  height: 100vh; /* fallback */
-  height: 100dvh;
+  background: #f8fafc;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* ── Header: viewport 固定（iOS キーボード表示時も常に画面上部に留まる） ── */
+/* ── Header ── */
 .app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  max-width: 480px;
-  margin: 0 auto;
-  z-index: 100;
+  flex-shrink: 0;
   background: linear-gradient(135deg, #1a1a2e, #0f3460);
   color: #fff;
   padding: 13px 16px;
@@ -40,14 +44,9 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-/* ── Video: viewport 固定（top は JS が updateContentPadding() で設定） ── */
+/* ── Video: flex 固定行、高さは JS が setVideoHeight() で設定 ── */
 #videoContainer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  max-width: 480px;
-  margin: 0 auto;
-  z-index: 99;
+  flex-shrink: 0;
   background: #000;
 }
 #videoContainer .video-wrapper {
@@ -60,14 +59,12 @@ body {
   top: 0; left: 0; width: 100%; height: 100%;
   border: none;
 }
-/* ── App: 全高を占有してスクロール（padding-top は JS が setVideoHeight() で設定） ── */
+/* ── App: 残り全高を占有してスクロール ── */
 #app {
   flex: 1;
   min-height: 0; /* flex overflow に必須 */
   overflow-y: auto;
   background: #f8fafc;
-  position: relative;
-  z-index: 1; /* fixed 要素(z-index:99/100)より確実に下に置く */
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
 .app-title span { color: #e94560; }
@@ -368,6 +365,7 @@ body {
 </head>
 <body>
 
+<div id="viewport-wrapper">
 <div class="app-header">
   <!-- 学習中のみ表示: 大きな離脱ボタン -->
   <button id="hdrExit"
@@ -400,6 +398,7 @@ body {
 </div>
 
 <div id="app"></div>
+</div><!-- /#viewport-wrapper -->
 
 <script src="data.js"></script>
 <script>
@@ -848,27 +847,14 @@ function setVideoHeight() {
   const w = Math.min(window.innerWidth, 480);
   document.getElementById('videoContainer').style.height =
     Math.min(Math.floor(w * 0.5625), Math.floor(w * 0.40)) + 'px';
-  updateContentPadding();
 }
 
-// ヘッダー・動画が position:fixed のため、#app に padding-top を設定して
-// コンテンツが固定要素の下から始まるようにする
-function updateContentPadding() {
-  const header = document.querySelector('.app-header');
-  const video  = document.getElementById('videoContainer');
-  const app    = document.getElementById('app');
-  if (!header || !app) return;
-  const headerH = header.offsetHeight;
-  if (video) video.style.top = headerH + 'px';
-  const videoH = (video && video.style.display !== 'none') ? video.offsetHeight : 0;
-  app.style.paddingTop = (headerH + videoH) + 'px';
-}
-
-function updateLayout() {
-  // dvh 非対応 かつ visualViewport 非対応環境向けフォールバック
-  if (!CSS.supports('height', '1dvh') && !window.visualViewport) {
-    document.body.style.height = window.innerHeight + 'px';
-  }
+// キーボード表示時に #viewport-wrapper の bottom をキーボード高さ分に更新し
+// ラッパーがキーボード上部の領域にぴったり収まるようにする
+function updateWrapperBottom() {
+  if (!window.visualViewport) return;
+  const keyboardHeight = Math.max(0, window.innerHeight - window.visualViewport.height);
+  document.getElementById('viewport-wrapper').style.bottom = keyboardHeight + 'px';
 }
 
 function showVideoContainer(item) {
@@ -887,7 +873,6 @@ function showVideoContainer(item) {
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
-  updateContentPadding();
 }
 
 function renderQcount(item) {
@@ -1214,17 +1199,14 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-// 画面回転時に動画高さと padding-top を再計算
+// 画面回転時に動画高さを再計算
 window.addEventListener('resize', setVideoHeight);
 
-// dvh 非対応の古い iOS 向けフォールバック
-if (!CSS.supports('height', '1dvh') && window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateLayout);
+// キーボード表示/非表示で #viewport-wrapper の bottom を更新し
+// ヘッダー・動画・コンテンツが常にキーボード上部の領域に収まるようにする
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateWrapperBottom);
 }
-
-// 初期 padding-top を設定（ヘッダーが fixed になったため）
-// renderHome() の後に DOM が確定してから実行
-requestAnimationFrame(updateContentPadding);
 
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
