@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>最速先取りナビ</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -310,8 +310,8 @@ body {
   min-width: 0;
   border: 1.5px solid #d0d8e4;
   border-radius: 8px;
-  padding: 8px 8px;
-  font-size: 16px; /* 16px未満だとiOS Safariが自動ズームしてレイアウトが崩れる */
+  padding: 5px 8px; /* paddingを小さくして視覚サイズを抑制 */
+  font-size: 16px; /* 16px未満だとiOS Safariが自動ズームする */
   color: #1a1a2e;
   background: #f8fafc;
 }
@@ -750,7 +750,11 @@ function updateLayout() {
     app.style.height = (vvH - headerH) + 'px';
   } else {
     const naturalH = window.innerWidth * 0.5625; // 16:9
-    const maxH     = Math.floor(vvH * 0.38);     // キーボードあり時に入力欄を確保
+    // キーボード表示中（vvH が innerHeight の75%未満）はwidthベースの固定高さにして動画サイズを安定させる
+    const keyboardOpen = vvH < window.innerHeight * 0.75;
+    const maxH = keyboardOpen
+      ? Math.floor(window.innerWidth * 0.40)  // キーボードあり: 画面幅の40%（変化しない）
+      : Math.floor(vvH * 0.45);               // キーボードなし: 画面高さの45%
     const videoH   = Math.min(naturalH, maxH);
     vc.style.top    = (offsetTop + headerH) + 'px';
     vc.style.height = videoH + 'px';
