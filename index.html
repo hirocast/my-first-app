@@ -201,26 +201,38 @@
   .status-chip.graduated  { background: linear-gradient(135deg,#f5a623,#e8900a); color:#fff; }
 
   /* ── ガイダンスストリップ ── */
-  #guidanceStrip {
-    display: none;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    margin: 10px 12px 0;
+  #guidanceToast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
     background: linear-gradient(135deg, #fff8e0, #ffedb0);
     border: 2px solid #f5a623;
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
-    animation: stripPulse 2s ease-in-out infinite;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(245,166,35,0.45);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    white-space: nowrap;
+    animation: guidancePulse 2s ease-in-out infinite;
   }
-  #guidanceStrip.visible { display: flex; }
+  #guidanceToast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
   .guidance-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
   .guidance-body { display: flex; flex-direction: column; gap: 2px; }
   .guidance-msg  { font-size: 0.9rem; font-weight: 700; color: #b36d00; line-height: 1.4; }
   .guidance-sub  { font-size: 0.72rem; font-weight: 400; color: #c87700; }
-  @keyframes stripPulse {
-    0%,100% { box-shadow: 0 4px 16px rgba(245,166,35,0.4); border-color: #f5a623; }
-    50%      { box-shadow: 0 6px 24px rgba(245,166,35,0.7); border-color: #e8900a; }
+  @keyframes guidancePulse {
+    0%,100% { box-shadow: 0 8px 32px rgba(245,166,35,0.45); border-color: #f5a623; }
+    50%      { box-shadow: 0 10px 40px rgba(245,166,35,0.75); border-color: #e8900a; }
   }
 
   .sec-meta {
@@ -799,10 +811,10 @@
 </div>
 
 <div class="tabs" id="tabBar"></div>
-<div id="guidanceStrip"></div>
 <div id="content"></div>
 <div class="bottom-pad"></div>
 
+<div id="guidanceToast"></div>
 <div class="review-overlay" id="reviewOverlay" onclick="closeReviewPanel()"></div>
 <div class="review-panel" id="reviewPanel">
   <div class="review-panel-title">📋 復習設定</div>
@@ -1428,7 +1440,7 @@ function isNewUser() {
 }
 
 function updateGuidanceStrip() {
-  const strip = document.getElementById('guidanceStrip');
+  const strip = document.getElementById('guidanceToast');
   if (!strip) return;
   if (localStorage.getItem(GUIDANCE_KEY) === 'done') {
     strip.classList.remove('visible');
