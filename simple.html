@@ -830,44 +830,63 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
-function updateLayout() {
+
+// キーボード開閉アニメーション中に動画がガタつかないよう、
+// 動画高さは debounce で安定後に更新。位置だけは即時更新。
+let _videoH = 0;
+let _resizeTimer;
+
+function _calcVideoH(vvH) {
+  const naturalH   = window.innerWidth * 0.5625;
+  const keyboardOpen = vvH < window.innerHeight * 0.75;
+  const maxH = keyboardOpen
+    ? Math.floor(window.innerWidth * 0.40)
+    : Math.floor(vvH * 0.45);
+  return Math.min(naturalH, maxH);
+}
+
+// 位置のみ更新（scroll イベントから即時呼び出し）
+function updatePositions() {
   const vv = window.visualViewport;
-  // iOS がキーボード表示時にビジュアルビューポートをスクロールさせる分を offsetTop で補正
   const offsetTop = vv ? vv.offsetTop : 0;
   const vvH       = vv ? vv.height   : window.innerHeight;
-
-  const headerEl = document.querySelector('.app-header');
-  const headerH  = headerEl.offsetHeight;
+  const headerEl  = document.querySelector('.app-header');
+  const headerH   = headerEl.offsetHeight;
   const vc  = document.getElementById('videoContainer');
   const app = document.getElementById('app');
 
-  // ヘッダーをビジュアルビューポートの上端に固定
   headerEl.style.top = offsetTop + 'px';
-
   if (vc.style.display === 'none') {
     app.style.top    = (offsetTop + headerH) + 'px';
     app.style.height = (vvH - headerH) + 'px';
   } else {
-    const naturalH = window.innerWidth * 0.5625; // 16:9
-    // キーボード表示中（vvH が innerHeight の75%未満）はwidthベースの固定高さにして動画サイズを安定させる
-    const keyboardOpen = vvH < window.innerHeight * 0.75;
-    const maxH = keyboardOpen
-      ? Math.floor(window.innerWidth * 0.40)  // キーボードあり: 画面幅の40%（変化しない）
-      : Math.floor(vvH * 0.45);               // キーボードなし: 画面高さの45%
-    const videoH   = Math.min(naturalH, maxH);
-    vc.style.top    = (offsetTop + headerH) + 'px';
-    vc.style.height = videoH + 'px';
-    const appTop = offsetTop + headerH + videoH;
-    app.style.top    = appTop + 'px';
-    app.style.height = Math.max(60, vvH - headerH - videoH) + 'px';
+    if (!_videoH) _videoH = _calcVideoH(vvH); // 初期化
+    vc.style.top     = (offsetTop + headerH) + 'px';
+    vc.style.height  = _videoH + 'px';
+    app.style.top    = (offsetTop + headerH + _videoH) + 'px';
+    app.style.height = Math.max(60, vvH - headerH - _videoH) + 'px';
   }
-  // フォーカス中の入力欄を #app 内でスクロールして見えるようにする
   const active = document.activeElement;
   if (active && active.matches && active.matches('.answer-input')) {
-    requestAnimationFrame(() => {
-      active.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-    });
+    requestAnimationFrame(() => active.scrollIntoView({ block: 'nearest', behavior: 'instant' }));
   }
+}
+
+// 高さも更新（resize 後 debounce で呼び出し）
+function updateLayout() {
+  const vv  = window.visualViewport;
+  const vvH = vv ? vv.height : window.innerHeight;
+  const vc  = document.getElementById('videoContainer');
+  if (vc.style.display !== 'none') {
+    _videoH = _calcVideoH(vvH);
+  }
+  updatePositions();
+}
+
+// resize は debounce してアニメーション完了後に動画高さを確定
+function onViewportResize() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(updateLayout, 120);
 }
 
 function showVideoContainer(item) {
@@ -1214,12 +1233,12 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 updateStreak();
 renderHome();
 updateLayout();
-window.addEventListener('resize', updateLayout);
+window.addEventListener('resize', onViewportResize);
 if (window.visualViewport) {
-  // resize: キーボード出現でビューポート高さ変化
-  // scroll: iOS がフォーカス時にビジュアルビューポートをスクロール → offsetTop で補正
-  window.visualViewport.addEventListener('resize', updateLayout);
-  window.visualViewport.addEventListener('scroll', updateLayout);
+  // resize: debounce でアニメーション完了後に動画高さを確定（ガタつき防止）
+  // scroll: offsetTop 補正は即時（位置だけ更新）
+  window.visualViewport.addEventListener('resize', onViewportResize);
+  window.visualViewport.addEventListener('scroll', updatePositions);
 }
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
