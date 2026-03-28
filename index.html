@@ -951,9 +951,9 @@ function renderQuizArea(vid) {
       if (allGraduated) {
         roundsHtml += `
           <div class="next-round-wrap">
-            <div class="all-grad-banner">
+            <div class="all-grad-banner" onclick="toggleCard('${vid}')" style="cursor:pointer;">
               🎓 全問習得済み！
-              <span class="all-grad-sub">この動画の確認問題はすべて習得しました</span>
+              <span class="all-grad-sub">この動画の確認問題はすべて習得しました　▲ 閉じる</span>
             </div>
             <div class="next-round-btns">
               <button class="btn-next-round btn-recheck"
