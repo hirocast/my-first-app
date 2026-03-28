@@ -10,9 +10,22 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   background: #f8fafc;
   color: #1a1a2e;
-  min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
+  overflow: hidden;
+  height: 100dvh;
+}
+#app {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 52px; /* updated by JS when video shown/hidden */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #f8fafc;
 }
 
 /* ── Header ── */
@@ -23,8 +36,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
@@ -304,7 +319,7 @@ body {
   </div>
 </div>
 
-<div id="videoContainer" style="display:none; position:sticky; top:52px; z-index:50; background:#000;">
+<div id="videoContainer" style="display:none; position:fixed; top:52px; left:0; right:0; z-index:50; background:#000;">
   <div class="video-wrapper">
     <iframe id="videoFrame" src="" allowfullscreen
             allow="autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
@@ -684,6 +699,14 @@ function onWatched() {
 // ─────────────────────────────────────
 // QCOUNT
 // ─────────────────────────────────────
+function updateAppTop() {
+  const vc = document.getElementById('videoContainer');
+  const app = document.getElementById('app');
+  const headerH = document.querySelector('.app-header').offsetHeight;
+  const vcH = vc.style.display === 'none' ? 0 : vc.offsetHeight;
+  app.style.top = (headerH + vcH) + 'px';
+}
+
 function showVideoContainer(item) {
   const container = document.getElementById('videoContainer');
   const frame = document.getElementById('videoFrame');
@@ -694,12 +717,15 @@ function showVideoContainer(item) {
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
   container.style.display = '';
+  // video の高さが確定してから #app の top を更新
+  requestAnimationFrame(() => updateAppTop());
 }
 
 function hideVideoContainer() {
   const container = document.getElementById('videoContainer');
   container.style.display = 'none';
   document.getElementById('videoFrame').src = '';
+  updateAppTop();
 }
 
 function renderQcount(item) {
@@ -923,6 +949,9 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
+updateAppTop();
+// リサイズ時（画面回転など）にも再計算
+window.addEventListener('resize', updateAppTop);
 </script>
 </body>
 </html>
