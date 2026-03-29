@@ -6,25 +6,21 @@
 <title>最速先取りナビ</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
+html, body { height: 100%; overflow: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   background: #f8fafc;
   color: #1a1a2e;
   max-width: 480px;
   margin: 0 auto;
-  /* dvh: キーボード表示時に高さが自動縮小（iOS 15.4+ / Chrome 108+）
-     非対応の場合は JS が body.style.height を window.innerHeight で補正 */
-  height: 100vh; /* fallback */
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
-/* ── Header: flex 固定行 ── */
+/* ── Header / Video / App : すべて fixed。top は JS が visualViewport.offsetTop で補正 ── */
 .app-header {
-  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  z-index: 100;
   background: linear-gradient(135deg, #1a1a2e, #0f3460);
   color: #fff;
   padding: 13px 16px;
@@ -32,28 +28,35 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-/* ── Video: flex 固定行、高さは JS が setVideoHeight() で一度だけ設定 ── */
 #videoContainer {
-  flex-shrink: 0;
+  position: fixed;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
+  z-index: 50;
   background: #000;
+  /* top / height : JS が設定 */
 }
+/* fixed コンテナの高さを video-wrapper が埋める */
 #videoContainer .video-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
+  padding-bottom: 0;
+  overflow: hidden;
 }
 #videoContainer .video-wrapper iframe {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   border: none;
 }
-/* ── App: 残り全高を占有してスクロール ── */
 #app {
-  flex: 1;
-  min-height: 0; /* flex overflow に必須 */
+  position: fixed;
+  left: 0; right: 0;
+  max-width: 480px; margin: 0 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: #f8fafc;
+  /* top / height : JS が設定 */
 }
 .app-title { font-size: 0.95rem; font-weight: 700; }
 .app-title span { color: #e94560; }
@@ -693,6 +696,7 @@ function setStudyMode(on) {
   document.getElementById('hdrExit').style.display    = on ? 'block' : 'none';
   document.getElementById('hdrTitle').style.display   = on ? 'none'  : 'block';
   document.getElementById('hdrModeBtn').style.display = on ? 'none'  : '';
+  updateLayout();
 }
 
 // ─────────────────────────────────────
@@ -827,21 +831,61 @@ function onWatched() {
 // QCOUNT
 // ─────────────────────────────────────
 
-// ── レイアウト ──────────────────────────────────────
-// body が height:100dvh の flex column なので JS による位置計算は不要。
-// dvh 非対応の古い iOS のみ、visualViewport.resize で body 高さを補正。
-function setVideoHeight() {
-  const w = Math.min(window.innerWidth, 480);
-  document.getElementById('videoContainer').style.height =
-    Math.min(Math.floor(w * 0.5625), Math.floor(w * 0.40)) + 'px';
+// iOS キーボード対応レイアウト
+// resize / scroll イベントを同じタイマーで debounce し、
+// キーボードアニメーション完了後に1回だけ確定することでガタつきを防ぐ
+let _videoH = 0;
+let _layoutTimer;
+
+function _calcVideoH(vvH) {
+  const naturalH     = window.innerWidth * 0.5625;
+  const keyboardOpen = vvH < window.innerHeight * 0.75;
+  const maxH = keyboardOpen
+    ? Math.floor(window.innerWidth * 0.40)
+    : Math.floor(vvH * 0.45);
+  return Math.min(naturalH, maxH);
 }
 
 function updateLayout() {
-  // dvh 非対応環境: body を visualViewport.height に合わせる
-  if (!CSS.supports('height', '1dvh')) {
-    const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    document.body.style.height = h + 'px';
+  const vv       = window.visualViewport;
+  const offsetTop = vv ? vv.offsetTop : 0;
+  const vvH      = vv ? vv.height    : window.innerHeight;
+  const headerEl = document.querySelector('.app-header');
+  const headerH  = headerEl.offsetHeight;
+  const vc  = document.getElementById('videoContainer');
+  const app = document.getElementById('app');
+
+  if (!_videoH) _videoH = _calcVideoH(vvH);
+
+  headerEl.style.top = offsetTop + 'px';
+
+  if (vc.style.display === 'none') {
+    app.style.top    = (offsetTop + headerH) + 'px';
+    app.style.height = (vvH - headerH) + 'px';
+  } else {
+    vc.style.top     = (offsetTop + headerH) + 'px';
+    vc.style.height  = _videoH + 'px';
+    app.style.top    = (offsetTop + headerH + _videoH) + 'px';
+    app.style.height = Math.max(60, vvH - headerH - _videoH) + 'px';
   }
+  const active = document.activeElement;
+  if (active && active.matches && active.matches('.answer-input')) {
+    requestAnimationFrame(() => active.scrollIntoView({ block: 'nearest', behavior: 'instant' }));
+  }
+}
+
+// resize / scroll を同じ debounce で処理：アニメーション中は何もせず、
+// 完了後 150ms で offsetTop・vvH・videoH をまとめて確定する
+function scheduleLayout() {
+  clearTimeout(_layoutTimer);
+  _layoutTimer = setTimeout(() => {
+    const vv  = window.visualViewport;
+    const vvH = vv ? vv.height : window.innerHeight;
+    if (document.getElementById('videoContainer').style.display !== 'none') {
+      _videoH = _calcVideoH(vvH);
+    }
+    updateLayout();
+  }, 150);
 }
 
 function showVideoContainer(item) {
@@ -853,13 +897,14 @@ function showVideoContainer(item) {
   const startParam = startSec > 0 ? `&start=${startSec}` : '';
   const newSrc = `https://www.youtube.com/embed/${item.yt}?rel=0&playsinline=1${startParam}`;
   if (frame.src !== newSrc) frame.src = newSrc;
-  setVideoHeight();
   container.style.display = '';
+  updateLayout();
 }
 
 function hideVideoContainer() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('videoFrame').src = '';
+  updateLayout();
 }
 
 function renderQcount(item) {
@@ -1186,12 +1231,14 @@ if (localStorage.getItem('tryit_mode') === 'full') {
 // ─────────────────────────────────────
 updateStreak();
 renderHome();
-// dvh 非対応の古い iOS 向けフォールバック
-if (!CSS.supports('height', '1dvh') && window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateLayout);
+updateLayout();
+window.addEventListener('resize', scheduleLayout);
+if (window.visualViewport) {
+  // resize と scroll を同じ scheduleLayout(debounce 150ms) で処理
+  // → アニメーション中は何もせず完了後に1回だけ確定してガタつきを防ぐ
+  window.visualViewport.addEventListener('resize', scheduleLayout);
+  window.visualViewport.addEventListener('scroll', scheduleLayout);
 }
-// 画面回転時に動画高さを再計算
-window.addEventListener('resize', setVideoHeight);
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
   if (e.target.matches && e.target.matches('.answer-input')) {
