@@ -945,6 +945,7 @@ function renderQcount(item) {
 
 function onSetQcount(n) {
   queue[qIdx].qcount = n;
+  delete queue[qIdx].retryIndices;
   renderProblems(queue[qIdx]);
 }
 
@@ -954,13 +955,18 @@ function onSetQcount(n) {
 function renderProblems(item) {
   setStudyMode(true);
   showVideoContainer(item); // 問題中も動画を表示（問題文が動画にあるため）
-  currentMarks = new Array(item.qcount).fill('');
+  // retryIndices がある場合：その問題だけ表示、残りは最初から○扱い
+  const indicesToShow = item.retryIndices
+    ? item.retryIndices
+    : Array.from({ length: item.qcount }, (_, i) => i);
+  currentMarks = new Array(item.qcount).fill('○');
+  indicesToShow.forEach(i => { currentMarks[i] = ''; });
   const q = loadQuiz();
   const savedTime = item.startTime || q[item.id + '_startTime'] || '';
 
   const pendingNums = (item.pendingProblems || []).map(p => p.num);
   let rows = '';
-  for (let i = 0; i < item.qcount; i++) {
+  for (const i of indicesToShow) {
     const pInfo = (item.pendingProblems || []).find(p => p.num === i + 1);
     const badge = pInfo
       ? `<span class="prob-pending-badge">${pInfo.mark === '×' ? '× 保留' : '△ 保留'}</span>`
@@ -1049,9 +1055,17 @@ function renderRetry(item) {
       <div class="retry-msg">数学は積み上げの教科です。<br>この単元をしっかり習得してから次に進みましょう。</div>
       <ul class="retry-list">${badRows}</ul>
     </div>
-    <button class="btn-ghost" onclick="renderProblems(queue[qIdx])">✏ 練習問題をもう一度解く</button>
+    <button class="btn-ghost" onclick="renderRetryProblems()">✏ 練習問題をもう一度解く</button>
     <button class="btn-ghost btn-skip" style="margin-top:6px;" onclick="skipWithPending()">❓ 解き方がわからないので保留して次へ進む</button>
   `);
+}
+
+function renderRetryProblems() {
+  const item = queue[qIdx];
+  item.retryIndices = currentMarks
+    .map((m, i) => m !== '○' ? i : -1)
+    .filter(i => i >= 0);
+  renderProblems(item);
 }
 
 function skipWithPending() {
