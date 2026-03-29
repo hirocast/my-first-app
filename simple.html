@@ -230,6 +230,14 @@ body {
 }
 .problem-row:last-child { border-bottom: none; }
 .prob-num { font-size: 0.82rem; color: #999; width: 32px; flex-shrink: 0; }
+.prob-pending-badge {
+  display: inline-block;
+  font-size: 0.62rem; font-weight: 700;
+  padding: 1px 5px; border-radius: 6px;
+  margin-left: 3px; vertical-align: middle;
+  background: #fde8ec; color: #e94560;
+}
+.prow-pending { background: #fff8f9; border-radius: 8px; }
 .mark-btns { display: flex; gap: 7px; }
 .mark-btn {
   width: 46px;
@@ -950,11 +958,16 @@ function renderProblems(item) {
   const q = loadQuiz();
   const savedTime = item.startTime || q[item.id + '_startTime'] || '';
 
+  const pendingNums = (item.pendingProblems || []).map(p => p.num);
   let rows = '';
   for (let i = 0; i < item.qcount; i++) {
+    const pInfo = (item.pendingProblems || []).find(p => p.num === i + 1);
+    const badge = pInfo
+      ? `<span class="prob-pending-badge">${pInfo.mark === '×' ? '× 保留' : '△ 保留'}</span>`
+      : '';
     rows += `
-      <div class="problem-row" id="prow_${i}">
-        <span class="prob-num">問${i + 1}</span>
+      <div class="problem-row${pInfo ? ' prow-pending' : ''}" id="prow_${i}">
+        <span class="prob-num">問${i + 1}${badge}</span>
         <input class="answer-input" type="text" placeholder="答え">
         <div class="mark-btns">
           <button class="mark-btn" onclick="setMark(${i},'○')">○</button>
@@ -963,6 +976,9 @@ function renderProblems(item) {
         </div>
       </div>`;
   }
+  const pendingNote = pendingNums.length > 0
+    ? `<div style="font-size:0.75rem;color:#e94560;margin-bottom:8px;">📌 保留中の問題に再挑戦しよう</div>`
+    : '';
 
   setScreen(`
     <div class="study-top">
@@ -971,6 +987,7 @@ function renderProblems(item) {
     </div>
 
     <div class="card">
+      ${pendingNote}
       <div class="starttime-inline">
         <span>⏱ 練習問題開始時間</span>
         <input id="startTimeInput" type="text" placeholder="例: 0345" value="${savedTime}">
@@ -1067,7 +1084,12 @@ function reviewPendingVideo(vid) {
   const v = allVids.find(x => x.id === vid);
   if (!v) return;
   const q = loadQuiz();
-  const item = { ...v, type: 'review', qcount: q[vid + '_qcount'] || 1 };
+  const pendingEntry = loadPending().find(e => e.vid === vid);
+  const item = {
+    ...v, type: 'review',
+    qcount: q[vid + '_qcount'] || 1,
+    pendingProblems: pendingEntry ? pendingEntry.problems : []
+  };
   queue = [item];
   qIdx = 0;
   currentMarks = new Array(item.qcount).fill('');
