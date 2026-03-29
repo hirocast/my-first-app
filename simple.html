@@ -8,27 +8,23 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 /* iOS Safari のフォーカス時自動ズームを防止: font-size が 16px 未満だとズームが発生する */
 input, select, textarea { font-size: 16px; }
-html { height: 100%; overflow: hidden; }
+html { overflow: hidden; }
+/* body を position:fixed にすることで iOS がドキュメントをスクロールできなくする。
+   キーボード表示時は iOS が body をスクロールしようとしても固定されているため、
+   代わりに #app（overflow-y:auto）の内部だけがスクロールされる。
+   これによりヘッダーと動画が常に画面上部に表示される。
+   JS が visualViewport.resize で height を更新してキーボード分を補正する。 */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  background: #f8fafc;
   color: #1a1a2e;
-  overflow: hidden;
-}
-
-/* ── Viewport Wrapper: position:fixed でキーボード上部の領域にぴったり収まる ──
-   iOS Safari ではキーボード表示時にレイアウトビューポートはリサイズされないため
-   position:fixed 要素が画面外に消える。このラッパーを全体に被せ、
-   visualViewport.resize イベントで bottom をキーボード高さ分に更新することで
-   ヘッダー・動画・コンテンツが常にキーボード上部の領域内に表示される。 */
-#viewport-wrapper {
   position: fixed;
-  top: 0;   /* JS が vv.offsetTop で上書き */
+  top: 0;
   left: 0;
   right: 0;
-  height: 100dvh; /* JS が vv.height で上書き、非対応ブラウザ向けフォールバック */
+  height: 100dvh; /* JS が vv.height で上書き */
   max-width: 480px;
   margin: 0 auto;
-  background: #f8fafc;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -365,7 +361,6 @@ body {
 </head>
 <body>
 
-<div id="viewport-wrapper">
 <div class="app-header">
   <!-- 学習中のみ表示: 大きな離脱ボタン -->
   <button id="hdrExit"
@@ -398,7 +393,6 @@ body {
 </div>
 
 <div id="app"></div>
-</div><!-- /#viewport-wrapper -->
 
 <script src="data.js"></script>
 <script>
@@ -849,18 +843,12 @@ function setVideoHeight() {
     Math.min(Math.floor(w * 0.5625), Math.floor(w * 0.40)) + 'px';
 }
 
-// キーボード表示・非表示、および iOS がビジュアルビューポートをスクロールした際に
-// #viewport-wrapper の top と height を更新する。
-// - top = vv.offsetTop  : iOS がビジュアルVPをスクロールした分だけ wrapper を下にずらす
-//                         これで wrapper が常にビジュアルVPの最上部から始まる
-// - height = vv.height  : キーボードを除いた表示可能領域の高さにする
-function updateWrapper() {
+// キーボード表示時に body の高さをキーボード上部の表示可能領域に合わせる。
+// body が position:fixed のため iOS はドキュメントをスクロールできず、
+// 代わりに #app（overflow-y:auto）内をスクロールしてフォーカスした入力欄を表示する。
+function updateBodyHeight() {
   if (!window.visualViewport) return;
-  const vv = window.visualViewport;
-  const wrapper = document.getElementById('viewport-wrapper');
-  if (!wrapper) return;
-  wrapper.style.top    = vv.offsetTop + 'px';
-  wrapper.style.height = vv.height    + 'px';
+  document.body.style.height = window.visualViewport.height + 'px';
 }
 
 function showVideoContainer(item) {
@@ -1208,12 +1196,10 @@ renderHome();
 // 画面回転時に動画高さを再計算
 window.addEventListener('resize', setVideoHeight);
 
-// キーボード表示・iOS のビジュアルVPスクロール両方に対応して wrapper を更新
+// キーボード表示/非表示で body height を更新する
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateWrapper);
-  window.visualViewport.addEventListener('scroll', updateWrapper);
+  window.visualViewport.addEventListener('resize', updateBodyHeight);
 }
-updateWrapper(); // 初期サイズ設定
 
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
