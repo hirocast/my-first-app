@@ -238,6 +238,15 @@ body {
   background: #fde8ec; color: #e94560;
 }
 .prow-pending { background: #fff8f9; border-radius: 8px; }
+.prob-prev-badge {
+  display: inline-block;
+  font-size: 0.62rem; font-weight: 700;
+  padding: 1px 5px; border-radius: 6px;
+  margin-left: 3px; vertical-align: middle;
+}
+.prob-prev-badge.maru { background: #e8f5e9; color: #2e7d32; }
+.prob-prev-badge.tri  { background: #fff4e0; color: #e67e00; }
+.prob-prev-badge.batu { background: #fde8ec; color: #e94560; }
 .mark-btns { display: flex; gap: 7px; }
 .mark-btn {
   width: 46px;
@@ -963,14 +972,22 @@ function renderProblems(item) {
   indicesToShow.forEach(i => { currentMarks[i] = ''; });
   const q = loadQuiz();
   const savedTime = item.startTime || q[item.id + '_startTime'] || '';
+  const prevRound = (q[item.id + '_started'] || 1) - 1; // 0 = 初回（前回マークなし）
 
   const pendingNums = (item.pendingProblems || []).map(p => p.num);
   let rows = '';
   for (const i of indicesToShow) {
     const pInfo = (item.pendingProblems || []).find(p => p.num === i + 1);
-    const badge = pInfo
-      ? `<span class="prob-pending-badge">${pInfo.mark === '×' ? '× 保留' : '△ 保留'}</span>`
-      : '';
+    // 保留バッジ優先、なければ前回マークバッジ
+    let badge = '';
+    if (pInfo) {
+      badge = `<span class="prob-pending-badge">${pInfo.mark === '×' ? '× 保留' : '△ 保留'}</span>`;
+    } else if (prevRound >= 1) {
+      const pm = q[`${item.id}_r${prevRound}_q${i + 1}`];
+      if (pm === '○') badge = `<span class="prob-prev-badge maru">前回○</span>`;
+      else if (pm === '△') badge = `<span class="prob-prev-badge tri">前回△</span>`;
+      else if (pm === '×') badge = `<span class="prob-prev-badge batu">前回×</span>`;
+    }
     rows += `
       <div class="problem-row${pInfo ? ' prow-pending' : ''}" id="prow_${i}">
         <span class="prob-num">問${i + 1}${badge}</span>
