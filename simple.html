@@ -1032,8 +1032,7 @@ function renderRetry(item) {
       <div class="retry-msg">数学は積み上げの教科です。<br>この単元をしっかり習得してから次に進みましょう。</div>
       <ul class="retry-list">${badRows}</ul>
     </div>
-    <button class="btn-next" onclick="renderVideo(queue[qIdx])">▶ 動画を見直す</button>
-    <button class="btn-ghost" style="margin-top:6px;" onclick="renderProblems(queue[qIdx])">✏ 練習問題をもう一度解く</button>
+    <button class="btn-ghost" onclick="renderProblems(queue[qIdx])">✏ 練習問題をもう一度解く</button>
     <button class="btn-ghost btn-skip" style="margin-top:6px;" onclick="skipWithPending()">❓ 解き方がわからないので保留して次へ進む</button>
   `);
 }
@@ -1053,7 +1052,7 @@ function skipWithPending() {
         <span style="color:#e94560;font-weight:700;">わからないことを「わかる」に変える力が、<br>数学の本当の力になります。</span>
       </div>
     </div>
-    <button class="btn-next" onclick="skipAdvance()">次の学習へ進む →</button>
+    <button class="btn-next ready" onclick="skipAdvance()">次の学習へ進む →</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="renderPending()">📋 保留問題を確認する</button>
   `);
 }
@@ -1061,6 +1060,18 @@ function skipWithPending() {
 function skipAdvance() {
   qIdx++;
   nextItem();
+}
+
+function reviewPendingVideo(vid) {
+  const allVids = getAllVideos();
+  const v = allVids.find(x => x.id === vid);
+  if (!v) return;
+  const q = loadQuiz();
+  const item = { ...v, type: 'review', qcount: q[vid + '_qcount'] || 1 };
+  queue = [item];
+  qIdx = 0;
+  currentMarks = new Array(item.qcount).fill('');
+  renderProblems(item);
 }
 
 function renderPending() {
@@ -1081,11 +1092,15 @@ function renderPending() {
     const probs = e.problems.map(p =>
       `<span class="pending-prob ${p.mark === '×' ? 'prob-x' : 'prob-tri'}">${p.mark} 問${p.num}</span>`
     ).join('');
+    const q = loadQuiz();
+    const startTime = q[e.vid + '_startTime'] || '';
+    const startLabel = startTime ? `（${startTime}〜）` : '';
     return `
       <div class="card pending-card">
         <div class="pending-title">${e.title}</div>
         <div class="pending-probs">${probs}</div>
         <div class="pending-date">保留日: ${relativeDate(e.date)}（${e.date}）</div>
+        <button class="btn-ghost btn-resolve" style="margin-bottom:6px;" onclick="reviewPendingVideo('${e.vid}')">▶ 動画を見ながら解く${startLabel}</button>
         <button class="btn-ghost btn-resolve" onclick="resolvePending('${e.vid}')">✅ 解決済みにする</button>
       </div>`;
   }).join('');
