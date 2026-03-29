@@ -1225,10 +1225,10 @@ function renderStats() {
   setScreen(`
     <div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:14px;">📊 学習記録</div>
     <div class="stats-grid">
-      ${card('今日',   s.today)}
-      ${card('昨日',   s.yesterday)}
-      ${card('今週',   s.week)}
-      ${card('今月',   s.month)}
+      ${card('今日',    s.today)}
+      ${card('昨日',    s.yesterday)}
+      ${card('直近7日', s.week)}
+      ${card('直近30日', s.month)}
     </div>
     <button class="btn-ghost" style="margin-top:8px;" onclick="renderHome()">← ホームへ戻る</button>
   `);
