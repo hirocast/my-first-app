@@ -22,10 +22,10 @@ body {
    ヘッダー・動画・コンテンツが常にキーボード上部の領域内に表示される。 */
 #viewport-wrapper {
   position: fixed;
-  top: 0;
+  top: 0;   /* JS が vv.offsetTop で上書き */
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 100dvh; /* JS が vv.height で上書き、非対応ブラウザ向けフォールバック */
   max-width: 480px;
   margin: 0 auto;
   background: #f8fafc;
@@ -849,12 +849,18 @@ function setVideoHeight() {
     Math.min(Math.floor(w * 0.5625), Math.floor(w * 0.40)) + 'px';
 }
 
-// キーボード表示時に #viewport-wrapper の bottom をキーボード高さ分に更新し
-// ラッパーがキーボード上部の領域にぴったり収まるようにする
-function updateWrapperBottom() {
+// キーボード表示・非表示、および iOS がビジュアルビューポートをスクロールした際に
+// #viewport-wrapper の top と height を更新する。
+// - top = vv.offsetTop  : iOS がビジュアルVPをスクロールした分だけ wrapper を下にずらす
+//                         これで wrapper が常にビジュアルVPの最上部から始まる
+// - height = vv.height  : キーボードを除いた表示可能領域の高さにする
+function updateWrapper() {
   if (!window.visualViewport) return;
-  const keyboardHeight = Math.max(0, window.innerHeight - window.visualViewport.height);
-  document.getElementById('viewport-wrapper').style.bottom = keyboardHeight + 'px';
+  const vv = window.visualViewport;
+  const wrapper = document.getElementById('viewport-wrapper');
+  if (!wrapper) return;
+  wrapper.style.top    = vv.offsetTop + 'px';
+  wrapper.style.height = vv.height    + 'px';
 }
 
 function showVideoContainer(item) {
@@ -1202,11 +1208,12 @@ renderHome();
 // 画面回転時に動画高さを再計算
 window.addEventListener('resize', setVideoHeight);
 
-// キーボード表示/非表示で #viewport-wrapper の bottom を更新し
-// ヘッダー・動画・コンテンツが常にキーボード上部の領域に収まるようにする
+// キーボード表示・iOS のビジュアルVPスクロール両方に対応して wrapper を更新
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', updateWrapperBottom);
+  window.visualViewport.addEventListener('resize', updateWrapper);
+  window.visualViewport.addEventListener('scroll', updateWrapper);
 }
+updateWrapper(); // 初期サイズ設定
 
 // 入力欄にフォーカスしたとき、キーボードアニメーション後にスクロールして見えるようにする
 document.addEventListener('focusin', (e) => {
