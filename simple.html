@@ -143,6 +143,40 @@ body {
 .btn-ghost:active { background: #f0f4f8; }
 .btn-danger { border-color: #e94560 !important; color: #e94560 !important; }
 
+/* ── Stats ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.stats-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.stats-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f3460;
+  margin-bottom: 10px;
+  text-align: center;
+  background: #f0f4f8;
+  border-radius: 6px;
+  padding: 3px 0;
+}
+.stats-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+.stats-icon { font-size: 0.75rem; width: 18px; flex-shrink: 0; }
+.stats-val  { font-size: 1.3rem; font-weight: 700; color: #1a1a2e; line-height: 1; }
+.stats-unit { font-size: 0.65rem; color: #888; }
+.stats-pct  { font-size: 0.65rem; color: #4caf50; font-weight: 700; margin-left: auto; }
+
 /* ── Start Selection ── */
 .start-ch-list { display: flex; flex-direction: column; gap: 8px; }
 .start-ch-btn {
@@ -437,6 +471,26 @@ const WATCHED_KEY = 'tryit_math1_v6';
 const QUIZ_KEY    = 'tryit_quiz_v1';
 const STREAK_KEY  = 'tryit_streak_v6';
 const PENDING_KEY = 'tryit_pending_v1';
+const STATS_KEY   = 'tryit_statslog_v1';
+
+function loadStatsLog() {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY)) || []; }
+  catch { return []; }
+}
+function appendStatsLog(vid, marks) {
+  const log = loadStatsLog();
+  log.push({ d: todayStr(), v: vid, m: marks });
+  // 直近90日分だけ保持
+  const cutoff = addDays(todayStr(), -90);
+  localStorage.setItem(STATS_KEY, JSON.stringify(log.filter(e => e.d >= cutoff)));
+}
+function calcStats(fromDate, toDate) {
+  const entries = loadStatsLog().filter(e => e.d >= fromDate && e.d <= toDate);
+  const vids = new Set(entries.map(e => e.v));
+  const total   = entries.reduce((s, e) => s + e.m.length, 0);
+  const correct = entries.reduce((s, e) => s + e.m.filter(m => m === '○').length, 0);
+  return { units: vids.size, total, correct };
+}
 
 function loadPending() {
   try { return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; }
@@ -693,6 +747,7 @@ function updateSRS(vid, marks) {
   q[vid + '_next']        = addDays(today, interval);
   q[vid + '_lastStudied'] = today;
   saveQuiz(q);
+  appendStatsLog(vid, marks);
 }
 
 // ─────────────────────────────────────
@@ -780,6 +835,7 @@ function renderHome() {
       ${startBtn}
     </div>
 
+    <button class="btn-ghost" onclick="renderStats()">📊 学習記録</button>
     <button class="btn-ghost" onclick="window.open('about.html','_blank')">📖 このアプリの学習理論について</button>
     <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
     <button class="btn-ghost" onclick="renderStartSelection()">📍 開始位置を変更</button>
@@ -1125,6 +1181,57 @@ function reviewPendingVideo(vid) {
   qIdx = 0;
   currentMarks = new Array(item.qcount).fill('');
   renderProblems(item);
+}
+
+function renderStats() {
+  setStudyMode(false);
+  hideVideoContainer();
+  const today     = todayStr();
+  const yesterday = addDays(today, -1);
+  const week      = addDays(today, -6);
+  const month     = addDays(today, -29);
+
+  const s = {
+    today:     calcStats(today,     today),
+    yesterday: calcStats(yesterday, yesterday),
+    week:      calcStats(week,      today),
+    month:     calcStats(month,     today),
+  };
+
+  function card(label, st) {
+    const pct = st.total > 0 ? Math.round(st.correct / st.total * 100) : 0;
+    return `
+      <div class="stats-card">
+        <div class="stats-label">${label}</div>
+        <div class="stats-row">
+          <span class="stats-icon">📹</span>
+          <span class="stats-val">${st.units}</span>
+          <span class="stats-unit">単元</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-icon">✏️</span>
+          <span class="stats-val">${st.total}</span>
+          <span class="stats-unit">問</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-icon">○</span>
+          <span class="stats-val">${st.correct}</span>
+          <span class="stats-unit">問正解</span>
+          ${st.total > 0 ? `<span class="stats-pct">${pct}%</span>` : ''}
+        </div>
+      </div>`;
+  }
+
+  setScreen(`
+    <div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:14px;">📊 学習記録</div>
+    <div class="stats-grid">
+      ${card('今日',   s.today)}
+      ${card('昨日',   s.yesterday)}
+      ${card('今週',   s.week)}
+      ${card('今月',   s.month)}
+    </div>
+    <button class="btn-ghost" style="margin-top:8px;" onclick="renderHome()">← ホームへ戻る</button>
+  `);
 }
 
 function renderPending() {
