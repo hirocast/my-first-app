@@ -1191,11 +1191,30 @@ function renderStats() {
   const week      = addDays(today, -6);
   const month     = addDays(today, -29);
 
+  // カレンダー月の first/last を計算
+  function monthRange(offset) {
+    const d = new Date(today);
+    d.setDate(1);
+    d.setMonth(d.getMonth() + offset);
+    const first = d.toISOString().slice(0, 10);
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(d.getDate() - 1);
+    const last = d.toISOString().slice(0, 10);
+    const label = `${d.getFullYear() === new Date(today).getFullYear() ? '' : d.getFullYear() + '/'}${d.getMonth() + 1}月`;
+    return { first, last, label };
+  }
+  const m0 = monthRange(0);   // 今月
+  const m1 = monthRange(-1);  // 前月
+  const m2 = monthRange(-2);  // 前々月
+
   const s = {
     today:     calcStats(today,     today),
     yesterday: calcStats(yesterday, yesterday),
     week:      calcStats(week,      today),
     month:     calcStats(month,     today),
+    m0:        calcStats(m0.first,  m0.last),
+    m1:        calcStats(m1.first,  m1.last),
+    m2:        calcStats(m2.first,  m2.last),
   };
 
   function card(label, st) {
@@ -1225,10 +1244,15 @@ function renderStats() {
   setScreen(`
     <div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:14px;">📊 学習記録</div>
     <div class="stats-grid">
-      ${card('今日',    s.today)}
-      ${card('昨日',    s.yesterday)}
-      ${card('直近7日', s.week)}
+      ${card('今日',     s.today)}
+      ${card('昨日',     s.yesterday)}
+      ${card('直近7日',  s.week)}
       ${card('直近30日', s.month)}
+    </div>
+    <div class="stats-grid" style="margin-top:10px;">
+      ${card(m0.label, s.m0)}
+      ${card(m1.label, s.m1)}
+      ${card(m2.label, s.m2)}
     </div>
     <button class="btn-ghost" style="margin-top:8px;" onclick="renderHome()">← ホームへ戻る</button>
   `);
