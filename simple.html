@@ -480,8 +480,8 @@ function loadStatsLog() {
 function appendStatsLog(vid, marks) {
   const log = loadStatsLog();
   log.push({ d: todayStr(), v: vid, m: marks });
-  // 直近90日分だけ保持
-  const cutoff = addDays(todayStr(), -90);
+  // 直近10年分保持
+  const cutoff = addDays(todayStr(), -3650);
   localStorage.setItem(STATS_KEY, JSON.stringify(log.filter(e => e.d >= cutoff)));
 }
 function calcStats(fromDate, toDate) {
