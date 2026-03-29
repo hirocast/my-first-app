@@ -840,6 +840,9 @@ function renderHome() {
     <button class="btn-ghost" onclick="renderBrowse()">📚 全動画一覧</button>
     <button class="btn-ghost" onclick="renderStartSelection()">📍 開始位置を変更</button>
     ${loadPending().length > 0 ? `<button class="btn-ghost btn-pending" onclick="renderPending()">❓ 保留中の問題 ${loadPending().length}件</button>` : ''}
+    <button class="btn-ghost" onclick="exportData()">💾 データをバックアップ</button>
+    <button class="btn-ghost" onclick="document.getElementById('importFileInput').click()">📂 バックアップから復元</button>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(this.files[0]);this.value=''">
     <button class="btn-ghost btn-danger" onclick="resetAll()">リセット</button>
   `);
 }
@@ -1410,6 +1413,46 @@ function resetAll() {
   localStorage.removeItem('tryit_start_from');
   updateStreak();
   renderHome();
+}
+
+// ─────────────────────────────────────
+// EXPORT / IMPORT
+// ─────────────────────────────────────
+const BACKUP_KEYS = [WATCHED_KEY, QUIZ_KEY, STREAK_KEY, PENDING_KEY, STATS_KEY, 'tryit_start_from', 'tryit_mode'];
+
+function exportData() {
+  const data = { version: 1, exportedAt: new Date().toISOString() };
+  BACKUP_KEYS.forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v !== null) data[k] = JSON.parse(v);
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `saisoku_backup_${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) { alert('このファイルはバックアップデータではありません。'); return; }
+      if (!confirm('現在のデータをバックアップデータで上書きしますか？\nこの操作は元に戻せません。')) return;
+      BACKUP_KEYS.forEach(k => {
+        if (data[k] !== undefined) localStorage.setItem(k, JSON.stringify(data[k]));
+      });
+      alert('インポートが完了しました。');
+      location.reload();
+    } catch {
+      alert('ファイルの読み込みに失敗しました。正しいバックアップファイルか確認してください。');
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ─────────────────────────────────────
